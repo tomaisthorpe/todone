@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth/next";
 import { Session } from "next-auth";
 import { authOptions } from "./auth";
 import { prisma } from "./prisma";
-import { TaskType, Priority, HabitType } from "@prisma/client";
+import { TaskType, Priority, HabitType } from "@/app/generated/prisma";
 
 // Get authenticated user session
 async function getAuthenticatedSession() {

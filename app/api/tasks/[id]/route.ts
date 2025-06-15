@@ -7,9 +7,10 @@ import { Session } from "next-auth";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions) as Session | null;
     
     if (!session?.user?.id) {
@@ -18,7 +19,7 @@ export async function GET(
 
     const task = await prisma.task.findFirst({
       where: {
-        id: params.id,
+        id: id,
         userId: session.user.id
       },
       include: {
@@ -43,9 +44,10 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions) as Session | null;
     
     if (!session?.user?.id) {
@@ -69,7 +71,7 @@ export async function PUT(
     // Find existing task
     const existingTask = await prisma.task.findFirst({
       where: {
-        id: params.id,
+        id: id,
         userId: session.user.id
       }
     });
@@ -108,7 +110,7 @@ export async function PUT(
       // Create habit completion record
       await prisma.habitCompletion.create({
         data: {
-          taskId: params.id,
+          taskId: id,
           completedAt: new Date()
         }
       });
@@ -129,7 +131,7 @@ export async function PUT(
 
     const updatedTask = await prisma.task.update({
       where: {
-        id: params.id
+        id: id
       },
       data: {
         ...(title !== undefined && { title }),
@@ -163,9 +165,10 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions) as Session | null;
     
     if (!session?.user?.id) {
@@ -175,7 +178,7 @@ export async function DELETE(
     // Verify task belongs to user
     const task = await prisma.task.findFirst({
       where: {
-        id: params.id,
+        id: id,
         userId: session.user.id
       }
     });
@@ -187,7 +190,7 @@ export async function DELETE(
     // Delete task (habit completions will be cascade deleted)
     await prisma.task.delete({
       where: {
-        id: params.id
+        id: id
       }
     });
 
