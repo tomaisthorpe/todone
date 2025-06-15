@@ -117,6 +117,69 @@ export async function createTaskAction(formData: FormData) {
   revalidatePath("/");
 }
 
+// Server action to update an existing task
+export async function updateTaskAction(formData: FormData) {
+  const userId = await getAuthenticatedUser();
+  
+  const taskId = formData.get("taskId") as string;
+  const title = formData.get("title") as string;
+  const project = formData.get("project") as string;
+  const priority = (formData.get("priority") as "LOW" | "MEDIUM" | "HIGH") || "MEDIUM";
+  const contextId = formData.get("contextId") as string;
+  const dueDate = formData.get("dueDate") as string;
+  const type = (formData.get("type") as "TASK" | "HABIT" | "RECURRING") || "TASK";
+  const habitType = formData.get("habitType") as "STREAK" | "LEARNING" | "WELLNESS" | "MAINTENANCE";
+  const frequency = formData.get("frequency") ? parseInt(formData.get("frequency") as string) : null;
+  
+  if (!taskId || !title || !contextId) {
+    throw new Error("Task ID, title and context are required");
+  }
+  
+  // Verify task belongs to user
+  const existingTask = await prisma.task.findFirst({
+    where: { id: taskId, userId }
+  });
+  
+  if (!existingTask) {
+    throw new Error("Task not found");
+  }
+  
+  // Verify context belongs to user
+  const context = await prisma.context.findFirst({
+    where: { id: contextId, userId }
+  });
+  
+  if (!context) {
+    throw new Error("Context not found");
+  }
+  
+  // Calculate urgency
+  const urgency = calculateUrgency({
+    priority,
+    dueDate: dueDate ? new Date(dueDate) : null,
+    createdAt: existingTask.createdAt,
+    tags: [] // TODO: Add tags support
+  });
+  
+  await prisma.task.update({
+    where: { id: taskId },
+    data: {
+      title,
+      project: project || null,
+      priority,
+      tags: [], // TODO: Add tags support
+      contextId,
+      dueDate: dueDate ? new Date(dueDate) : null,
+      urgency,
+      type,
+      habitType: type === "HABIT" ? habitType : null,
+      frequency: type === "HABIT" ? frequency : null,
+    }
+  });
+  
+  revalidatePath("/");
+}
+
 // Server action to create a new context
 export async function createContextAction(formData: FormData) {
   const userId = await getAuthenticatedUser();

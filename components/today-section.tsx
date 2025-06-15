@@ -5,6 +5,12 @@ import type { Task } from "@/lib/data";
 
 interface TodaySectionProps {
   tasks: Task[];
+  contexts: Array<{
+    id: string;
+    name: string;
+    icon: string;
+    color: string;
+  }>;
 }
 
 function getTodayTasks(tasks: Task[]): Task[] {
@@ -39,7 +45,7 @@ function getTodayTasks(tasks: Task[]): Task[] {
     });
 }
 
-export function TodaySection({ tasks }: TodaySectionProps) {
+export function TodaySection({ tasks, contexts }: TodaySectionProps) {
   const todayTasks = getTodayTasks(tasks);
   const completedCount = todayTasks.filter(task => task.completed).length;
   const overdueCount = todayTasks.filter(task => {
@@ -70,7 +76,7 @@ export function TodaySection({ tasks }: TodaySectionProps) {
         {todayTasks.length > 0 ? (
           <div className="space-y-2">
             {todayTasks.map((task) => (
-              <TaskCard key={task.id} task={task} />
+              <TaskCard key={task.id} task={task} contexts={contexts} />
             ))}
           </div>
         ) : (
