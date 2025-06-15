@@ -12,8 +12,8 @@ import { Button } from "@/components/ui/button";
 
 export default async function Dashboard() {
   // Check authentication
-  const session = await getServerSession(authOptions) as Session | null;
-  
+  const session = (await getServerSession(authOptions)) as Session | null;
+
   if (!session) {
     redirect("/auth/signin");
   }
@@ -25,21 +25,45 @@ export default async function Dashboard() {
   // This sorting is stable and only calculated on server-side load/reload
   const sortedContexts = [...contexts].sort((a, b) => {
     // Calculate health for each context (server-side snapshot)
-    const aHabits = tasks.filter(task => task.contextId === a.id && task.type === "HABIT");
-    const bHabits = tasks.filter(task => task.contextId === b.id && task.type === "HABIT");
-    
-    const aHealth = aHabits.length === 0 ? 100 : Math.round((aHabits.filter(h => h.completed).length / aHabits.length) * 100);
-    const bHealth = bHabits.length === 0 ? 100 : Math.round((bHabits.filter(h => h.completed).length / bHabits.length) * 100);
-    
+    const aHabits = tasks.filter(
+      (task) => task.contextId === a.id && task.type === "HABIT"
+    );
+    const bHabits = tasks.filter(
+      (task) => task.contextId === b.id && task.type === "HABIT"
+    );
+
+    const aHealth =
+      aHabits.length === 0
+        ? 100
+        : Math.round(
+            (aHabits.filter((h) => h.completed).length / aHabits.length) * 100
+          );
+    const bHealth =
+      bHabits.length === 0
+        ? 100
+        : Math.round(
+            (bHabits.filter((h) => h.completed).length / bHabits.length) * 100
+          );
+
     // Sort by health (lowest first)
     if (aHealth !== bHealth) {
       return aHealth - bHealth;
     }
-    
+
     // If health is equal, sort by highest urgency task in context
-    const aMaxUrgency = Math.max(...tasks.filter(task => task.contextId === a.id).map(task => task.urgency), 0);
-    const bMaxUrgency = Math.max(...tasks.filter(task => task.contextId === b.id).map(task => task.urgency), 0);
-    
+    const aMaxUrgency = Math.max(
+      ...tasks
+        .filter((task) => task.contextId === a.id)
+        .map((task) => task.urgency),
+      0
+    );
+    const bMaxUrgency = Math.max(
+      ...tasks
+        .filter((task) => task.contextId === b.id)
+        .map((task) => task.urgency),
+      0
+    );
+
     return bMaxUrgency - aMaxUrgency;
   });
 
@@ -69,12 +93,7 @@ export default async function Dashboard() {
               <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg">
                 <Settings className="w-5 h-5" />
               </button>
-              <AddItemModal contexts={contexts}>
-                <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                  <Plus className="w-4 h-4" />
-                  <span>Add Task</span>
-                </button>
-              </AddItemModal>
+              <AddItemModal contexts={contexts} />
             </div>
           </div>
         </div>
@@ -103,12 +122,6 @@ export default async function Dashboard() {
               <p className="text-gray-500">
                 No contexts yet. Create one to get started!
               </p>
-              <AddItemModal contexts={contexts}>
-                <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 mt-4">
-                  <Plus className="w-4 h-4" />
-                  <span>Add Context</span>
-                </button>
-              </AddItemModal>
             </div>
           )}
         </div>

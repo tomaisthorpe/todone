@@ -34,6 +34,7 @@ import {
   Code,
   Coffee,
   Building,
+  Plus,
 } from "lucide-react";
 
 // Form schemas
@@ -68,8 +69,8 @@ interface AddItemModalProps {
     icon: string;
     color: string;
   }>;
-  children: React.ReactNode;
   defaultContextId?: string;
+  addButtonSize?: "sm" | "lg";
 }
 
 const contextIcons = [
@@ -97,11 +98,15 @@ const habitTypeIcons = {
   MAINTENANCE: { icon: Wrench, color: "text-gray-500" },
 };
 
-export function AddItemModal({ contexts, children, defaultContextId }: AddItemModalProps) {
+export function AddItemModal({
+  contexts,
+  defaultContextId,
+  addButtonSize = "lg",
+}: AddItemModalProps) {
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"task" | "context">("task");
   const [isPending, startTransition] = useTransition();
-  
+
   // Generate unique IDs for this modal instance to prevent conflicts
   const modalId = useId();
   const getFieldId = (fieldName: string) => `${modalId}-${fieldName}`;
@@ -168,7 +173,19 @@ export function AddItemModal({ contexts, children, defaultContextId }: AddItemMo
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogTrigger asChild>
+        {addButtonSize === "sm" ? (
+          <button className="flex items-center space-x-2 px-2 py-1 text-xs bg-white/20 hover:bg-white/30 rounded-md transition-colors">
+            <Plus className="w-3 h-3" />
+            <span>Add</span>
+          </button>
+        ) : (
+          <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            <Plus className="w-4 h-4" />
+            <span>Add Task</span>
+          </button>
+        )}
+      </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white shadow-xl rounded-2xl border-0">
         <DialogHeader>
           <DialogTitle>Add New Item</DialogTitle>
@@ -362,7 +379,9 @@ export function AddItemModal({ contexts, children, defaultContextId }: AddItemMo
                     </Select>
                   </div>
                   <div>
-                    <Label htmlFor={getFieldId("frequency")}>Frequency (days)</Label>
+                    <Label htmlFor={getFieldId("frequency")}>
+                      Frequency (days)
+                    </Label>
                     <Input
                       id={getFieldId("frequency")}
                       type="number"

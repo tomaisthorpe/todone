@@ -119,29 +119,20 @@ export function ContextGroup({
           </ContextCollapsibleTrigger>
 
           <div className="mt-3 flex items-center justify-between">
-            <div className="w-full bg-white bg-opacity-30 rounded-full h-2">
+            <div className="w-full bg-white/30 rounded-full h-2">
               <div
                 className="bg-white h-2 rounded-full transition-all duration-300"
                 style={{ width: `${completion.percentage}%` }}
               />
             </div>
-            
+
             {/* Add Task Button - Always Visible */}
             <div className="ml-3 flex-shrink-0">
-              <AddItemModal 
-                contexts={allContexts.map(ctx => ({
-                  id: ctx.id,
-                  name: ctx.name,
-                  icon: ctx.icon,
-                  color: ctx.color
-                }))} 
+              <AddItemModal
+                contexts={allContexts}
                 defaultContextId={context.id}
-              >
-                <button className="flex items-center space-x-1 px-2 py-1 text-xs bg-white bg-opacity-20 hover:bg-opacity-30 rounded-md transition-colors">
-                  <Plus className="w-3 h-3" />
-                  <span>Add</span>
-                </button>
-              </AddItemModal>
+                addButtonSize="sm"
+              />
             </div>
           </div>
         </div>

@@ -702,7 +702,7 @@ const Todone = () => {
         <div className={`p-4 ${context.color} text-white`}>
           <button
             onClick={() => toggleContextCollapse(context.id)}
-            className="w-full flex items-center justify-between hover:bg-white hover:bg-opacity-10 rounded-lg p-2 transition-colors"
+            className="w-full flex items-center justify-between hover:bg-white/10 rounded-lg p-2 transition-colors"
           >
             <div className="flex items-center space-x-3">
               <div className="flex items-center space-x-2">
@@ -740,7 +740,7 @@ const Todone = () => {
           </button>
 
           <div className="mt-3">
-            <div className="w-full bg-white bg-opacity-30 rounded-full h-2">
+            <div className="w-full bg-white/30 rounded-full h-2">
               <div
                 className="bg-white h-2 rounded-full transition-all duration-300"
                 style={{ width: `${completion.percentage}%` }}
