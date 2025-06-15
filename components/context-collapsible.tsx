@@ -60,7 +60,7 @@ export function ContextCollapsibleTrigger({ children }: TriggerProps) {
   return (
     <button
       onClick={toggle}
-      className="w-full flex items-center justify-center rounded hover:bg-opacity-10 transition-colors"
+      className="w-full flex items-center justify-center rounded transition-colors"
     >
       {children || (
         <ChevronDown
