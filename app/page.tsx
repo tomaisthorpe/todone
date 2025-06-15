@@ -5,6 +5,7 @@ import { Session } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { TodaySection } from "@/components/today-section";
 import { ContextGroup } from "@/components/context-group";
+import { AddItemModal } from "@/components/add-item-modal";
 import { getTasks, getContexts } from "@/lib/data";
 import { signOutAction } from "@/lib/server-actions";
 import { Button } from "@/components/ui/button";
@@ -46,10 +47,12 @@ export default async function Dashboard() {
               <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg">
                 <Settings className="w-5 h-5" />
               </button>
-              <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                <Plus className="w-4 h-4" />
-                <span>Add Task</span>
-              </button>
+              <AddItemModal contexts={contexts}>
+                <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                  <Plus className="w-4 h-4" />
+                  <span>Add Task</span>
+                </button>
+              </AddItemModal>
             </div>
           </div>
         </div>
@@ -77,10 +80,12 @@ export default async function Dashboard() {
               <p className="text-gray-500">
                 No contexts yet. Create one to get started!
               </p>
-              <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 mt-4">
-                <Plus className="w-4 h-4" />
-                <span>Add Context</span>
-              </button>
+              <AddItemModal contexts={contexts}>
+                <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 mt-4">
+                  <Plus className="w-4 h-4" />
+                  <span>Add Context</span>
+                </button>
+              </AddItemModal>
             </div>
           )}
         </div>

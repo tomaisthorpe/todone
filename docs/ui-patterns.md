@@ -8,7 +8,7 @@ This document defines the consistent UI patterns used throughout Todone.
 ```
 Header (fixed)
 ├── Logo + Title
-├── Add Task Button
+├── Add Task Button (opens AddItemModal)
 └── Settings
 
 Main Container (max-width, centered)
@@ -277,5 +277,52 @@ Empty State
   8.5
 </div>
 ```
+
+## Modal Patterns
+
+### AddItemModal
+**Structure:**
+```
+Dialog Modal
+├── Header ("Add New Item")
+├── Tab Navigation (Task | Context)
+├── Dynamic Form Content
+│   ├── Task Form (with conditional habit fields)
+│   └── Context Form (icon & color selection)
+└── Action Buttons (Cancel | Create)
+```
+
+**Tab Navigation:**
+- Active tab: Blue border-bottom, blue text
+- Inactive tab: Transparent border, gray text with hover
+- Icons accompany text labels
+
+**Form Layout:**
+- Grid-based responsive layout (2 columns on desktop)
+- Full-width elements span both columns
+- Labels above inputs
+- Validation errors below fields in red text
+
+**Task Form Fields:**
+- Title (required, full-width)
+- Task Type (select: Task/Habit/Recurring)
+- Priority (select: Low/Medium/High)
+- Context (select with visual indicators)
+- Due Date (datetime-local input)
+- Habit Type (conditional, select with icons)
+- Frequency (conditional, number input)
+- Project (optional text)
+- Tags (disabled, placeholder for future)
+
+**Context Form Fields:**
+- Name (required, full-width)
+- Icon (select with icon previews)
+- Color (select with color swatches)
+- Description (optional textarea)
+
+**Conditional Logic:**
+- Habit-specific fields only show when Task Type = "HABIT"
+- Form validation prevents submission with missing required fields
+- Loading states show "Creating..." text on submit buttons
 
 These patterns ensure consistency across the app while maintaining the flexibility to evolve specific components as needed.
