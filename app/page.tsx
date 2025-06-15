@@ -101,7 +101,7 @@ export default async function Dashboard() {
 
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
         {/* Today Section */}
-        <TodaySection tasks={tasks} />
+        <TodaySection tasks={tasks} contexts={contexts} />
 
         {/* Context Groups */}
         <div className="space-y-4">

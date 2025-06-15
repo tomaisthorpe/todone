@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useEffect, useId } from "react";
+import { useState, useTransition, useEffect, useId, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -9,7 +9,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,7 +21,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { createTaskAction, createContextAction } from "@/lib/server-actions";
+import {
+  createTaskAction,
+  updateTaskAction,
+  createContextAction,
+} from "@/lib/server-actions";
 import {
   CheckSquare,
   RotateCcw,
@@ -35,7 +38,40 @@ import {
   Coffee,
   Building,
   Plus,
+  Pizza,
+  UtensilsCrossed,
+  ChefHat,
+  Wine,
+  Beer,
+  Grape,
+  Salad,
+  CookingPot,
+  Croissant,
+  IceCreamCone,
+  Cake,
+  Sandwich,
+  Soup,
+  Wallet,
+  Coins,
+  PiggyBank,
+  CreditCard,
+  Banknote,
+  TrendingUp,
+  Calculator,
+  Receipt,
+  Leaf,
+  TreePine,
+  Sprout,
+  Flower,
+  TreeDeciduous,
+  Flower2,
+  LeafyGreen,
+  Trees,
+  FlaskConical,
+  TestTube,
+  Beaker,
 } from "lucide-react";
+import type { Task } from "@/lib/data";
 
 // Form schemas
 const taskSchema = z.object({
@@ -62,15 +98,17 @@ const contextSchema = z.object({
 type TaskFormData = z.infer<typeof taskSchema>;
 type ContextFormData = z.infer<typeof contextSchema>;
 
-interface AddItemModalProps {
+interface TaskModalProps {
   contexts: Array<{
     id: string;
     name: string;
     icon: string;
     color: string;
   }>;
+  task?: Task;
+  isOpen: boolean;
+  onClose: () => void;
   defaultContextId?: string;
-  addButtonSize?: "sm" | "lg";
 }
 
 const contextIcons = [
@@ -78,6 +116,42 @@ const contextIcons = [
   { value: "Code", icon: Code, label: "Coding" },
   { value: "Coffee", icon: Coffee, label: "Kitchen" },
   { value: "Building", icon: Building, label: "Work" },
+  // Food & Beverage Icons
+  { value: "Pizza", icon: Pizza, label: "Food" },
+  { value: "UtensilsCrossed", icon: UtensilsCrossed, label: "Dining" },
+  { value: "ChefHat", icon: ChefHat, label: "Cooking" },
+  { value: "Wine", icon: Wine, label: "Wine" },
+  { value: "Beer", icon: Beer, label: "Beer" },
+  { value: "Grape", icon: Grape, label: "Fermentation" },
+  { value: "Salad", icon: Salad, label: "Healthy Food" },
+  { value: "CookingPot", icon: CookingPot, label: "Meal Prep" },
+  { value: "Croissant", icon: Croissant, label: "Bakery" },
+  { value: "IceCreamCone", icon: IceCreamCone, label: "Desserts" },
+  { value: "Cake", icon: Cake, label: "Baking" },
+  { value: "Sandwich", icon: Sandwich, label: "Quick Meals" },
+  { value: "Soup", icon: Soup, label: "Comfort Food" },
+  // Finance Icons
+  { value: "Wallet", icon: Wallet, label: "Personal Finance" },
+  { value: "Coins", icon: Coins, label: "Savings" },
+  { value: "PiggyBank", icon: PiggyBank, label: "Budget" },
+  { value: "CreditCard", icon: CreditCard, label: "Credit" },
+  { value: "Banknote", icon: Banknote, label: "Cash" },
+  { value: "TrendingUp", icon: TrendingUp, label: "Investments" },
+  { value: "Calculator", icon: Calculator, label: "Accounting" },
+  { value: "Receipt", icon: Receipt, label: "Expenses" },
+  // Plant/Nature Icons
+  { value: "Leaf", icon: Leaf, label: "Plants" },
+  { value: "TreePine", icon: TreePine, label: "Garden" },
+  { value: "Sprout", icon: Sprout, label: "Growing" },
+  { value: "Flower", icon: Flower, label: "Flowers" },
+  { value: "TreeDeciduous", icon: TreeDeciduous, label: "Trees" },
+  { value: "Flower2", icon: Flower2, label: "Gardening" },
+  { value: "LeafyGreen", icon: LeafyGreen, label: "Herbs" },
+  { value: "Trees", icon: Trees, label: "Forest" },
+  // Science/Fermentation Icons
+  { value: "FlaskConical", icon: FlaskConical, label: "Brewing" },
+  { value: "TestTube", icon: TestTube, label: "Experiments" },
+  { value: "Beaker", icon: Beaker, label: "Laboratory" },
 ];
 
 const contextColors = [
@@ -89,6 +163,10 @@ const contextColors = [
   { value: "bg-cyan-500", label: "Cyan", color: "bg-cyan-500" },
   { value: "bg-pink-500", label: "Pink", color: "bg-pink-500" },
   { value: "bg-gray-500", label: "Gray", color: "bg-gray-500" },
+  { value: "bg-orange-500", label: "Orange", color: "bg-orange-500" },
+  { value: "bg-emerald-500", label: "Emerald", color: "bg-emerald-500" },
+  { value: "bg-teal-500", label: "Teal", color: "bg-teal-500" },
+  { value: "bg-indigo-500", label: "Indigo", color: "bg-indigo-500" },
 ];
 
 const habitTypeIcons = {
@@ -98,18 +176,22 @@ const habitTypeIcons = {
   MAINTENANCE: { icon: Wrench, color: "text-gray-500" },
 };
 
-export function AddItemModal({
+export function TaskModal({
   contexts,
+  task,
+  isOpen,
+  onClose,
   defaultContextId,
-  addButtonSize = "lg",
-}: AddItemModalProps) {
-  const [open, setOpen] = useState(false);
+}: TaskModalProps) {
   const [activeTab, setActiveTab] = useState<"task" | "context">("task");
   const [isPending, startTransition] = useTransition();
+  const titleInputRef = useRef<HTMLInputElement>(null);
 
   // Generate unique IDs for this modal instance to prevent conflicts
   const modalId = useId();
   const getFieldId = (fieldName: string) => `${modalId}-${fieldName}`;
+
+  const isEditing = !!task;
 
   const taskForm = useForm<TaskFormData>({
     resolver: zodResolver(taskSchema),
@@ -129,18 +211,50 @@ export function AddItemModal({
     },
   });
 
-  // Reset task form with default context when modal opens
+  // Reset forms when modal opens/closes or task changes
   useEffect(() => {
-    if (open && defaultContextId) {
-      taskForm.setValue("contextId", defaultContextId);
+    if (isOpen) {
+      if (task) {
+        // Editing mode - populate form with task data
+        taskForm.reset({
+          title: task.title,
+          project: task.project || "",
+          priority: task.priority,
+          contextId: task.contextId,
+          dueDate: task.dueDate
+            ? new Date(task.dueDate).toISOString().slice(0, 16)
+            : "",
+          type: task.type,
+          habitType: task.habitType || undefined,
+          frequency: task.frequency || undefined,
+          tags: task.tags.join(", "),
+        });
+      } else {
+        // Adding mode - reset to defaults
+        taskForm.reset({
+          priority: "MEDIUM",
+          type: "TASK",
+          tags: "",
+          contextId: defaultContextId || "",
+        });
+      }
+
+      // Auto-focus title input
+      setTimeout(() => {
+        titleInputRef.current?.focus();
+        titleInputRef.current?.select();
+      }, 100);
     }
-  }, [open, defaultContextId, taskForm]);
+  }, [isOpen, task, defaultContextId, taskForm]);
 
   const taskType = taskForm.watch("type");
 
   const onSubmitTask = (data: TaskFormData) => {
     startTransition(async () => {
       const formData = new FormData();
+      if (isEditing) {
+        formData.append("taskId", task.id);
+      }
       formData.append("title", data.title);
       if (data.project) formData.append("project", data.project);
       formData.append("priority", data.priority);
@@ -151,9 +265,13 @@ export function AddItemModal({
       if (data.frequency)
         formData.append("frequency", data.frequency.toString());
 
-      await createTaskAction(formData);
-      taskForm.reset();
-      setOpen(false);
+      if (isEditing) {
+        await updateTaskAction(formData);
+      } else {
+        await createTaskAction(formData);
+      }
+
+      onClose();
     });
   };
 
@@ -167,28 +285,24 @@ export function AddItemModal({
 
       await createContextAction(formData);
       contextForm.reset();
-      setOpen(false);
+      onClose();
     });
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {addButtonSize === "sm" ? (
-          <button className="flex items-center space-x-2 px-2 py-1 text-xs bg-white/20 hover:bg-white/30 rounded-md transition-colors">
-            <Plus className="w-3 h-3" />
-            <span>Add</span>
-          </button>
-        ) : (
-          <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-            <Plus className="w-4 h-4" />
-            <span>Add Task</span>
-          </button>
-        )}
-      </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white shadow-xl rounded-2xl border-0">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent
+        className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white shadow-xl rounded-2xl border-0"
+        onOpenAutoFocus={(e) => {
+          e.preventDefault();
+          if (titleInputRef.current) {
+            titleInputRef.current.focus();
+            titleInputRef.current.select();
+          }
+        }}
+      >
         <DialogHeader>
-          <DialogTitle>Add New Item</DialogTitle>
+          <DialogTitle>{isEditing ? "Edit Task" : "Add New Item"}</DialogTitle>
         </DialogHeader>
 
         {/* Tab Navigation */}
@@ -205,22 +319,24 @@ export function AddItemModal({
             type="button"
           >
             <CheckSquare className="w-4 h-4 inline mr-2" />
-            Add Task
+            {isEditing ? "Edit Task" : "Add Task"}
           </button>
-          <button
-            onClick={() => setActiveTab("context")}
-            className={`flex-1 px-4 py-2 text-sm font-medium rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400
-              ${
-                activeTab === "context"
-                  ? "bg-blue-50 text-blue-700 shadow-sm"
-                  : "bg-transparent text-gray-500 hover:text-gray-700"
-              }
-            `}
-            type="button"
-          >
-            <Home className="w-4 h-4 inline mr-2" />
-            Add Context
-          </button>
+          {!isEditing && (
+            <button
+              onClick={() => setActiveTab("context")}
+              className={`flex-1 px-4 py-2 text-sm font-medium rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400
+                ${
+                  activeTab === "context"
+                    ? "bg-blue-50 text-blue-700 shadow-sm"
+                    : "bg-transparent text-gray-500 hover:text-gray-700"
+                }
+              `}
+              type="button"
+            >
+              <Home className="w-4 h-4 inline mr-2" />
+              Add Context
+            </button>
+          )}
         </div>
 
         {/* Task Form */}
@@ -235,7 +351,14 @@ export function AddItemModal({
                 <Input
                   id={getFieldId("title")}
                   placeholder="What needs to be done?"
-                  {...taskForm.register("title")}
+                  {...taskForm.register("title", {
+                    setValueAs: (v) => v,
+                  })}
+                  ref={(el) => {
+                    titleInputRef.current = el;
+                    const { ref } = taskForm.register("title");
+                    if (typeof ref === "function") ref(el);
+                  }}
                 />
                 {taskForm.formState.errors.title && (
                   <p className="text-sm text-red-500 mt-1">
@@ -417,15 +540,17 @@ export function AddItemModal({
             </div>
 
             <div className="flex justify-end space-x-2 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setOpen(false)}
-              >
+              <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
               <Button type="submit" disabled={isPending}>
-                {isPending ? "Creating..." : "Create Task"}
+                {isPending
+                  ? isEditing
+                    ? "Updating..."
+                    : "Creating..."
+                  : isEditing
+                  ? "Update Task"
+                  : "Create Task"}
               </Button>
             </div>
           </form>
@@ -461,7 +586,7 @@ export function AddItemModal({
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-h-60">
                     {contextIcons.map(({ value, icon: Icon, label }) => (
                       <SelectItem key={value} value={value}>
                         <Icon className="w-4 h-4 inline mr-2" />
@@ -509,11 +634,7 @@ export function AddItemModal({
             </div>
 
             <div className="flex justify-end space-x-2 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setOpen(false)}
-              >
+              <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
               <Button type="submit" disabled={isPending}>
@@ -524,5 +645,52 @@ export function AddItemModal({
         )}
       </DialogContent>
     </Dialog>
+  );
+}
+
+// Legacy component for backward compatibility and add button
+export function AddItemModal({
+  contexts,
+  defaultContextId,
+  addButtonSize = "lg",
+}: {
+  contexts: Array<{
+    id: string;
+    name: string;
+    icon: string;
+    color: string;
+  }>;
+  defaultContextId?: string;
+  addButtonSize?: "sm" | "lg";
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <>
+      {addButtonSize === "sm" ? (
+        <button
+          onClick={() => setIsOpen(true)}
+          className="flex items-center space-x-2 px-2 py-1 text-xs bg-white/20 hover:bg-white/30 rounded-md transition-colors"
+        >
+          <Plus className="w-3 h-3" />
+          <span>Add</span>
+        </button>
+      ) : (
+        <button
+          onClick={() => setIsOpen(true)}
+          className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Add Task</span>
+        </button>
+      )}
+
+      <TaskModal
+        contexts={contexts}
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        defaultContextId={defaultContextId}
+      />
+    </>
   );
 }
