@@ -87,9 +87,26 @@ Habits use relaxed, non-judgmental language:
 ## Technical Stack
 
 - **Frontend**: Next.js with React
-- **Styling**: Tailwind CSS
+- **Database**: PostgreSQL
+- **Styling**: Tailwind CSS + shadcn/ui components
 - **Icons**: Lucide React
 - **Data**: Local state (will expand to persistence layer)
+
+### UI Component Strategy
+
+We use **shadcn/ui** for foundational components and build custom components for Todone-specific patterns:
+
+**shadcn/ui components:**
+- Basic building blocks: Button, Card, Badge, Dialog, Input
+- Standard patterns: Loading states, form components, modals
+
+**Custom components:**
+- TaskCard (handles 3 task types with different visual treatments)
+- ContextGroup (collapse/expand with health visualization)
+- HabitStatusBadge (relaxed status language with emojis)
+- UrgencyScore (mathematical scoring display)
+
+This approach gives us speed for common patterns while maintaining full control over the unique Todone UX that differentiates it from other task apps.
 
 ## Design Principles
 
@@ -119,6 +136,27 @@ Habits use relaxed, non-judgmental language:
 - [ ] Hardware displays for context reminders
 - [ ] Mobile app
 - [ ] Sync across devices
+
+## Design Reference
+
+The current UI mockup can be found in `/docs/mockup.tsx`. This represents the target design and includes:
+
+- Complete task management interface
+- All task types (regular, habits, recurring)
+- Context organization with health bars
+- Habit status language and visual hierarchy
+- Collapsible contexts with unified task lists
+
+Use this mockup as a reference for component structure, styling patterns, and user interaction flows.
+
+## Documentation Maintenance
+
+When making significant changes to the UI or design decisions, please update:
+- `/docs/design-decisions.md` - Add new decisions or update reasoning
+- `/docs/ui-patterns.md` - Update component patterns and examples
+- `/docs/mockup.tsx` - Update if UI significantly changes
+
+This helps maintain context for future development and AI assistance.
 
 ## Development Guidelines
 

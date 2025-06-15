@@ -1,0 +1,23 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Development Guidelines for LLMs
+
+When working on Todone, always:
+
+1. **Before making changes**: Review existing patterns in `/docs/ui-patterns.md`
+2. **After UI changes**: Update component examples in ui-patterns.md if you create new patterns
+3. **After design decisions**: Add reasoning to design-decisions.md if you make significant UX choices
+4. **Document new patterns**: If you create reusable components or patterns, add them to ui-patterns.md
+
+## Documentation Update Triggers
+
+Update docs when you:
+- Create new component patterns
+- Change existing visual designs
+- Make decisions about user experience
+- Add new task types or habit behaviors
+- Modify the urgency calculation
+- Change the context health system
