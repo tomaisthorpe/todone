@@ -7,7 +7,6 @@ import { Session } from "next-auth";
 import { authOptions } from "./auth";
 import { prisma } from "./prisma";
 import { calculateUrgency } from "./utils";
-import { signOut } from "next-auth/react";
 
 // Get authenticated user or redirect
 async function getAuthenticatedUser() {
