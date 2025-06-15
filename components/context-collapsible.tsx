@@ -23,9 +23,9 @@ interface ContextCollapsibleProps {
   defaultCollapsed?: boolean;
 }
 
-export function ContextCollapsible({ 
-  children, 
-  defaultCollapsed = false 
+export function ContextCollapsible({
+  children,
+  defaultCollapsed = false,
 }: ContextCollapsibleProps) {
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
 
@@ -44,9 +44,9 @@ interface ContentProps {
 
 export function ContextCollapsibleContent({ children }: ContentProps) {
   const { isCollapsed } = useCollapsible();
-  
+
   if (isCollapsed) return null;
-  
+
   return <>{children}</>;
 }
 
@@ -56,17 +56,17 @@ interface TriggerProps {
 
 export function ContextCollapsibleTrigger({ children }: TriggerProps) {
   const { isCollapsed, toggle } = useCollapsible();
-  
+
   return (
     <button
       onClick={toggle}
-      className="flex items-center justify-center w-6 h-6 rounded hover:bg-gray-100 transition-colors"
+      className="w-full flex items-center justify-center rounded hover:bg-opacity-10 transition-colors"
     >
       {children || (
-        <ChevronDown 
+        <ChevronDown
           className={`w-4 h-4 text-gray-400 transition-transform ${
-            isCollapsed ? '-rotate-90' : 'rotate-0'
-          }`} 
+            isCollapsed ? "-rotate-90" : "rotate-0"
+          }`}
         />
       )}
     </button>

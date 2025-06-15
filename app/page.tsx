@@ -5,15 +5,12 @@ import { getTasks, getContexts } from "@/lib/data";
 
 export default async function Dashboard() {
   // Server-side data fetching
-  const [tasks, contexts] = await Promise.all([
-    getTasks(),
-    getContexts()
-  ]);
+  const [tasks, contexts] = await Promise.all([getTasks(), getContexts()]);
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="bg-white shadow-sm">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -43,7 +40,7 @@ export default async function Dashboard() {
         <div className="space-y-4">
           <h2 className="text-xl font-semibold text-gray-900">Contexts</h2>
           {contexts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               {contexts.map((context) => (
                 <ContextGroup
                   key={context.id}
@@ -54,7 +51,9 @@ export default async function Dashboard() {
             </div>
           ) : (
             <div className="text-center py-8">
-              <p className="text-gray-500">No contexts yet. Create one to get started!</p>
+              <p className="text-gray-500">
+                No contexts yet. Create one to get started!
+              </p>
               <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 mt-4">
                 <Plus className="w-4 h-4" />
                 <span>Add Context</span>

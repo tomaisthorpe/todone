@@ -2,10 +2,10 @@ import React from "react";
 import { TaskCard } from "./task-card";
 import { cn } from "@/lib/utils";
 import { Home, Code, Coffee, Car, Briefcase, ChevronDown } from "lucide-react";
-import { 
-  ContextCollapsible, 
-  ContextCollapsibleContent, 
-  ContextCollapsibleTrigger 
+import {
+  ContextCollapsible,
+  ContextCollapsibleContent,
+  ContextCollapsibleTrigger,
 } from "./context-collapsible";
 import type { Task, Context } from "@/lib/data";
 
@@ -22,7 +22,7 @@ function getIconComponent(iconName: string) {
     Car,
     Briefcase,
   };
-  
+
   return iconMap[iconName] || Home;
 }
 
@@ -72,7 +72,7 @@ export function ContextGroup({ context, tasks }: ContextGroupProps) {
       <ContextCollapsible>
         <div className={cn("p-4 text-white", context.color)}>
           <ContextCollapsibleTrigger>
-            <div className="w-full flex items-center justify-between hover:bg-white hover:bg-opacity-10 rounded-lg p-2 transition-colors">
+            <div className="w-full flex items-center justify-between rounded-lg p-2 transition-colors">
               <div className="flex items-center space-x-3">
                 <div className="flex items-center space-x-2">
                   <ChevronDown className="w-4 h-4" />
@@ -84,7 +84,12 @@ export function ContextGroup({ context, tasks }: ContextGroupProps) {
                 </div>
               </div>
               <div className="text-right">
-                <div className={cn("inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-white", getCompletionColor(completion.percentage))}>
+                <div
+                  className={cn(
+                    "inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-white",
+                    getCompletionColor(completion.percentage)
+                  )}
+                >
                   {completion.percentage}%
                 </div>
                 <p className="text-xs opacity-90 mt-1">
