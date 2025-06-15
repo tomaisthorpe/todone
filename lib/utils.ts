@@ -78,3 +78,53 @@ export function getUrgencyColor(urgency: number): string {
   if (urgency >= 5) return "text-orange-600 bg-orange-100";
   return "text-green-600 bg-green-100";
 }
+
+export function formatDateForTask(date: Date | null): { text: string; color: string; isOverdue: boolean } | null {
+  if (!date) return null;
+  
+  const today = new Date();
+  const diffTime = date.getTime() - today.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) {
+    return {
+      text: "Today",
+      color: "text-blue-600 bg-blue-100",
+      isOverdue: false,
+    };
+  }
+  if (diffDays === 1) {
+    return {
+      text: "Tomorrow",
+      color: "text-green-600 bg-green-100",
+      isOverdue: false,
+    };
+  }
+  if (diffDays === -1) {
+    return {
+      text: "Yesterday",
+      color: "text-red-600 bg-red-100",
+      isOverdue: true,
+    };
+  }
+  if (diffDays < 0) {
+    return {
+      text: `${Math.abs(diffDays)}d overdue`,
+      color: "text-red-600 bg-red-100",
+      isOverdue: true,
+    };
+  }
+  if (diffDays < 7) {
+    return {
+      text: `In ${diffDays}d`,
+      color: "text-gray-600 bg-gray-100",
+      isOverdue: false,
+    };
+  }
+  
+  return {
+    text: date.toLocaleDateString(),
+    color: "text-gray-600 bg-gray-100",
+    isOverdue: false,
+  };
+}

@@ -1,6 +1,5 @@
 import React from "react";
 import { Calendar } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 import { TaskCard } from "./task-card";
 import type { Task } from "@/lib/data";
 
@@ -32,33 +31,33 @@ export function TodaySection({ tasks }: TodaySectionProps) {
   const completedCount = todayTasks.filter(task => task.completed).length;
 
   return (
-    <Card className="border border-gray-200 shadow-sm">
-      <div className="flex items-center justify-between p-4 bg-white border-b border-gray-100">
-        <div className="flex items-center space-x-3">
-          <Calendar className="w-5 h-5 text-blue-600" />
-          <h2 className="text-xl font-semibold text-gray-900">Today</h2>
-        </div>
-        <div className="text-sm text-gray-500">
-          {completedCount}/{todayTasks.length} completed
+    <div className="bg-white rounded-xl shadow-sm">
+      <div className="p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <Calendar className="w-5 h-5 text-blue-600" />
+            <h2 className="text-xl font-semibold text-gray-900">Today</h2>
+          </div>
+          <div className="text-sm text-gray-500">
+            {completedCount}/{todayTasks.length} completed
+          </div>
         </div>
       </div>
 
-      <CardContent className="p-0">
+      <div className="p-6">
         {todayTasks.length > 0 ? (
-          <div className="divide-y divide-gray-100">
+          <div className="space-y-2">
             {todayTasks.map((task) => (
-              <div key={task.id} className="px-4 py-2">
-                <TaskCard task={task} />
-              </div>
+              <TaskCard key={task.id} task={task} />
             ))}
           </div>
         ) : (
-          <div className="p-8 text-center">
+          <div className="text-center py-8">
             <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-3" />
             <p className="text-gray-500">No tasks scheduled for today</p>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

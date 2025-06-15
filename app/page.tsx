@@ -1,5 +1,4 @@
 import { CheckCircle2, Plus, Settings } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { TodaySection } from "@/components/today-section";
 import { ContextGroup } from "@/components/context-group";
 import { getTasks, getContexts } from "@/lib/data";
@@ -24,13 +23,13 @@ export default async function Dashboard() {
               <h1 className="text-2xl font-bold text-gray-900">Todone</h1>
             </div>
             <div className="flex items-center space-x-3">
-              <Button variant="ghost" size="sm">
+              <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg">
                 <Settings className="w-5 h-5" />
-              </Button>
-              <Button>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Task
-              </Button>
+              </button>
+              <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                <Plus className="w-4 h-4" />
+                <span>Add Task</span>
+              </button>
             </div>
           </div>
         </div>
@@ -40,10 +39,11 @@ export default async function Dashboard() {
         {/* Today Section */}
         <TodaySection tasks={tasks} />
 
-        {/* Contexts - Single Column Layout */}
+        {/* Context Groups */}
         <div className="space-y-4">
+          <h2 className="text-xl font-semibold text-gray-900">Contexts</h2>
           {contexts.length > 0 ? (
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {contexts.map((context) => (
                 <ContextGroup
                   key={context.id}
@@ -55,10 +55,10 @@ export default async function Dashboard() {
           ) : (
             <div className="text-center py-8">
               <p className="text-gray-500">No contexts yet. Create one to get started!</p>
-              <Button className="mt-4">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Context
-              </Button>
+              <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 mt-4">
+                <Plus className="w-4 h-4" />
+                <span>Add Context</span>
+              </button>
             </div>
           )}
         </div>
