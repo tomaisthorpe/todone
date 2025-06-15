@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -69,6 +69,7 @@ interface AddItemModalProps {
     color: string;
   }>;
   children: React.ReactNode;
+  defaultContextId?: string;
 }
 
 const contextIcons = [
@@ -96,7 +97,7 @@ const habitTypeIcons = {
   MAINTENANCE: { icon: Wrench, color: "text-gray-500" },
 };
 
-export function AddItemModal({ contexts, children }: AddItemModalProps) {
+export function AddItemModal({ contexts, children, defaultContextId }: AddItemModalProps) {
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"task" | "context">("task");
   const [isPending, startTransition] = useTransition();
@@ -107,6 +108,7 @@ export function AddItemModal({ contexts, children }: AddItemModalProps) {
       priority: "MEDIUM",
       type: "TASK",
       tags: "",
+      contextId: defaultContextId || "",
     },
   });
 
@@ -117,6 +119,13 @@ export function AddItemModal({ contexts, children }: AddItemModalProps) {
       color: "bg-blue-500",
     },
   });
+
+  // Reset task form with default context when modal opens
+  useEffect(() => {
+    if (open && defaultContextId) {
+      taskForm.setValue("contextId", defaultContextId);
+    }
+  }, [open, defaultContextId, taskForm]);
 
   const taskType = taskForm.watch("type");
 

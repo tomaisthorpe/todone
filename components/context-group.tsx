@@ -1,7 +1,8 @@
 import React from "react";
 import { TaskCard } from "./task-card";
+import { AddItemModal } from "./add-item-modal";
 import { cn } from "@/lib/utils";
-import { Home, Code, Coffee, Car, Briefcase, ChevronDown } from "lucide-react";
+import { Home, Code, Coffee, Car, Briefcase, ChevronDown, Plus } from "lucide-react";
 import {
   ContextCollapsible,
   ContextCollapsibleContent,
@@ -12,6 +13,7 @@ import type { Task, Context } from "@/lib/data";
 interface ContextGroupProps {
   context: Context;
   tasks: Task[];
+  allContexts: Context[];
 }
 
 function getIconComponent(iconName: string) {
@@ -46,7 +48,7 @@ function getCompletionColor(percentage: number): string {
   return "text-red-700";
 }
 
-export function ContextGroup({ context, tasks }: ContextGroupProps) {
+export function ContextGroup({ context, tasks, allContexts }: ContextGroupProps) {
   const contextTasks = tasks
     .filter((task) => task.contextId === context.id)
     .sort((a, b) => {
@@ -127,6 +129,24 @@ export function ContextGroup({ context, tasks }: ContextGroupProps) {
                 No tasks in this context
               </p>
             )}
+            
+            {/* Add Task Button */}
+            <div className="mt-4 pt-3 border-t border-gray-100">
+              <AddItemModal 
+                contexts={allContexts.map(ctx => ({
+                  id: ctx.id,
+                  name: ctx.name,
+                  icon: ctx.icon,
+                  color: ctx.color
+                }))} 
+                defaultContextId={context.id}
+              >
+                <button className="w-full flex items-center justify-center space-x-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg border border-dashed border-gray-300 hover:border-gray-400 transition-colors">
+                  <Plus className="w-4 h-4" />
+                  <span>Add Task</span>
+                </button>
+              </AddItemModal>
+            </div>
           </div>
         </ContextCollapsibleContent>
       </ContextCollapsible>

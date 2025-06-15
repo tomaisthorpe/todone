@@ -21,6 +21,27 @@ export default async function Dashboard() {
   // Server-side data fetching
   const [tasks, contexts] = await Promise.all([getTasks(), getContexts()]);
 
+  // Sort contexts by health (lowest first), then by highest urgency task
+  const sortedContexts = contexts.sort((a, b) => {
+    // Calculate health for each context
+    const aHabits = tasks.filter(task => task.contextId === a.id && task.type === "HABIT");
+    const bHabits = tasks.filter(task => task.contextId === b.id && task.type === "HABIT");
+    
+    const aHealth = aHabits.length === 0 ? 100 : Math.round((aHabits.filter(h => h.completed).length / aHabits.length) * 100);
+    const bHealth = bHabits.length === 0 ? 100 : Math.round((bHabits.filter(h => h.completed).length / bHabits.length) * 100);
+    
+    // Sort by health (lowest first)
+    if (aHealth !== bHealth) {
+      return aHealth - bHealth;
+    }
+    
+    // If health is equal, sort by highest urgency task in context
+    const aMaxUrgency = Math.max(...tasks.filter(task => task.contextId === a.id).map(task => task.urgency), 0);
+    const bMaxUrgency = Math.max(...tasks.filter(task => task.contextId === b.id).map(task => task.urgency), 0);
+    
+    return bMaxUrgency - aMaxUrgency;
+  });
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -65,13 +86,14 @@ export default async function Dashboard() {
         {/* Context Groups */}
         <div className="space-y-4">
           <h2 className="text-xl font-semibold text-gray-900">Contexts</h2>
-          {contexts.length > 0 ? (
+          {sortedContexts.length > 0 ? (
             <div className="grid grid-cols-1 gap-4">
-              {contexts.map((context) => (
+              {sortedContexts.map((context) => (
                 <ContextGroup
                   key={context.id}
                   context={context}
                   tasks={tasks}
+                  allContexts={contexts}
                 />
               ))}
             </div>
