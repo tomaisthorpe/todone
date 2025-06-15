@@ -6,7 +6,6 @@ import { getServerSession } from "next-auth/next";
 import { Session } from "next-auth";
 import { authOptions } from "./auth";
 import { prisma } from "./prisma";
-import { calculateUrgency } from "./utils";
 
 // Get authenticated user or redirect
 async function getAuthenticatedUser() {
@@ -90,14 +89,7 @@ export async function createTaskAction(formData: FormData) {
     throw new Error("Context not found");
   }
   
-  // Calculate urgency
-  const urgency = calculateUrgency({
-    priority,
-    dueDate: dueDate ? new Date(dueDate) : null,
-    createdAt: new Date(),
-    tags: [] // TODO: Add tags support
-  });
-  
+  // Create task without urgency - it will be calculated dynamically
   await prisma.task.create({
     data: {
       title,
@@ -106,7 +98,6 @@ export async function createTaskAction(formData: FormData) {
       tags: [], // TODO: Add tags support
       contextId,
       dueDate: dueDate ? new Date(dueDate) : null,
-      urgency,
       type,
       habitType: type === "HABIT" ? habitType : null,
       frequency: type === "HABIT" ? frequency : null,

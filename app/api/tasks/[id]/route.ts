@@ -32,7 +32,18 @@ export async function GET(
       return NextResponse.json({ error: "Task not found" }, { status: 404 });
     }
 
-    return NextResponse.json(task);
+    // Calculate urgency dynamically
+    const taskWithUrgency = {
+      ...task,
+      urgency: calculateUrgency({
+        priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
+        dueDate: task.dueDate,
+        createdAt: task.createdAt,
+        tags: task.tags
+      })
+    };
+
+    return NextResponse.json(taskWithUrgency);
   } catch (error) {
     console.error('Error fetching task:', error);
     return NextResponse.json(
@@ -121,14 +132,7 @@ export async function PUT(
       };
     }
 
-    // Calculate new urgency
-    const urgency = calculateUrgency({
-      priority: priority || existingTask.priority,
-      dueDate: dueDate ? new Date(dueDate) : existingTask.dueDate,
-      createdAt: existingTask.createdAt,
-      tags: tags || existingTask.tags
-    });
-
+    // Update task without storing urgency - it will be calculated dynamically
     const updatedTask = await prisma.task.update({
       where: {
         id: id
@@ -144,7 +148,6 @@ export async function PUT(
         ...(habitType !== undefined && { habitType }),
         ...(frequency !== undefined && { frequency }),
         ...(nextDue !== undefined && { nextDue: nextDue ? new Date(nextDue) : null }),
-        urgency,
         ...habitCompletionData
       },
       include: {
@@ -153,7 +156,18 @@ export async function PUT(
       }
     });
 
-    return NextResponse.json(updatedTask);
+    // Calculate urgency dynamically for response
+    const taskWithUrgency = {
+      ...updatedTask,
+      urgency: calculateUrgency({
+        priority: updatedTask.priority as "LOW" | "MEDIUM" | "HIGH",
+        dueDate: updatedTask.dueDate,
+        createdAt: updatedTask.createdAt,
+        tags: updatedTask.tags
+      })
+    };
+
+    return NextResponse.json(taskWithUrgency);
   } catch (error) {
     console.error('Error updating task:', error);
     return NextResponse.json(

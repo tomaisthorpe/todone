@@ -3,6 +3,7 @@ import { Session } from "next-auth";
 import { authOptions } from "./auth";
 import { prisma } from "./prisma";
 import { TaskType, Priority, HabitType } from "@/app/generated/prisma";
+import { calculateUrgency } from "./utils";
 
 // Get authenticated user session
 async function getAuthenticatedSession() {
@@ -93,17 +94,27 @@ export async function getTasks(): Promise<Task[]> {
       },
       orderBy: [
         { completed: 'asc' },
-        { urgency: 'desc' },
         { createdAt: 'desc' }
       ],
     });
 
-    return tasks.map(task => ({
+    const tasksWithUrgency = tasks.map(task => ({
       ...task,
       priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
       type: task.type as "TASK" | "HABIT" | "RECURRING",
       habitType: task.habitType as "STREAK" | "LEARNING" | "WELLNESS" | "MAINTENANCE" | null,
+      urgency: calculateUrgency({
+        priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
+        dueDate: task.dueDate,
+        createdAt: task.createdAt,
+        tags: task.tags
+      })
     }));
+
+    return tasksWithUrgency.sort((a, b) => {
+      if (a.completed !== b.completed) return a.completed ? 1 : -1;
+      return b.urgency - a.urgency;
+    });
   } catch (error) {
     console.error("Error fetching tasks:", error);
     return [];
@@ -162,17 +173,27 @@ export async function getUserTasks(userId: string): Promise<Task[]> {
       },
       orderBy: [
         { completed: 'asc' },
-        { urgency: 'desc' },
         { createdAt: 'desc' }
       ],
     });
 
-    return tasks.map(task => ({
+    const tasksWithUrgency = tasks.map(task => ({
       ...task,
       priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
       type: task.type as "TASK" | "HABIT" | "RECURRING",
       habitType: task.habitType as "STREAK" | "LEARNING" | "WELLNESS" | "MAINTENANCE" | null,
+      urgency: calculateUrgency({
+        priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
+        dueDate: task.dueDate,
+        createdAt: task.createdAt,
+        tags: task.tags
+      })
     }));
+
+    return tasksWithUrgency.sort((a, b) => {
+      if (a.completed !== b.completed) return a.completed ? 1 : -1;
+      return b.urgency - a.urgency;
+    });
   } catch (error) {
     console.error("Error fetching user tasks:", error);
     return [];
