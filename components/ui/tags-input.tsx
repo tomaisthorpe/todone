@@ -124,7 +124,7 @@ export function TagsInput({
     <div className={cn("relative", className)}>
       <div
         className={cn(
-          "flex flex-wrap gap-1 p-2 border border-input bg-background rounded-md min-h-10",
+          "flex flex-wrap gap-1 p-2 border bg-white rounded-md min-h-10",
           "focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
           disabled && "opacity-50 cursor-not-allowed"
         )}
@@ -167,15 +167,16 @@ export function TagsInput({
       {showSuggestions && filteredSuggestions.length > 0 && (
         <div
           ref={suggestionsRef}
-          className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-md shadow-md max-h-48 overflow-y-auto"
+          className="absolute z-50 w-full mt-1 bg-white rounded-md shadow-md max-h-48 overflow-y-auto"
         >
           {filteredSuggestions.map((suggestion, index) => (
             <button
               key={suggestion}
               type="button"
               className={cn(
-                "w-full px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-                index === selectedSuggestionIndex && "bg-accent text-accent-foreground"
+                "w-full px-3 py-2 text-left text-sm hover:bg-gray-100 hover:text-accent-foreground focus:bg-gray-100 focus:text-accent-foreground",
+                index === selectedSuggestionIndex &&
+                  "bg-accent text-accent-foreground"
               )}
               onClick={() => handleSuggestionClick(suggestion)}
             >
