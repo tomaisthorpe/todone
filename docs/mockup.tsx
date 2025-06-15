@@ -31,11 +31,10 @@ const Todone = () => {
       id: 1,
       title: "Fix authentication bug in user dashboard",
       project: "SideProject A",
-      priority: "high",
+      priority: "HIGH",
       tags: ["bug", "urgent"],
       context: "coding",
       dueDate: "2025-06-15",
-      urgency: 8.5,
       completed: false,
       type: "task",
     },
@@ -43,14 +42,13 @@ const Todone = () => {
       id: 2,
       title: "Morning workout",
       project: "Health",
-      priority: "medium",
+      priority: "MEDIUM",
       tags: ["fitness"],
       context: "bedroom",
       dueDate: "2025-06-15",
-      urgency: 7.8,
       completed: true,
       type: "habit",
-      habitType: "streak",
+      habitType: "STREAK",
       streak: 12,
       longestStreak: 28,
       frequency: 1,
@@ -62,11 +60,10 @@ const Todone = () => {
       id: 3,
       title: "Deploy staging environment",
       project: "SideProject A",
-      priority: "high",
+      priority: "HIGH",
       tags: ["deployment"],
       context: "coding",
-      dueDate: "2025-06-17",
-      urgency: 7.9,
+      dueDate: "2025-06-16",
       completed: false,
       type: "task",
     },
@@ -74,52 +71,48 @@ const Todone = () => {
       id: 4,
       title: "Review pull requests",
       project: "SideProject B",
-      priority: "medium",
+      priority: "MEDIUM",
       tags: ["review"],
       context: "coding",
       dueDate: null,
-      urgency: 6.2,
       completed: true,
       type: "task",
     },
     {
       id: 5,
-      title: "Update documentation",
-      project: "SideProject A",
-      priority: "low",
-      tags: ["docs"],
+      title: "Clean keyboard",
+      project: "Maintenance",
+      priority: "LOW",
+      tags: ["cleaning"],
       context: "coding",
-      dueDate: "2025-06-20",
-      urgency: 4.1,
+      dueDate: null,
       completed: false,
       type: "task",
     },
     {
-      id: 15,
+      id: 6,
       title: "Daily coding practice",
       project: "Learning",
-      priority: "medium",
+      priority: "MEDIUM",
       tags: ["learning", "coding"],
       context: "coding",
       dueDate: null,
-      urgency: 6.5,
       completed: false,
       type: "habit",
-      habitType: "learning",
+      habitType: "LEARNING",
       streak: 7,
       longestStreak: 15,
       frequency: 1,
       lastCompleted: "2025-06-14",
     },
     {
-      id: 18,
+      id: 7,
       title: "Weekly team standup",
       project: "Work",
-      priority: "medium",
+      priority: "MEDIUM",
       tags: ["meeting", "recurring"],
       context: "coding",
       dueDate: "2025-06-16",
-      urgency: 6.8,
       completed: false,
       type: "recurring",
       frequency: 7,
@@ -128,167 +121,132 @@ const Todone = () => {
 
     // Bathroom context
     {
-      id: 6,
-      title: "Charge electric toothbrush",
-      project: "Maintenance",
-      priority: "low",
-      tags: ["maintenance"],
-      context: "bathroom",
-      dueDate: "2025-06-16",
-      urgency: 3.2,
-      completed: false,
-      type: "task",
-    },
-    {
-      id: 7,
-      title: "Clean bathroom sink",
-      project: "Cleaning",
-      priority: "medium",
-      tags: ["cleaning"],
-      context: "bathroom",
-      dueDate: null,
-      urgency: 5.5,
-      completed: false,
-      type: "habit",
-      habitType: "maintenance",
-      streak: 3,
-      frequency: 7,
-      lastCompleted: "2025-06-12",
-    },
-    {
       id: 8,
-      title: "Replace toilet paper",
-      project: "Maintenance",
-      priority: "low",
-      tags: ["supplies"],
-      context: "bathroom",
-      dueDate: "2025-06-14",
-      urgency: 2.8,
+      title: "Install new lighting",
+      project: "Home Improvement",
+      priority: "LOW",
+      tags: ["electrical"],
+      context: "kitchen",
+      dueDate: "2025-06-20",
       completed: false,
       type: "task",
     },
-    {
-      id: 13,
-      title: "Deep clean shower",
-      project: "Cleaning",
-      priority: "medium",
-      tags: ["cleaning", "deep"],
-      context: "bathroom",
-      dueDate: null,
-      urgency: 6.8,
-      completed: false,
-      type: "habit",
-      habitType: "maintenance",
-      streak: 2,
-      frequency: 14,
-      lastCompleted: "2025-06-01",
-    },
-    {
-      id: 16,
-      title: "Evening skincare routine",
-      project: "Self-Care",
-      priority: "low",
-      tags: ["skincare", "routine"],
-      context: "bathroom",
-      dueDate: null,
-      urgency: 4.8,
-      completed: false,
-      type: "habit",
-      habitType: "wellness",
-      streak: 18,
-      longestStreak: 32,
-      frequency: 1,
-      lastCompleted: "2025-06-14",
-    },
-
-    // Kitchen context
     {
       id: 9,
-      title: "Wipe down counters",
-      project: "Cleaning",
-      priority: "medium",
-      tags: ["cleaning"],
+      title: "Meal prep Sunday",
+      project: "Health",
+      priority: "MEDIUM",
+      tags: ["cooking", "health"],
       context: "kitchen",
-      dueDate: "2025-06-15",
-      urgency: 6.1,
-      completed: true,
-      type: "habit",
-      habitType: "maintenance",
-      streak: 5,
-      frequency: 1,
-      lastCompleted: "2025-06-15",
+      dueDate: null,
+      completed: false,
+      type: "task",
     },
     {
       id: 10,
-      title: "Empty dishwasher",
-      project: "Cleaning",
-      priority: "medium",
-      tags: ["dishes"],
+      title: "Clear junk drawer",
+      project: "Organization",
+      priority: "LOW",
+      tags: ["organizing"],
       context: "kitchen",
-      dueDate: "2025-06-15",
-      urgency: 5.8,
+      dueDate: null,
       completed: false,
       type: "task",
     },
     {
       id: 11,
-      title: "Add fabric softener",
-      project: "Laundry",
-      priority: "low",
-      tags: ["laundry"],
+      title: "Clean stovetop after cooking",
+      project: "Daily Cleaning",
+      priority: "MEDIUM",
+      tags: ["cleaning", "habit"],
       context: "kitchen",
-      dueDate: null,
-      urgency: 3.5,
+      dueDate: "2025-06-15",
+      completed: false,
+      type: "habit",
+      habitType: "MAINTENANCE",
+      streak: 3,
+      frequency: 1,
+      lastCompleted: "2025-06-13",
+    },
+    {
+      id: 12,
+      title: "Wipe down counters",
+      project: "Cleaning",
+      priority: "MEDIUM",
+      tags: ["cleaning"],
+      context: "kitchen",
+      dueDate: "2025-06-15",
+      completed: true,
+      type: "habit",
+      habitType: "MAINTENANCE",
+      streak: 5,
+      frequency: 1,
+      lastCompleted: "2025-06-15",
+    },
+    {
+      id: 13,
+      title: "Empty dishwasher",
+      project: "Cleaning",
+      priority: "MEDIUM",
+      tags: ["dishes"],
+      context: "kitchen",
+      dueDate: "2025-06-15",
       completed: false,
       type: "task",
     },
     {
       id: 14,
-      title: "Clean refrigerator",
-      project: "Cleaning",
-      priority: "low",
-      tags: ["cleaning", "weekly"],
+      title: "Stock coffee supplies",
+      project: "Groceries",
+      priority: "LOW",
+      tags: ["shopping"],
       context: "kitchen",
       dueDate: null,
-      urgency: 4.2,
       completed: false,
-      type: "habit",
-      habitType: "maintenance",
-      streak: 4,
-      frequency: 7,
-      lastCompleted: "2025-06-13",
+      type: "task",
     },
 
     // Bedroom context
     {
-      id: 12,
+      id: 15,
       title: "Make bed",
       project: "Morning Routine",
-      priority: "low",
+      priority: "LOW",
       tags: ["routine"],
       context: "bedroom",
       dueDate: null,
-      urgency: 4.2,
       completed: true,
       type: "habit",
-      habitType: "wellness",
+      habitType: "WELLNESS",
       streak: 8,
       longestStreak: 22,
       frequency: 1,
       lastCompleted: "2025-06-15",
     },
     {
+      id: 16,
+      title: "Laundry rotation",
+      project: "Housekeeping",
+      priority: "MEDIUM",
+      tags: ["laundry"],
+      context: "bedroom",
+      dueDate: "2025-06-16",
+      completed: false,
+      type: "recurring",
+      frequency: 3,
+      nextDue: "2025-06-16",
+    },
+    {
       id: 17,
       title: "Read before bed",
       project: "Learning",
-      priority: "low",
+      priority: "LOW",
       tags: ["reading", "routine"],
       context: "bedroom",
       dueDate: null,
-      urgency: 5.2,
       completed: false,
       type: "habit",
-      habitType: "learning",
+      habitType: "LEARNING",
       streak: 9,
       longestStreak: 18,
       frequency: 1,
@@ -366,13 +324,69 @@ const Todone = () => {
     return "text-red-600 bg-red-100";
   };
 
+  // Calculate urgency for mockup tasks
+  const calculateMockUrgency = (task: {
+    priority: string;
+    dueDate: string | null;
+    tags: string[];
+  }): number => {
+    let urgency: number = 5.0; // Base urgency
+
+    // Priority weight
+    switch (task.priority) {
+      case "HIGH":
+        urgency += 2.0;
+        break;
+      case "MEDIUM":
+        urgency += 1.0;
+        break;
+      case "LOW":
+        urgency += 0.0;
+        break;
+    }
+
+    // Age weight (simulated - assume all tasks are from today for mockup)
+    const ageInDays: number = 0; // Mockup assumes current tasks
+    urgency += Math.min(ageInDays * 0.1, 2.0);
+
+    // Due date weight
+    if (task.dueDate) {
+      const today = new Date("2025-06-15");
+      const dueDate = new Date(task.dueDate);
+      const daysUntilDue: number = Math.floor(
+        (dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+      );
+      
+      if (daysUntilDue <= 0) {
+        urgency += 3.0; // Overdue
+      } else if (daysUntilDue <= 1) {
+        urgency += 2.0; // Due today/tomorrow
+      } else if (daysUntilDue <= 3) {
+        urgency += 1.0; // Due soon
+      }
+    }
+
+    // Tag weight
+    const urgentTags = ["urgent", "important", "critical"];
+    const hasUrgentTag = task.tags.some((tag: string) => 
+      urgentTags.includes(tag.toLowerCase())
+    );
+    if (hasUrgentTag) {
+      urgency += 1.5;
+    }
+
+    return Math.min(Math.max(urgency, 0), 10); // Clamp between 0 and 10
+  };
+
   const getTodayTasks = () => {
     const today = "2025-06-15";
     return tasks
       .filter((task) => task.dueDate === today)
       .sort((a, b) => {
         if (a.completed !== b.completed) return a.completed ? 1 : -1;
-        return b.urgency - a.urgency;
+        const aUrgency = calculateMockUrgency(a);
+        const bUrgency = calculateMockUrgency(b);
+        return bUrgency - aUrgency;
       });
   };
 
@@ -553,6 +567,7 @@ const Todone = () => {
     const dateInfo = formatDate(task.dueDate);
     const habitStatus = task.type === "habit" ? getHabitStatus(task) : null;
     const habitDisplay = getHabitDisplay(task);
+    const taskUrgency = calculateMockUrgency(task);
 
     return (
       <div
@@ -658,14 +673,14 @@ const Todone = () => {
               )}
               <div
                 className={`px-1.5 py-0.5 rounded text-xs font-semibold ${
-                  task.urgency >= 7
+                  taskUrgency >= 7
                     ? "text-red-600 bg-red-100"
-                    : task.urgency >= 5
+                    : taskUrgency >= 5
                     ? "text-orange-600 bg-orange-100"
                     : "text-green-600 bg-green-100"
                 }`}
               >
-                {task.urgency.toFixed(1)}
+                {taskUrgency.toFixed(1)}
               </div>
             </div>
           </div>
@@ -679,7 +694,7 @@ const Todone = () => {
       .filter((task) => task.context === context.id)
       .sort((a, b) => {
         if (a.completed !== b.completed) return a.completed ? 1 : -1;
-        return b.urgency - a.urgency;
+        return calculateMockUrgency(b) - calculateMockUrgency(a);
       });
 
     const completion = getContextCompletion(context.id);
