@@ -2,8 +2,6 @@
 
 import React from "react";
 import { 
-  CheckCircle2, 
-  Circle, 
   AlertCircle, 
   RotateCcw,
   Dumbbell,
@@ -12,43 +10,15 @@ import {
   Wrench
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { formatDate, getUrgencyColor } from "@/lib/utils";
 import { getHabitStatus, getHabitDisplay } from "@/lib/habits";
 import { cn } from "@/lib/utils";
-
-interface Task {
-  id: string;
-  title: string;
-  project?: string | null;
-  priority: "LOW" | "MEDIUM" | "HIGH";
-  tags: string[];
-  contextId: string;
-  dueDate: Date | null;
-  urgency: number;
-  completed: boolean;
-  type: "TASK" | "HABIT" | "RECURRING";
-  userId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  habitType?: "STREAK" | "LEARNING" | "WELLNESS" | "MAINTENANCE" | null;
-  streak?: number | null;
-  longestStreak?: number | null;
-  frequency?: number | null;
-  lastCompleted?: Date | null;
-  nextDue?: Date | null;
-  context?: {
-    id: string;
-    name: string;
-    icon: string;
-    color: string;
-  };
-}
+import { TaskToggleButton } from "./task-toggle-button";
+import type { Task } from "@/lib/data";
 
 interface TaskCardProps {
   task: Task;
   compact?: boolean;
-  onToggle?: (id: string) => void;
 }
 
 const renderHabitIcon = (iconType: string, className: string) => {
@@ -66,7 +36,7 @@ const renderHabitIcon = (iconType: string, className: string) => {
   }
 };
 
-export function TaskCard({ task, compact = false, onToggle }: TaskCardProps) {
+export function TaskCard({ task, compact = false }: TaskCardProps) {
   const dateInfo = task.dueDate ? {
     text: formatDate(task.dueDate),
     isOverdue: task.dueDate < new Date()
@@ -79,12 +49,6 @@ export function TaskCard({ task, compact = false, onToggle }: TaskCardProps) {
   
   const habitDisplay = getHabitDisplay(task);
 
-  const handleToggle = () => {
-    if (onToggle) {
-      onToggle(task.id);
-    }
-  };
-
   return (
     <div
       className={cn(
@@ -92,18 +56,7 @@ export function TaskCard({ task, compact = false, onToggle }: TaskCardProps) {
         task.completed && "opacity-60"
       )}
     >
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={handleToggle}
-        className="mt-0.5 p-0 h-auto hover:bg-transparent"
-      >
-        {task.completed ? (
-          <CheckCircle2 className="w-5 h-5 text-green-600" />
-        ) : (
-          <Circle className="w-5 h-5 text-gray-400 hover:text-gray-600" />
-        )}
-      </Button>
+      <TaskToggleButton taskId={task.id} completed={task.completed} />
 
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between">

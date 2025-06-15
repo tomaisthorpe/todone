@@ -1,86 +1,15 @@
-"use client";
-
-import { useState } from "react";
-import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
 import { CheckCircle2, Plus, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TodaySection } from "@/components/today-section";
 import { ContextGroup } from "@/components/context-group";
-import { useTasks, useToggleTask } from "@/hooks/use-tasks";
-import { useContexts } from "@/hooks/use-contexts";
+import { getTasks, getContexts } from "@/lib/data";
 
-export default function Dashboard() {
-  const { status } = useSession();
-  const [collapsedContexts, setCollapsedContexts] = useState(new Set<string>());
-
-  // Redirect to auth if not authenticated
-  if (status === "loading") {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (status === "unauthenticated") {
-    redirect("/auth/signin");
-  }
-
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const { data: tasks = [], isLoading: tasksLoading, error: tasksError } = useTasks();
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const { data: contexts = [], isLoading: contextsLoading, error: contextsError } = useContexts();
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const toggleTaskMutation = useToggleTask();
-
-  const handleToggleContext = (contextId: string) => {
-    const newCollapsed = new Set(collapsedContexts);
-    if (newCollapsed.has(contextId)) {
-      newCollapsed.delete(contextId);
-    } else {
-      newCollapsed.add(contextId);
-    }
-    setCollapsedContexts(newCollapsed);
-  };
-
-  const handleToggleTask = async (taskId: string) => {
-    const task = tasks.find(t => t.id === taskId);
-    if (!task) return;
-
-    try {
-      await toggleTaskMutation.mutateAsync({
-        id: taskId,
-        completed: !task.completed
-      });
-    } catch (error) {
-      console.error("Failed to toggle task:", error);
-    }
-  };
-
-  if (tasksLoading || contextsLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading your tasks...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (tasksError || contextsError) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600">Error loading data. Please try refreshing the page.</p>
-        </div>
-      </div>
-    );
-  }
+export default async function Dashboard() {
+  // Server-side data fetching
+  const [tasks, contexts] = await Promise.all([
+    getTasks(),
+    getContexts()
+  ]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -109,7 +38,7 @@ export default function Dashboard() {
 
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
         {/* Today Section */}
-        <TodaySection tasks={tasks} onToggleTask={handleToggleTask} />
+        <TodaySection tasks={tasks} />
 
         {/* Contexts Grid */}
         <div className="space-y-4">
@@ -121,9 +50,6 @@ export default function Dashboard() {
                   key={context.id}
                   context={context}
                   tasks={tasks}
-                  isCollapsed={collapsedContexts.has(context.id)}
-                  onToggleCollapse={handleToggleContext}
-                  onToggleTask={handleToggleTask}
                 />
               ))}
             </div>

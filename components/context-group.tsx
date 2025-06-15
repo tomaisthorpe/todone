@@ -1,54 +1,27 @@
-"use client";
-
 import React from "react";
-import { ChevronDown, ChevronRight, Home, Code, Coffee, Car, Briefcase } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { TaskCard } from "./task-card";
 import { cn } from "@/lib/utils";
-
-interface Task {
-  id: string;
-  title: string;
-  project?: string | null;
-  priority: "LOW" | "MEDIUM" | "HIGH";
-  tags: string[];
-  contextId: string;
-  dueDate: Date | null;
-  urgency: number;
-  completed: boolean;
-  type: "TASK" | "HABIT" | "RECURRING";
-  userId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  habitType?: "STREAK" | "LEARNING" | "WELLNESS" | "MAINTENANCE" | null;
-  streak?: number | null;
-  longestStreak?: number | null;
-  frequency?: number | null;
-  lastCompleted?: Date | null;
-  nextDue?: Date | null;
-}
-
-interface Context {
-  id: string;
-  name: string;
-  description?: string | null;
-  icon: string;
-  color: string;
-  shared?: boolean;
-  userId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  tasks?: Task[];
-}
+import { Home, Code, Coffee, Car, Briefcase } from "lucide-react";
+import { ContextCollapsible } from "./context-collapsible";
+import type { Task, Context } from "@/lib/data";
 
 interface ContextGroupProps {
   context: Context;
   tasks: Task[];
-  isCollapsed: boolean;
-  onToggleCollapse: (contextId: string) => void;
-  onToggleTask: (taskId: string) => void;
+}
+
+function getIconComponent(iconName: string) {
+  const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+    Home,
+    Code,
+    Coffee,
+    Car,
+    Briefcase,
+  };
+  
+  return iconMap[iconName] || Home;
 }
 
 function getContextCompletion(tasks: Task[]) {
@@ -71,25 +44,7 @@ function getCompletionColor(percentage: number): string {
   return "text-red-600";
 }
 
-function getIconComponent(iconName: string) {
-  const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-    Home,
-    Code,
-    Coffee,
-    Car,
-    Briefcase,
-  };
-  
-  return iconMap[iconName] || Home;
-}
-
-export function ContextGroup({
-  context,
-  tasks,
-  isCollapsed,
-  onToggleCollapse,
-  onToggleTask,
-}: ContextGroupProps) {
+export function ContextGroup({ context, tasks }: ContextGroupProps) {
   const contextTasks = tasks
     .filter((task) => task.contextId === context.id)
     .sort((a, b) => {
@@ -98,8 +53,6 @@ export function ContextGroup({
     });
 
   const completion = getContextCompletion(contextTasks);
-  
-  // Get the icon component safely
   const IconComponent = getIconComponent(context.icon);
 
   // Count tasks scheduled for today
@@ -115,27 +68,16 @@ export function ContextGroup({
   return (
     <Card className="overflow-hidden">
       <CardHeader className={cn("p-4 text-white", context.color)}>
-        <Button
-          variant="ghost"
-          onClick={() => onToggleCollapse(context.id)}
-          className="w-full flex items-center justify-between hover:bg-white hover:bg-opacity-10 rounded-lg p-2 transition-colors text-white"
-        >
-          <div className="flex items-center space-x-3">
-            <div className="flex items-center space-x-2">
-              {isCollapsed ? (
-                <ChevronRight className="w-4 h-4" />
-              ) : (
-                <ChevronDown className="w-4 h-4" />
-              )}
-              <IconComponent className="w-5 h-5" />
-            </div>
+        <div className="flex items-center justify-between">
+          <ContextCollapsible>
+            <IconComponent className="w-5 h-5" />
             <div className="text-left">
               <h3 className="font-semibold">{context.name}</h3>
               {context.description && (
                 <p className="text-sm opacity-90">{context.description}</p>
               )}
             </div>
-          </div>
+          </ContextCollapsible>
           
           <div className="text-right">
             <Badge
@@ -156,7 +98,7 @@ export function ContextGroup({
               </p>
             )}
           </div>
-        </Button>
+        </div>
 
         <div className="mt-3">
           <div className="w-full bg-white bg-opacity-30 rounded-full h-2">
@@ -168,7 +110,7 @@ export function ContextGroup({
         </div>
       </CardHeader>
 
-      {!isCollapsed && (
+      <ContextCollapsible.Content>
         <CardContent className="p-4">
           {contextTasks.length > 0 ? (
             <div className="space-y-1">
@@ -177,7 +119,6 @@ export function ContextGroup({
                   key={task.id}
                   task={task}
                   compact
-                  onToggle={onToggleTask}
                 />
               ))}
             </div>
@@ -187,7 +128,7 @@ export function ContextGroup({
             </p>
           )}
         </CardContent>
-      )}
+      </ContextCollapsible.Content>
     </Card>
   );
 }

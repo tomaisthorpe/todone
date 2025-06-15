@@ -1,41 +1,11 @@
-"use client";
-
 import React from "react";
 import { Calendar } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { TaskCard } from "./task-card";
-
-interface Task {
-  id: string;
-  title: string;
-  project?: string | null;
-  priority: "LOW" | "MEDIUM" | "HIGH";
-  tags: string[];
-  contextId: string;
-  dueDate: Date | null;
-  urgency: number;
-  completed: boolean;
-  type: "TASK" | "HABIT" | "RECURRING";
-  userId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  habitType?: "STREAK" | "LEARNING" | "WELLNESS" | "MAINTENANCE" | null;
-  streak?: number | null;
-  longestStreak?: number | null;
-  frequency?: number | null;
-  lastCompleted?: Date | null;
-  nextDue?: Date | null;
-  context?: {
-    id: string;
-    name: string;
-    icon: string;
-    color: string;
-  };
-}
+import type { Task } from "@/lib/data";
 
 interface TodaySectionProps {
   tasks: Task[];
-  onToggleTask: (taskId: string) => void;
 }
 
 function getTodayTasks(tasks: Task[]): Task[] {
@@ -57,7 +27,7 @@ function getTodayTasks(tasks: Task[]): Task[] {
     });
 }
 
-export function TodaySection({ tasks, onToggleTask }: TodaySectionProps) {
+export function TodaySection({ tasks }: TodaySectionProps) {
   const todayTasks = getTodayTasks(tasks);
   const completedCount = todayTasks.filter(task => task.completed).length;
 
@@ -82,7 +52,6 @@ export function TodaySection({ tasks, onToggleTask }: TodaySectionProps) {
               <TaskCard
                 key={task.id}
                 task={task}
-                onToggle={onToggleTask}
               />
             ))}
           </div>

@@ -2,17 +2,25 @@
 
 ## Overview
 
-This is the full-stack version of Todone, a context-based task management app with customizable urgency scoring and flexible habit tracking. The application has been built according to the specifications in the README.md and design documents.
+This is the full-stack version of Todone, a context-based task management app with customizable urgency scoring and flexible habit tracking. The application has been built according to the specifications in the README.md and design documents, **utilizing React Server Components and Server Actions for optimal performance**.
 
 ## Tech Stack
 
-- **Frontend**: Next.js 15 with App Router, React 19, TypeScript
+- **Frontend**: Next.js 15 with App Router, React 19 Server Components, TypeScript
 - **Database**: PostgreSQL with Prisma ORM
 - **Authentication**: NextAuth.js v4 with credentials provider
 - **Styling**: Tailwind CSS + shadcn/ui components
-- **State Management**: TanStack Query (React Query)
+- **Data**: Server-side data fetching with Server Actions
 - **Icons**: Lucide React
-- **Forms**: React Hook Form + Zod validation
+- **Forms**: Server Actions with native form handling
+
+## Architecture Highlights
+
+✅ **Server-First Approach**: Follows React best practices by using Server Components wherever possible  
+✅ **Server Actions**: All mutations handled server-side for better performance and security  
+✅ **Minimal Client JavaScript**: Only interactive components use `"use client"`  
+✅ **Optimistic UI**: Task toggling with `useTransition` for immediate feedback  
+✅ **Type Safety**: Full TypeScript coverage from database to UI  
 
 ## Setup Instructions
 
@@ -84,50 +92,56 @@ This account includes sample contexts and tasks that match the design mockup.
 
 ### ✅ Implemented Features
 
-1. **Authentication System**
+1. **Server-Side Architecture**
+   - React Server Components for optimal performance
+   - Server Actions for all data mutations
+   - Minimal client-side JavaScript
+   - Server-side data fetching and rendering
+
+2. **Authentication System**
    - Secure login/logout with NextAuth.js
    - Password hashing with bcryptjs
-   - Protected routes and session management
+   - Server-side session checking and protection
 
-2. **Database Schema**
+3. **Database Schema**
    - Users, contexts, tasks, and habit completions
    - Proper relationships and constraints
    - User data isolation and security
 
-3. **Core Components**
-   - TaskCard: Handles all task types with visual distinctions
-   - ContextGroup: Collapsible contexts with health bars
-   - TodaySection: Shows all tasks due today
+4. **Core Components**
+   - TaskCard: Server Component with client-side toggle button
+   - ContextGroup: Server Component with collapsible client behavior
+   - TodaySection: Server Component for today's tasks
    - Responsive design with mobile support
 
-4. **Task Management**
-   - Create, read, update, delete tasks
+5. **Task Management**
+   - Server Actions for create, update, delete operations
    - Three task types: regular, habits, recurring
-   - Urgency calculation based on multiple factors
-   - Real-time updates with optimistic UI
+   - Urgency calculation on server-side
+   - Optimistic UI updates with `useTransition`
 
-5. **Habit Tracking**
+6. **Habit Tracking**
    - Four habit types with different visual emphasis
    - Flexible frequency settings (daily, weekly, etc.)
    - Streak tracking and completion history
    - Relaxed, supportive status language
 
-6. **Context Health System**
+7. **Context Health System**
    - Health percentage based only on habits
    - Visual health bars and indicators
-   - Context collapse/expand functionality
+   - Client-side collapsible functionality
 
-7. **Data Persistence**
+8. **Data Persistence**
    - PostgreSQL database with Prisma ORM
-   - API routes for all CRUD operations
-   - Error handling and loading states
+   - Server Actions for all CRUD operations
+   - Automatic page revalidation after mutations
 
-### 🔄 API Endpoints
+### 🔄 Server Actions
 
-- `GET/POST /api/tasks` - List and create tasks
-- `GET/PUT/DELETE /api/tasks/[id]` - Individual task operations
-- `GET/POST /api/contexts` - List and create contexts
-- `POST /api/auth/[...nextauth]` - Authentication endpoints
+- `toggleTaskAction(taskId)` - Toggle task completion with habit tracking
+- `createTaskAction(formData)` - Create new tasks from form data
+- `createContextAction(formData)` - Create new contexts
+- `deleteTaskAction(taskId)` - Delete tasks securely
 
 ### 🎨 UI/UX Features
 
@@ -136,7 +150,7 @@ This account includes sample contexts and tasks that match the design mockup.
 - Proper color coding for urgency levels
 - Habit icons and status badges
 - Responsive grid layout
-- Loading and error states
+- Server-rendered with minimal client JavaScript
 
 ## Development Commands
 
@@ -159,26 +173,24 @@ npm run db:studio       # Open Prisma Studio
 
 ```
 ├── app/                          # Next.js App Router
-│   ├── api/                      # API routes
-│   │   ├── auth/[...nextauth]/   # NextAuth configuration
-│   │   ├── tasks/                # Task CRUD operations
-│   │   └── contexts/             # Context CRUD operations
+│   ├── api/                      # API routes (legacy, now using Server Actions)
 │   ├── auth/signin/              # Authentication pages
 │   ├── globals.css               # Global styles with shadcn/ui
-│   ├── layout.tsx                # Root layout with providers
-│   └── page.tsx                  # Main dashboard page
+│   ├── layout.tsx                # Root layout with minimal providers
+│   └── page.tsx                  # Main dashboard (Server Component)
 ├── components/                   # React components
 │   ├── ui/                       # shadcn/ui components
-│   ├── task-card.tsx             # Task display component
-│   ├── context-group.tsx         # Context management component
-│   ├── today-section.tsx         # Today's tasks section
-│   └── providers.tsx             # Query and auth providers
-├── hooks/                        # React Query hooks
-│   ├── use-tasks.ts              # Task management hooks
-│   └── use-contexts.ts           # Context management hooks
+│   ├── task-card.tsx             # Server Component for task display
+│   ├── task-toggle-button.tsx    # Client Component for task interaction
+│   ├── context-group.tsx         # Server Component for context management
+│   ├── context-collapsible.tsx   # Client Component for collapse behavior
+│   ├── today-section.tsx         # Server Component for today's tasks
+│   └── providers.tsx             # Minimal providers (SessionProvider only)
 ├── lib/                          # Utility functions
 │   ├── auth.ts                   # NextAuth configuration
 │   ├── prisma.ts                 # Prisma client instance
+│   ├── server-actions.ts         # Server Actions for mutations
+│   ├── data.ts                   # Server-side data fetching functions
 │   ├── utils.ts                  # General utilities + urgency calculation
 │   └── habits.ts                 # Habit-specific utilities
 ├── prisma/                       # Database schema and migrations
@@ -192,13 +204,35 @@ npm run db:studio       # Open Prisma Studio
     └── mockup.tsx                # Original design mockup
 ```
 
+## Server vs Client Components
+
+### Server Components (no "use client")
+- `app/page.tsx` - Main dashboard with server-side data fetching
+- `components/task-card.tsx` - Task display (static rendering)
+- `components/context-group.tsx` - Context display (static rendering)  
+- `components/today-section.tsx` - Today's tasks (static rendering)
+
+### Client Components ("use client")
+- `components/task-toggle-button.tsx` - Task completion interaction
+- `components/context-collapsible.tsx` - Context collapse/expand
+- `components/providers.tsx` - SessionProvider wrapper
+- `app/auth/signin/page.tsx` - Authentication form
+
 ## Key Design Decisions
 
-1. **Habits ≠ Tasks**: Habits use supportive language and flexible timing
-2. **Context-Based Organization**: Tasks organized by where/when they're done
-3. **Urgency Over Priority**: Mathematical urgency calculation
-4. **Unified Task Lists**: All task types in the same list, sorted by urgency
-5. **Context Health from Habits Only**: One-off tasks don't affect context health
+1. **Server-First Architecture**: Maximize use of React Server Components
+2. **Server Actions**: All mutations handled server-side for security and performance
+3. **Minimal Client JS**: Only interactive elements require client-side code
+4. **Optimistic Updates**: Immediate UI feedback with `useTransition`
+5. **Type Safety**: End-to-end TypeScript from database to UI
+
+## Performance Benefits
+
+- **Reduced Bundle Size**: Most components render on server
+- **Better SEO**: Server-rendered content
+- **Faster Initial Load**: Less JavaScript to download
+- **Better UX**: Optimistic updates for interactions
+- **Improved Security**: Sensitive operations on server
 
 ## Troubleshooting
 
@@ -219,21 +253,20 @@ npm run db:studio       # Open Prisma Studio
 
 ## Next Steps
 
-The application is fully functional with all core features implemented. For future enhancements, consider:
+The application follows React best practices with a server-first approach. For future enhancements, consider:
 
-1. **Text-based task entry** with natural language parsing
+1. **Text-based task entry** with Server Actions form handling
 2. **Shared contexts** for family/roommate collaboration
-3. **Mobile app** version
-4. **Advanced analytics** and reporting
-5. **Customizable urgency weights**
-6. **Task templates** and automation
+3. **Progressive enhancement** for better offline experience
+4. **Advanced analytics** with server-side computation
+5. **Real-time updates** using Server Actions with WebSocket fallback
 
 ## Support
 
 For questions or issues:
 1. Check the documentation in `/docs/`
-2. Review the original design decisions
+2. Review the server-side data flow
 3. Check the console for error messages
 4. Verify database connectivity and seeding
 
-The application follows the exact specifications from the design documentation and provides a solid foundation for a production-ready task management system.
+The application follows React Server Component best practices and provides excellent performance with minimal client-side JavaScript while maintaining full functionality.
