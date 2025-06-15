@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, createContext, useContext } from "react";
+import { useState, createContext, useContext, ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 
 interface CollapsibleContextType {
@@ -19,7 +19,7 @@ function useCollapsible() {
 }
 
 interface ContextCollapsibleProps {
-  children: React.ReactNode;
+  children: ReactNode;
   defaultCollapsed?: boolean;
 }
 
@@ -39,10 +39,10 @@ export function ContextCollapsible({
 }
 
 interface ContentProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
-function Content({ children }: ContentProps) {
+export function ContextCollapsibleContent({ children }: ContentProps) {
   const { isCollapsed } = useCollapsible();
   
   if (isCollapsed) return null;
@@ -51,10 +51,10 @@ function Content({ children }: ContentProps) {
 }
 
 interface TriggerProps {
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
-function Trigger({ children }: TriggerProps) {
+export function ContextCollapsibleTrigger({ children }: TriggerProps) {
   const { isCollapsed, toggle } = useCollapsible();
   
   return (
@@ -72,6 +72,3 @@ function Trigger({ children }: TriggerProps) {
     </button>
   );
 }
-
-ContextCollapsible.Content = Content;
-ContextCollapsible.Trigger = Trigger;

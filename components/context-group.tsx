@@ -3,7 +3,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { TaskCard } from "./task-card";
 import { cn } from "@/lib/utils";
 import { Home, Code, Coffee, Car, Briefcase, ChevronDown } from "lucide-react";
-import { ContextCollapsible } from "./context-collapsible";
+import { 
+  ContextCollapsible, 
+  ContextCollapsibleContent, 
+  ContextCollapsibleTrigger 
+} from "./context-collapsible";
 import type { Task, Context } from "@/lib/data";
 
 interface ContextGroupProps {
@@ -88,13 +92,13 @@ export function ContextGroup({ context, tasks }: ContextGroupProps) {
               </div>
             )}
             
-            <ContextCollapsible.Trigger>
+            <ContextCollapsibleTrigger>
               <ChevronDown className="w-4 h-4 text-gray-400 transition-transform" />
-            </ContextCollapsible.Trigger>
+            </ContextCollapsibleTrigger>
           </div>
         </div>
 
-        <ContextCollapsible.Content>
+        <ContextCollapsibleContent>
           <CardContent className="p-0">
             {contextTasks.length > 0 ? (
               <div className="divide-y divide-gray-100">
@@ -102,7 +106,6 @@ export function ContextGroup({ context, tasks }: ContextGroupProps) {
                   <div key={task.id} className="px-4 py-2">
                     <TaskCard
                       task={task}
-                      compact
                     />
                   </div>
                 ))}
@@ -113,7 +116,7 @@ export function ContextGroup({ context, tasks }: ContextGroupProps) {
               </div>
             )}
           </CardContent>
-        </ContextCollapsible.Content>
+        </ContextCollapsibleContent>
       </ContextCollapsible>
     </Card>
   );
