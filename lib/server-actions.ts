@@ -6,6 +6,7 @@ import { getServerSession } from "next-auth/next";
 import { Session } from "next-auth";
 import { authOptions } from "./auth";
 import { prisma } from "./prisma";
+import { calculateUrgency, parseTags } from "./utils";
 
 // Get authenticated user or redirect
 async function getAuthenticatedUser() {
@@ -75,6 +76,7 @@ export async function createTaskAction(formData: FormData) {
   const type = (formData.get("type") as "TASK" | "HABIT" | "RECURRING") || "TASK";
   const habitType = formData.get("habitType") as "STREAK" | "LEARNING" | "WELLNESS" | "MAINTENANCE";
   const frequency = formData.get("frequency") ? parseInt(formData.get("frequency") as string) : null;
+  const tagsString = formData.get("tags") as string;
   
   if (!title || !contextId) {
     throw new Error("Title and context are required");
@@ -89,13 +91,15 @@ export async function createTaskAction(formData: FormData) {
     throw new Error("Context not found");
   }
   
+  const tags = parseTags(tagsString || "");
+  
   // Create task without urgency - it will be calculated dynamically
   await prisma.task.create({
     data: {
       title,
       project: project || null,
       priority,
-      tags: [], // TODO: Add tags support
+      tags,
       contextId,
       dueDate: dueDate ? new Date(dueDate) : null,
       type,
@@ -121,6 +125,7 @@ export async function updateTaskAction(formData: FormData) {
   const type = (formData.get("type") as "TASK" | "HABIT" | "RECURRING") || "TASK";
   const habitType = formData.get("habitType") as "STREAK" | "LEARNING" | "WELLNESS" | "MAINTENANCE";
   const frequency = formData.get("frequency") ? parseInt(formData.get("frequency") as string) : null;
+  const tagsString = formData.get("tags") as string;
   
   if (!taskId || !title || !contextId) {
     throw new Error("Task ID, title and context are required");
@@ -144,12 +149,14 @@ export async function updateTaskAction(formData: FormData) {
     throw new Error("Context not found");
   }
   
+  const tags = parseTags(tagsString || "");
+  
   // Calculate urgency
   const urgency = calculateUrgency({
     priority,
     dueDate: dueDate ? new Date(dueDate) : null,
     createdAt: existingTask.createdAt,
-    tags: [] // TODO: Add tags support
+    tags
   });
   
   await prisma.task.update({
@@ -158,7 +165,7 @@ export async function updateTaskAction(formData: FormData) {
       title,
       project: project || null,
       priority,
-      tags: [], // TODO: Add tags support
+      tags,
       contextId,
       dueDate: dueDate ? new Date(dueDate) : null,
       urgency,
@@ -219,4 +226,30 @@ export async function deleteTaskAction(taskId: string) {
 // Sign out action
 export async function signOutAction() {
   redirect("/api/auth/signout");
+}
+
+// Get all existing tags for autocomplete
+export async function getExistingTags(): Promise<string[]> {
+  const session = await getServerSession(authOptions) as Session | null;
+  
+  if (!session?.user?.id) {
+    return [];
+  }
+
+  try {
+    const tasks = await prisma.task.findMany({
+      where: { userId: session.user.id },
+      select: { tags: true }
+    });
+
+    const allTags = new Set<string>();
+    tasks.forEach(task => {
+      task.tags.forEach(tag => allTags.add(tag));
+    });
+
+    return Array.from(allTags).sort();
+  } catch (error) {
+    console.error("Error fetching existing tags:", error);
+    return [];
+  }
 }

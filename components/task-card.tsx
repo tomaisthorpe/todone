@@ -9,11 +9,17 @@ import {
   Wrench,
   AlertCircle
 } from "lucide-react";
-import { formatDateForTask } from "@/lib/utils";
+import { formatDateForTask, explainUrgency } from "@/lib/utils";
 import { getHabitStatus, getHabitDisplay } from "@/lib/habits";
 import { cn } from "@/lib/utils";
 import { TaskToggleButton } from "./task-toggle-button";
 import { TaskModal } from "./add-item-modal";
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { Task } from "@/lib/data";
 
 interface TaskCardProps {
@@ -49,9 +55,15 @@ export function TaskCard({ task, contexts }: TaskCardProps) {
     frequency: task.frequency
   }) : null;
   const habitDisplay = getHabitDisplay(task);
+  const urgencyExplanation = explainUrgency({
+    priority: task.priority,
+    dueDate: task.dueDate,
+    createdAt: task.createdAt,
+    tags: task.tags
+  });
 
   return (
-    <>
+    <TooltipProvider>
       <div
         className={cn(
           "flex items-start space-x-3 p-3 hover:bg-gray-50 rounded-lg",
@@ -157,18 +169,32 @@ export function TaskCard({ task, contexts }: TaskCardProps) {
                   {dateInfo.text}
                 </div>
               )}
-              <div
-                className={cn(
-                  "px-1.5 py-0.5 rounded text-xs font-semibold",
-                  task.urgency >= 7
-                    ? "text-red-600 bg-red-100"
-                    : task.urgency >= 5
-                    ? "text-orange-600 bg-orange-100"
-                    : "text-green-600 bg-green-100"
-                )}
-              >
-                {task.urgency.toFixed(1)}
-              </div>
+              <Tooltip>
+                <TooltipTrigger>
+                  <div
+                    className={cn(
+                      "px-1.5 py-0.5 rounded text-xs font-semibold cursor-help",
+                      task.urgency >= 7
+                        ? "text-red-600 bg-red-100"
+                        : task.urgency >= 5
+                        ? "text-orange-600 bg-orange-100"
+                        : "text-green-600 bg-green-100"
+                    )}
+                  >
+                    {task.urgency.toFixed(1)}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <div className="text-sm">
+                    <div className="font-semibold mb-1">Urgency Calculation:</div>
+                    {urgencyExplanation.explanation.map((line, index) => (
+                      <div key={index} className="text-xs">
+                        {line}
+                      </div>
+                    ))}
+                  </div>
+                </TooltipContent>
+              </Tooltip>
             </div>
           </div>
         </div>
@@ -180,6 +206,6 @@ export function TaskCard({ task, contexts }: TaskCardProps) {
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
       />
-    </>
+    </TooltipProvider>
   );
 }

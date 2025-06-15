@@ -21,10 +21,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { TagsInput } from "@/components/ui/tags-input";
 import {
   createTaskAction,
   updateTaskAction,
   createContextAction,
+  getExistingTags,
 } from "@/lib/server-actions";
 import {
   CheckSquare,
@@ -70,6 +72,7 @@ import {
   FlaskConical,
   TestTube,
   Beaker,
+  Calendar,
 } from "lucide-react";
 import type { Task } from "@/lib/data";
 
@@ -85,7 +88,7 @@ const taskSchema = z.object({
     .enum(["STREAK", "LEARNING", "WELLNESS", "MAINTENANCE"])
     .optional(),
   frequency: z.number().min(1).max(365).optional(),
-  tags: z.string().optional(),
+  tags: z.array(z.string()),
 });
 
 const contextSchema = z.object({
@@ -185,6 +188,7 @@ export function TaskModal({
 }: TaskModalProps) {
   const [activeTab, setActiveTab] = useState<"task" | "context">("task");
   const [isPending, startTransition] = useTransition();
+  const [existingTags, setExistingTags] = useState<string[]>([]);
   const titleInputRef = useRef<HTMLInputElement>(null);
 
   // Generate unique IDs for this modal instance to prevent conflicts
@@ -198,7 +202,7 @@ export function TaskModal({
     defaultValues: {
       priority: "MEDIUM",
       type: "TASK",
-      tags: "",
+      tags: [],
       contextId: defaultContextId || "",
     },
   });
@@ -210,6 +214,13 @@ export function TaskModal({
       color: "bg-blue-500",
     },
   });
+
+  // Load existing tags for autocomplete
+  useEffect(() => {
+    if (isOpen) {
+      getExistingTags().then(setExistingTags);
+    }
+  }, [isOpen]);
 
   // Reset forms when modal opens/closes or task changes
   useEffect(() => {
@@ -227,14 +238,14 @@ export function TaskModal({
           type: task.type,
           habitType: task.habitType || undefined,
           frequency: task.frequency || undefined,
-          tags: task.tags.join(", "),
+          tags: task.tags,
         });
       } else {
         // Adding mode - reset to defaults
         taskForm.reset({
           priority: "MEDIUM",
           type: "TASK",
-          tags: "",
+          tags: [],
           contextId: defaultContextId || "",
         });
       }
@@ -264,6 +275,9 @@ export function TaskModal({
       if (data.habitType) formData.append("habitType", data.habitType);
       if (data.frequency)
         formData.append("frequency", data.frequency.toString());
+      
+      // Convert tags array to comma-separated string for form data
+      formData.append("tags", data.tags.join(", "));
 
       if (isEditing) {
         await updateTaskAction(formData);
@@ -366,6 +380,17 @@ export function TaskModal({
                   </p>
                 )}
               </div>
+
+              {/* Show creation date when editing */}
+              {isEditing && task && (
+                <div className="col-span-2">
+                  <Label>Created On</Label>
+                  <div className="flex items-center space-x-2 px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-600">
+                    <Calendar className="w-4 h-4" />
+                    <span>{new Date(task.createdAt).toLocaleString()}</span>
+                  </div>
+                </div>
+              )}
 
               <div>
                 <Label htmlFor={getFieldId("type")}>Task Type</Label>
@@ -530,12 +555,15 @@ export function TaskModal({
 
               <div className="col-span-2">
                 <Label htmlFor={getFieldId("tags")}>Tags</Label>
-                <Input
-                  id={getFieldId("tags")}
-                  placeholder="Comma-separated tags (coming soon)"
-                  disabled
-                  {...taskForm.register("tags")}
+                <TagsInput
+                  value={taskForm.watch("tags")}
+                  onChange={(tags) => taskForm.setValue("tags", tags)}
+                  suggestions={existingTags}
+                  placeholder="Add tags (e.g., urgent, work, fitness)"
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  Type tags and press Enter or comma to add. Start typing to see suggestions from existing tags.
+                </p>
               </div>
             </div>
 
