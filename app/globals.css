@@ -1,1 +1,9 @@
 @import "tailwindcss";
+
+.border-input {
+    border-color: #e5e7eb;
+}
+
+.border-input:focus {
+    border-color: #3b82f6;
+}

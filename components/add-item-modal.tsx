@@ -44,7 +44,9 @@ const taskSchema = z.object({
   contextId: z.string().min(1, "Context is required"),
   dueDate: z.string().optional(),
   type: z.enum(["TASK", "HABIT", "RECURRING"]),
-  habitType: z.enum(["STREAK", "LEARNING", "WELLNESS", "MAINTENANCE"]).optional(),
+  habitType: z
+    .enum(["STREAK", "LEARNING", "WELLNESS", "MAINTENANCE"])
+    .optional(),
   frequency: z.number().min(1).max(365).optional(),
   tags: z.string().optional(),
 });
@@ -128,7 +130,8 @@ export function AddItemModal({ contexts, children }: AddItemModalProps) {
       if (data.dueDate) formData.append("dueDate", data.dueDate);
       formData.append("type", data.type);
       if (data.habitType) formData.append("habitType", data.habitType);
-      if (data.frequency) formData.append("frequency", data.frequency.toString());
+      if (data.frequency)
+        formData.append("frequency", data.frequency.toString());
 
       await createTaskAction(formData);
       taskForm.reset();
@@ -153,31 +156,37 @@ export function AddItemModal({ contexts, children }: AddItemModalProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white shadow-xl rounded-2xl border-0">
         <DialogHeader>
           <DialogTitle>Add New Item</DialogTitle>
         </DialogHeader>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-gray-200">
+        <div className="flex gap-2 bg-gray-100 rounded-lg p-1 mt-2 mb-6">
           <button
             onClick={() => setActiveTab("task")}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === "task"
-                ? "border-blue-500 text-blue-600"
-                : "border-transparent text-gray-500 hover:text-gray-700"
-            }`}
+            className={`flex-1 px-4 py-2 text-sm font-medium rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400
+              ${
+                activeTab === "task"
+                  ? "bg-blue-50 text-blue-700 shadow-sm"
+                  : "bg-transparent text-gray-500 hover:text-gray-700"
+              }
+            `}
+            type="button"
           >
             <CheckSquare className="w-4 h-4 inline mr-2" />
             Add Task
           </button>
           <button
             onClick={() => setActiveTab("context")}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === "context"
-                ? "border-blue-500 text-blue-600"
-                : "border-transparent text-gray-500 hover:text-gray-700"
-            }`}
+            className={`flex-1 px-4 py-2 text-sm font-medium rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400
+              ${
+                activeTab === "context"
+                  ? "bg-blue-50 text-blue-700 shadow-sm"
+                  : "bg-transparent text-gray-500 hover:text-gray-700"
+              }
+            `}
+            type="button"
           >
             <Home className="w-4 h-4 inline mr-2" />
             Add Context
@@ -186,7 +195,10 @@ export function AddItemModal({ contexts, children }: AddItemModalProps) {
 
         {/* Task Form */}
         {activeTab === "task" && (
-          <form onSubmit={taskForm.handleSubmit(onSubmitTask)} className="space-y-4">
+          <form
+            onSubmit={taskForm.handleSubmit(onSubmitTask)}
+            className="space-y-4"
+          >
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
                 <Label htmlFor="title">Task Title *</Label>
@@ -206,7 +218,12 @@ export function AddItemModal({ contexts, children }: AddItemModalProps) {
                 <Label htmlFor="type">Task Type</Label>
                 <Select
                   value={taskForm.watch("type")}
-                  onValueChange={(value) => taskForm.setValue("type", value as "TASK" | "HABIT" | "RECURRING")}
+                  onValueChange={(value) =>
+                    taskForm.setValue(
+                      "type",
+                      value as "TASK" | "HABIT" | "RECURRING"
+                    )
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -232,7 +249,12 @@ export function AddItemModal({ contexts, children }: AddItemModalProps) {
                 <Label htmlFor="priority">Priority</Label>
                 <Select
                   value={taskForm.watch("priority")}
-                  onValueChange={(value) => taskForm.setValue("priority", value as "LOW" | "MEDIUM" | "HIGH")}
+                  onValueChange={(value) =>
+                    taskForm.setValue(
+                      "priority",
+                      value as "LOW" | "MEDIUM" | "HIGH"
+                    )
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -249,18 +271,24 @@ export function AddItemModal({ contexts, children }: AddItemModalProps) {
                 <Label htmlFor="context">Context *</Label>
                 <Select
                   value={taskForm.watch("contextId")}
-                  onValueChange={(value) => taskForm.setValue("contextId", value)}
+                  onValueChange={(value) =>
+                    taskForm.setValue("contextId", value)
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select context" />
                   </SelectTrigger>
                   <SelectContent>
                     {contexts.map((context) => {
-                      const IconComponent = contextIcons.find(c => c.value === context.icon)?.icon || Home;
+                      const IconComponent =
+                        contextIcons.find((c) => c.value === context.icon)
+                          ?.icon || Home;
                       return (
                         <SelectItem key={context.id} value={context.id}>
                           <div className="flex items-center">
-                            <div className={`w-3 h-3 rounded-full ${context.color} mr-2`} />
+                            <div
+                              className={`w-3 h-3 rounded-full ${context.color} mr-2`}
+                            />
                             <IconComponent className="w-4 h-4 mr-2" />
                             {context.name}
                           </div>
@@ -292,18 +320,31 @@ export function AddItemModal({ contexts, children }: AddItemModalProps) {
                     <Label htmlFor="habitType">Habit Type</Label>
                     <Select
                       value={taskForm.watch("habitType")}
-                      onValueChange={(value) => taskForm.setValue("habitType", value as "STREAK" | "LEARNING" | "WELLNESS" | "MAINTENANCE")}
+                      onValueChange={(value) =>
+                        taskForm.setValue(
+                          "habitType",
+                          value as
+                            | "STREAK"
+                            | "LEARNING"
+                            | "WELLNESS"
+                            | "MAINTENANCE"
+                        )
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select habit type" />
                       </SelectTrigger>
                       <SelectContent>
-                        {Object.entries(habitTypeIcons).map(([type, { icon: Icon, color }]) => (
-                          <SelectItem key={type} value={type}>
-                            <Icon className={`w-4 h-4 inline mr-2 ${color}`} />
-                            {type.charAt(0) + type.slice(1).toLowerCase()}
-                          </SelectItem>
-                        ))}
+                        {Object.entries(habitTypeIcons).map(
+                          ([type, { icon: Icon, color }]) => (
+                            <SelectItem key={type} value={type}>
+                              <Icon
+                                className={`w-4 h-4 inline mr-2 ${color}`}
+                              />
+                              {type.charAt(0) + type.slice(1).toLowerCase()}
+                            </SelectItem>
+                          )
+                        )}
                       </SelectContent>
                     </Select>
                   </div>
@@ -315,7 +356,9 @@ export function AddItemModal({ contexts, children }: AddItemModalProps) {
                       min="1"
                       max="365"
                       placeholder="1 = daily, 7 = weekly"
-                      {...taskForm.register("frequency", { valueAsNumber: true })}
+                      {...taskForm.register("frequency", {
+                        valueAsNumber: true,
+                      })}
                     />
                   </div>
                 </>
@@ -358,7 +401,10 @@ export function AddItemModal({ contexts, children }: AddItemModalProps) {
 
         {/* Context Form */}
         {activeTab === "context" && (
-          <form onSubmit={contextForm.handleSubmit(onSubmitContext)} className="space-y-4">
+          <form
+            onSubmit={contextForm.handleSubmit(onSubmitContext)}
+            className="space-y-4"
+          >
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
                 <Label htmlFor="name">Context Name *</Label>
@@ -398,7 +444,9 @@ export function AddItemModal({ contexts, children }: AddItemModalProps) {
                 <Label htmlFor="color">Color</Label>
                 <Select
                   value={contextForm.watch("color")}
-                  onValueChange={(value) => contextForm.setValue("color", value)}
+                  onValueChange={(value) =>
+                    contextForm.setValue("color", value)
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -407,7 +455,9 @@ export function AddItemModal({ contexts, children }: AddItemModalProps) {
                     {contextColors.map(({ value, label, color }) => (
                       <SelectItem key={value} value={value}>
                         <div className="flex items-center">
-                          <div className={`w-4 h-4 rounded-full ${color} mr-2`} />
+                          <div
+                            className={`w-4 h-4 rounded-full ${color} mr-2`}
+                          />
                           {label}
                         </div>
                       </SelectItem>
