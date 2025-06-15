@@ -1,7 +1,16 @@
 import React from "react";
 import { TaskCard } from "./task-card";
+import { AddItemModal } from "./add-item-modal";
 import { cn } from "@/lib/utils";
-import { Home, Code, Coffee, Car, Briefcase, ChevronDown } from "lucide-react";
+import {
+  Home,
+  Code,
+  Coffee,
+  Car,
+  Briefcase,
+  ChevronDown,
+  Plus,
+} from "lucide-react";
 import {
   ContextCollapsible,
   ContextCollapsibleContent,
@@ -12,6 +21,7 @@ import type { Task, Context } from "@/lib/data";
 interface ContextGroupProps {
   context: Context;
   tasks: Task[];
+  allContexts: Context[];
 }
 
 function getIconComponent(iconName: string) {
@@ -46,7 +56,11 @@ function getCompletionColor(percentage: number): string {
   return "text-red-700";
 }
 
-export function ContextGroup({ context, tasks }: ContextGroupProps) {
+export function ContextGroup({
+  context,
+  tasks,
+  allContexts,
+}: ContextGroupProps) {
   const contextTasks = tasks
     .filter((task) => task.contextId === context.id)
     .sort((a, b) => {
@@ -104,11 +118,20 @@ export function ContextGroup({ context, tasks }: ContextGroupProps) {
             </div>
           </ContextCollapsibleTrigger>
 
-          <div className="mt-3">
-            <div className="w-full bg-white bg-opacity-30 rounded-full h-2">
+          <div className="mt-3 flex items-center justify-between">
+            <div className="w-full bg-white/30 rounded-full h-2">
               <div
                 className="bg-white h-2 rounded-full transition-all duration-300"
                 style={{ width: `${completion.percentage}%` }}
+              />
+            </div>
+
+            {/* Add Task Button - Always Visible */}
+            <div className="ml-3 flex-shrink-0">
+              <AddItemModal
+                contexts={allContexts}
+                defaultContextId={context.id}
+                addButtonSize="sm"
               />
             </div>
           </div>

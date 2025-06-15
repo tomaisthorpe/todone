@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect, useId } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -34,6 +34,7 @@ import {
   Code,
   Coffee,
   Building,
+  Plus,
 } from "lucide-react";
 
 // Form schemas
@@ -68,7 +69,8 @@ interface AddItemModalProps {
     icon: string;
     color: string;
   }>;
-  children: React.ReactNode;
+  defaultContextId?: string;
+  addButtonSize?: "sm" | "lg";
 }
 
 const contextIcons = [
@@ -96,10 +98,18 @@ const habitTypeIcons = {
   MAINTENANCE: { icon: Wrench, color: "text-gray-500" },
 };
 
-export function AddItemModal({ contexts, children }: AddItemModalProps) {
+export function AddItemModal({
+  contexts,
+  defaultContextId,
+  addButtonSize = "lg",
+}: AddItemModalProps) {
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"task" | "context">("task");
   const [isPending, startTransition] = useTransition();
+
+  // Generate unique IDs for this modal instance to prevent conflicts
+  const modalId = useId();
+  const getFieldId = (fieldName: string) => `${modalId}-${fieldName}`;
 
   const taskForm = useForm<TaskFormData>({
     resolver: zodResolver(taskSchema),
@@ -107,6 +117,7 @@ export function AddItemModal({ contexts, children }: AddItemModalProps) {
       priority: "MEDIUM",
       type: "TASK",
       tags: "",
+      contextId: defaultContextId || "",
     },
   });
 
@@ -117,6 +128,13 @@ export function AddItemModal({ contexts, children }: AddItemModalProps) {
       color: "bg-blue-500",
     },
   });
+
+  // Reset task form with default context when modal opens
+  useEffect(() => {
+    if (open && defaultContextId) {
+      taskForm.setValue("contextId", defaultContextId);
+    }
+  }, [open, defaultContextId, taskForm]);
 
   const taskType = taskForm.watch("type");
 
@@ -155,7 +173,19 @@ export function AddItemModal({ contexts, children }: AddItemModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogTrigger asChild>
+        {addButtonSize === "sm" ? (
+          <button className="flex items-center space-x-2 px-2 py-1 text-xs bg-white/20 hover:bg-white/30 rounded-md transition-colors">
+            <Plus className="w-3 h-3" />
+            <span>Add</span>
+          </button>
+        ) : (
+          <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            <Plus className="w-4 h-4" />
+            <span>Add Task</span>
+          </button>
+        )}
+      </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white shadow-xl rounded-2xl border-0">
         <DialogHeader>
           <DialogTitle>Add New Item</DialogTitle>
@@ -201,9 +231,9 @@ export function AddItemModal({ contexts, children }: AddItemModalProps) {
           >
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
-                <Label htmlFor="title">Task Title *</Label>
+                <Label htmlFor={getFieldId("title")}>Task Title *</Label>
                 <Input
-                  id="title"
+                  id={getFieldId("title")}
                   placeholder="What needs to be done?"
                   {...taskForm.register("title")}
                 />
@@ -215,7 +245,7 @@ export function AddItemModal({ contexts, children }: AddItemModalProps) {
               </div>
 
               <div>
-                <Label htmlFor="type">Task Type</Label>
+                <Label htmlFor={getFieldId("type")}>Task Type</Label>
                 <Select
                   value={taskForm.watch("type")}
                   onValueChange={(value) =>
@@ -246,7 +276,7 @@ export function AddItemModal({ contexts, children }: AddItemModalProps) {
               </div>
 
               <div>
-                <Label htmlFor="priority">Priority</Label>
+                <Label htmlFor={getFieldId("priority")}>Priority</Label>
                 <Select
                   value={taskForm.watch("priority")}
                   onValueChange={(value) =>
@@ -268,7 +298,7 @@ export function AddItemModal({ contexts, children }: AddItemModalProps) {
               </div>
 
               <div>
-                <Label htmlFor="context">Context *</Label>
+                <Label htmlFor={getFieldId("context")}>Context *</Label>
                 <Select
                   value={taskForm.watch("contextId")}
                   onValueChange={(value) =>
@@ -305,9 +335,9 @@ export function AddItemModal({ contexts, children }: AddItemModalProps) {
               </div>
 
               <div>
-                <Label htmlFor="dueDate">Due Date</Label>
+                <Label htmlFor={getFieldId("dueDate")}>Due Date</Label>
                 <Input
-                  id="dueDate"
+                  id={getFieldId("dueDate")}
                   type="datetime-local"
                   {...taskForm.register("dueDate")}
                 />
@@ -317,7 +347,7 @@ export function AddItemModal({ contexts, children }: AddItemModalProps) {
               {taskType === "HABIT" && (
                 <>
                   <div>
-                    <Label htmlFor="habitType">Habit Type</Label>
+                    <Label htmlFor={getFieldId("habitType")}>Habit Type</Label>
                     <Select
                       value={taskForm.watch("habitType")}
                       onValueChange={(value) =>
@@ -349,9 +379,11 @@ export function AddItemModal({ contexts, children }: AddItemModalProps) {
                     </Select>
                   </div>
                   <div>
-                    <Label htmlFor="frequency">Frequency (days)</Label>
+                    <Label htmlFor={getFieldId("frequency")}>
+                      Frequency (days)
+                    </Label>
                     <Input
-                      id="frequency"
+                      id={getFieldId("frequency")}
                       type="number"
                       min="1"
                       max="365"
@@ -365,18 +397,18 @@ export function AddItemModal({ contexts, children }: AddItemModalProps) {
               )}
 
               <div className="col-span-2">
-                <Label htmlFor="project">Project</Label>
+                <Label htmlFor={getFieldId("project")}>Project</Label>
                 <Input
-                  id="project"
+                  id={getFieldId("project")}
                   placeholder="Optional project name"
                   {...taskForm.register("project")}
                 />
               </div>
 
               <div className="col-span-2">
-                <Label htmlFor="tags">Tags</Label>
+                <Label htmlFor={getFieldId("tags")}>Tags</Label>
                 <Input
-                  id="tags"
+                  id={getFieldId("tags")}
                   placeholder="Comma-separated tags (coming soon)"
                   disabled
                   {...taskForm.register("tags")}
@@ -407,9 +439,9 @@ export function AddItemModal({ contexts, children }: AddItemModalProps) {
           >
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
-                <Label htmlFor="name">Context Name *</Label>
+                <Label htmlFor={getFieldId("name")}>Context Name *</Label>
                 <Input
-                  id="name"
+                  id={getFieldId("name")}
                   placeholder="e.g., Work, Home, Kitchen"
                   {...contextForm.register("name")}
                 />
@@ -421,7 +453,7 @@ export function AddItemModal({ contexts, children }: AddItemModalProps) {
               </div>
 
               <div>
-                <Label htmlFor="icon">Icon</Label>
+                <Label htmlFor={getFieldId("icon")}>Icon</Label>
                 <Select
                   value={contextForm.watch("icon")}
                   onValueChange={(value) => contextForm.setValue("icon", value)}
@@ -441,7 +473,7 @@ export function AddItemModal({ contexts, children }: AddItemModalProps) {
               </div>
 
               <div>
-                <Label htmlFor="color">Color</Label>
+                <Label htmlFor={getFieldId("color")}>Color</Label>
                 <Select
                   value={contextForm.watch("color")}
                   onValueChange={(value) =>
@@ -467,9 +499,9 @@ export function AddItemModal({ contexts, children }: AddItemModalProps) {
               </div>
 
               <div className="col-span-2">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor={getFieldId("description")}>Description</Label>
                 <Textarea
-                  id="description"
+                  id={getFieldId("description")}
                   placeholder="Optional description"
                   {...contextForm.register("description")}
                 />
