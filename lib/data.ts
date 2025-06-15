@@ -79,315 +79,104 @@ export interface Context {
   updatedAt: Date;
 }
 
-// Mock data that matches the mockup
-const today = new Date("2025-06-15");
-const tomorrow = new Date("2025-06-16");
-const yesterday = new Date("2025-06-14");
-
-const mockContexts: Context[] = [
-  {
-    id: "coding-context",
-    name: "Coding",
-    description: "Development work",
-    icon: "Code",
-    color: "bg-blue-500",
-    shared: false,
-    userId: "demo-user",
-    createdAt: today,
-    updatedAt: today,
-  },
-  {
-    id: "bathroom-context",
-    name: "Bathroom",
-    description: "Bathroom tasks & cleaning",
-    icon: "Home",
-    color: "bg-cyan-500",
-    shared: false,
-    userId: "demo-user",
-    createdAt: today,
-    updatedAt: today,
-  },
-  {
-    id: "kitchen-context",
-    name: "Kitchen",
-    description: "Kitchen & cooking tasks",
-    icon: "Coffee",
-    color: "bg-green-500",
-    shared: false,
-    userId: "demo-user",
-    createdAt: today,
-    updatedAt: today,
-  },
-  {
-    id: "bedroom-context",
-    name: "Bedroom",
-    description: "Bedroom & sleep routine",
-    icon: "Home",
-    color: "bg-purple-500",
-    shared: false,
-    userId: "demo-user",
-    createdAt: today,
-    updatedAt: today,
-  },
-];
-
-const mockTasks: Task[] = [
-  // Today's priority tasks
-  {
-    id: "task-1",
-    title: "Fix authentication bug in user dashboard",
-    project: "SideProject A",
-    priority: "HIGH",
-    tags: ["bug", "urgent"],
-    contextId: "coding-context",
-    dueDate: today,
-    urgency: 8.5,
-    completed: false,
-    type: "TASK",
-    userId: "demo-user",
-    createdAt: today,
-    updatedAt: today,
-    habitType: null,
-    streak: null,
-    longestStreak: null,
-    frequency: null,
-    lastCompleted: null,
-    nextDue: null,
-  },
-  {
-    id: "habit-1",
-    title: "Morning workout",
-    project: "Health",
-    priority: "MEDIUM",
-    tags: ["fitness"],
-    contextId: "bedroom-context",
-    dueDate: today,
-    urgency: 7.8,
-    completed: true,
-    type: "HABIT",
-    userId: "demo-user",
-    createdAt: today,
-    updatedAt: today,
-    habitType: "STREAK",
-    streak: 12,
-    longestStreak: 28,
-    frequency: 1,
-    lastCompleted: today,
-    nextDue: null,
-  },
-
-  // Coding context
-  {
-    id: "task-2",
-    title: "Deploy staging environment",
-    project: "SideProject A",
-    priority: "HIGH",
-    tags: ["deployment"],
-    contextId: "coding-context",
-    dueDate: tomorrow,
-    urgency: 7.9,
-    completed: false,
-    type: "TASK",
-    userId: "demo-user",
-    createdAt: today,
-    updatedAt: today,
-    habitType: null,
-    streak: null,
-    longestStreak: null,
-    frequency: null,
-    lastCompleted: null,
-    nextDue: null,
-  },
-  {
-    id: "task-3",
-    title: "Review pull requests",
-    project: "SideProject B",
-    priority: "MEDIUM",
-    tags: ["review"],
-    contextId: "coding-context",
-    dueDate: null,
-    urgency: 6.2,
-    completed: true,
-    type: "TASK",
-    userId: "demo-user",
-    createdAt: today,
-    updatedAt: today,
-    habitType: null,
-    streak: null,
-    longestStreak: null,
-    frequency: null,
-    lastCompleted: null,
-    nextDue: null,
-  },
-  {
-    id: "habit-2",
-    title: "Daily coding practice",
-    project: "Learning",
-    priority: "MEDIUM",
-    tags: ["learning", "coding"],
-    contextId: "coding-context",
-    dueDate: null,
-    urgency: 6.5,
-    completed: false,
-    type: "HABIT",
-    userId: "demo-user",
-    createdAt: today,
-    updatedAt: today,
-    habitType: "LEARNING",
-    streak: 7,
-    longestStreak: 15,
-    frequency: 1,
-    lastCompleted: yesterday,
-    nextDue: null,
-  },
-  {
-    id: "recurring-1",
-    title: "Weekly team standup",
-    project: "Work",
-    priority: "MEDIUM",
-    tags: ["meeting", "recurring"],
-    contextId: "coding-context",
-    dueDate: tomorrow,
-    urgency: 6.8,
-    completed: false,
-    type: "RECURRING",
-    userId: "demo-user",
-    createdAt: today,
-    updatedAt: today,
-    habitType: null,
-    streak: null,
-    longestStreak: null,
-    frequency: 7,
-    lastCompleted: null,
-    nextDue: tomorrow,
-  },
-
-  // Kitchen context
-  {
-    id: "habit-3",
-    title: "Wipe down counters",
-    project: "Cleaning",
-    priority: "MEDIUM",
-    tags: ["cleaning"],
-    contextId: "kitchen-context",
-    dueDate: today,
-    urgency: 6.1,
-    completed: true,
-    type: "HABIT",
-    userId: "demo-user",
-    createdAt: today,
-    updatedAt: today,
-    habitType: "MAINTENANCE",
-    streak: 5,
-    longestStreak: null,
-    frequency: 1,
-    lastCompleted: today,
-    nextDue: null,
-  },
-  {
-    id: "task-4",
-    title: "Empty dishwasher",
-    project: "Cleaning",
-    priority: "MEDIUM",
-    tags: ["dishes"],
-    contextId: "kitchen-context",
-    dueDate: today,
-    urgency: 5.8,
-    completed: false,
-    type: "TASK",
-    userId: "demo-user",
-    createdAt: today,
-    updatedAt: today,
-    habitType: null,
-    streak: null,
-    longestStreak: null,
-    frequency: null,
-    lastCompleted: null,
-    nextDue: null,
-  },
-
-  // Bedroom context
-  {
-    id: "habit-4",
-    title: "Make bed",
-    project: "Morning Routine",
-    priority: "LOW",
-    tags: ["routine"],
-    contextId: "bedroom-context",
-    dueDate: null,
-    urgency: 4.2,
-    completed: true,
-    type: "HABIT",
-    userId: "demo-user",
-    createdAt: today,
-    updatedAt: today,
-    habitType: "WELLNESS",
-    streak: 8,
-    longestStreak: 22,
-    frequency: 1,
-    lastCompleted: today,
-    nextDue: null,
-  },
-  {
-    id: "habit-5",
-    title: "Read before bed",
-    project: "Learning",
-    priority: "LOW",
-    tags: ["reading", "routine"],
-    contextId: "bedroom-context",
-    dueDate: null,
-    urgency: 5.2,
-    completed: false,
-    type: "HABIT",
-    userId: "demo-user",
-    createdAt: today,
-    updatedAt: today,
-    habitType: "LEARNING",
-    streak: 9,
-    longestStreak: 18,
-    frequency: 1,
-    lastCompleted: yesterday,
-    nextDue: null,
-  },
-
-  // Bathroom context
-  {
-    id: "habit-6",
-    title: "Evening skincare routine",
-    project: "Self-Care",
-    priority: "LOW",
-    tags: ["skincare", "routine"],
-    contextId: "bathroom-context",
-    dueDate: null,
-    urgency: 4.8,
-    completed: false,
-    type: "HABIT",
-    userId: "demo-user",
-    createdAt: today,
-    updatedAt: today,
-    habitType: "WELLNESS",
-    streak: 18,
-    longestStreak: 32,
-    frequency: 1,
-    lastCompleted: yesterday,
-    nextDue: null,
-  },
-];
-
 export async function getTasks(): Promise<Task[]> {
-  return mockTasks;
+  const session = await getAuthenticatedSession();
+  
+  if (!session?.user?.id) {
+    return [];
+  }
+
+  try {
+    const tasks = await prisma.task.findMany({
+      where: {
+        userId: session.user.id,
+      },
+      orderBy: [
+        { completed: 'asc' },
+        { urgency: 'desc' },
+        { createdAt: 'desc' }
+      ],
+    });
+
+    return tasks.map(task => ({
+      ...task,
+      priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
+      type: task.type as "TASK" | "HABIT" | "RECURRING",
+      habitType: task.habitType as "STREAK" | "LEARNING" | "WELLNESS" | "MAINTENANCE" | null,
+    }));
+  } catch (error) {
+    console.error("Error fetching tasks:", error);
+    return [];
+  }
 }
 
 export async function getContexts(): Promise<Context[]> {
-  return mockContexts;
+  const session = await getAuthenticatedSession();
+  
+  if (!session?.user?.id) {
+    return [];
+  }
+
+  try {
+    const contexts = await prisma.context.findMany({
+      where: {
+        OR: [
+          { userId: session.user.id },
+          { shared: true }
+        ]
+      },
+      orderBy: { name: 'asc' },
+    });
+
+    return contexts;
+  } catch (error) {
+    console.error("Error fetching contexts:", error);
+    return [];
+  }
 }
 
 export async function getUserContexts(userId: string): Promise<Context[]> {
-  return mockContexts.filter(context => context.userId === userId);
+  try {
+    const contexts = await prisma.context.findMany({
+      where: {
+        OR: [
+          { userId: userId },
+          { shared: true }
+        ]
+      },
+      orderBy: { name: 'asc' },
+    });
+
+    return contexts;
+  } catch (error) {
+    console.error("Error fetching user contexts:", error);
+    return [];
+  }
 }
 
 export async function getUserTasks(userId: string): Promise<Task[]> {
-  return mockTasks.filter(task => task.userId === userId);
+  try {
+    const tasks = await prisma.task.findMany({
+      where: {
+        userId: userId,
+      },
+      orderBy: [
+        { completed: 'asc' },
+        { urgency: 'desc' },
+        { createdAt: 'desc' }
+      ],
+    });
+
+    return tasks.map(task => ({
+      ...task,
+      priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
+      type: task.type as "TASK" | "HABIT" | "RECURRING",
+      habitType: task.habitType as "STREAK" | "LEARNING" | "WELLNESS" | "MAINTENANCE" | null,
+    }));
+  } catch (error) {
+    console.error("Error fetching user tasks:", error);
+    return [];
+  }
 }
 
 // Get tasks due today

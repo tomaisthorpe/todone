@@ -11,11 +11,9 @@ import { calculateUrgency } from "./utils";
 // Get authenticated user or redirect
 async function getAuthenticatedUser() {
   const session = await getServerSession(authOptions) as Session | null;
-  
   if (!session?.user?.id) {
     redirect("/auth/signin");
   }
-  
   return session.user.id;
 }
 
@@ -162,4 +160,9 @@ export async function deleteTaskAction(taskId: string) {
   });
   
   revalidatePath("/");
+}
+
+// Sign out action
+export async function signOutAction() {
+  redirect("/api/auth/signout");
 }

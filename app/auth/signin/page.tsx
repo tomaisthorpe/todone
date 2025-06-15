@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { signIn, getSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { CheckCircle2, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,8 @@ export default function SignIn() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const successMessage = searchParams.get("message");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -118,6 +121,12 @@ export default function SignIn() {
                 </div>
               )}
 
+              {successMessage && (
+                <div className="text-sm text-green-600 bg-green-50 p-3 rounded-md">
+                  {successMessage}
+                </div>
+              )}
+
               <Button
                 type="submit"
                 className="w-full"
@@ -148,6 +157,18 @@ export default function SignIn() {
             </div>
           </CardContent>
         </Card>
+
+        <div className="text-center">
+          <p className="text-sm text-gray-600">
+            Don&apos;t have an account?{" "}
+            <Link 
+              href="/auth/signup" 
+              className="font-medium text-blue-600 hover:text-blue-500"
+            >
+              Sign up
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
