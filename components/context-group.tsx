@@ -142,7 +142,7 @@ export function ContextGroup({
             {contextTasks.length > 0 ? (
               <div className="space-y-1">
                 {contextTasks.map((task) => (
-                  <TaskCard key={task.id} task={task} />
+                  <TaskCard key={task.id} task={task} contexts={allContexts} />
                 ))}
               </div>
             ) : (
