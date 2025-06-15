@@ -22,8 +22,9 @@ export default async function Dashboard() {
   const [tasks, contexts] = await Promise.all([getTasks(), getContexts()]);
 
   // Sort contexts by health (lowest first), then by highest urgency task
-  const sortedContexts = contexts.sort((a, b) => {
-    // Calculate health for each context
+  // This sorting is stable and only calculated on server-side load/reload
+  const sortedContexts = [...contexts].sort((a, b) => {
+    // Calculate health for each context (server-side snapshot)
     const aHabits = tasks.filter(task => task.contextId === a.id && task.type === "HABIT");
     const bHabits = tasks.filter(task => task.contextId === b.id && task.type === "HABIT");
     

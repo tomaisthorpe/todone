@@ -118,12 +118,30 @@ export function ContextGroup({
             </div>
           </ContextCollapsibleTrigger>
 
-          <div className="mt-3">
-            <div className="w-full bg-white/30 rounded-full h-2">
+          <div className="mt-3 flex items-center justify-between">
+            <div className="w-full bg-white bg-opacity-30 rounded-full h-2">
               <div
                 className="bg-white h-2 rounded-full transition-all duration-300"
                 style={{ width: `${completion.percentage}%` }}
               />
+            </div>
+            
+            {/* Add Task Button - Always Visible */}
+            <div className="ml-3 flex-shrink-0">
+              <AddItemModal 
+                contexts={allContexts.map(ctx => ({
+                  id: ctx.id,
+                  name: ctx.name,
+                  icon: ctx.icon,
+                  color: ctx.color
+                }))} 
+                defaultContextId={context.id}
+              >
+                <button className="flex items-center space-x-1 px-2 py-1 text-xs bg-white bg-opacity-20 hover:bg-opacity-30 rounded-md transition-colors">
+                  <Plus className="w-3 h-3" />
+                  <span>Add</span>
+                </button>
+              </AddItemModal>
             </div>
           </div>
         </div>
@@ -141,24 +159,6 @@ export function ContextGroup({
                 No tasks in this context
               </p>
             )}
-
-            {/* Add Task Button */}
-            <div className="mt-4 pt-3 border-t border-gray-100">
-              <AddItemModal
-                contexts={allContexts.map((ctx) => ({
-                  id: ctx.id,
-                  name: ctx.name,
-                  icon: ctx.icon,
-                  color: ctx.color,
-                }))}
-                defaultContextId={context.id}
-              >
-                <button className="w-full flex items-center justify-center space-x-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg border border-dashed border-gray-300 hover:border-gray-400 transition-colors">
-                  <Plus className="w-4 h-4" />
-                  <span>Add Task</span>
-                </button>
-              </AddItemModal>
-            </div>
           </div>
         </ContextCollapsibleContent>
       </ContextCollapsible>
