@@ -21,7 +21,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { createTaskAction, updateTaskAction, createContextAction } from "@/lib/server-actions";
+import {
+  createTaskAction,
+  updateTaskAction,
+  createContextAction,
+} from "@/lib/server-actions";
 import {
   CheckSquare,
   RotateCcw,
@@ -144,7 +148,7 @@ const contextIcons = [
   { value: "Flower2", icon: Flower2, label: "Gardening" },
   { value: "LeafyGreen", icon: LeafyGreen, label: "Herbs" },
   { value: "Trees", icon: Trees, label: "Forest" },
-  // Science/Fermentation Icons  
+  // Science/Fermentation Icons
   { value: "FlaskConical", icon: FlaskConical, label: "Brewing" },
   { value: "TestTube", icon: TestTube, label: "Experiments" },
   { value: "Beaker", icon: Beaker, label: "Laboratory" },
@@ -217,7 +221,9 @@ export function TaskModal({
           project: task.project || "",
           priority: task.priority,
           contextId: task.contextId,
-          dueDate: task.dueDate ? new Date(task.dueDate).toISOString().slice(0, 16) : "",
+          dueDate: task.dueDate
+            ? new Date(task.dueDate).toISOString().slice(0, 16)
+            : "",
           type: task.type,
           habitType: task.habitType || undefined,
           frequency: task.frequency || undefined,
@@ -232,7 +238,7 @@ export function TaskModal({
           contextId: defaultContextId || "",
         });
       }
-      
+
       // Auto-focus title input
       setTimeout(() => {
         titleInputRef.current?.focus();
@@ -264,7 +270,7 @@ export function TaskModal({
       } else {
         await createTaskAction(formData);
       }
-      
+
       onClose();
     });
   };
@@ -285,11 +291,18 @@ export function TaskModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white shadow-xl rounded-2xl border-0">
+      <DialogContent
+        className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white shadow-xl rounded-2xl border-0"
+        onOpenAutoFocus={(e) => {
+          e.preventDefault();
+          if (titleInputRef.current) {
+            titleInputRef.current.focus();
+            titleInputRef.current.select();
+          }
+        }}
+      >
         <DialogHeader>
-          <DialogTitle>
-            {isEditing ? "Edit Task" : "Add New Item"}
-          </DialogTitle>
+          <DialogTitle>{isEditing ? "Edit Task" : "Add New Item"}</DialogTitle>
         </DialogHeader>
 
         {/* Tab Navigation */}
@@ -336,10 +349,16 @@ export function TaskModal({
               <div className="col-span-2">
                 <Label htmlFor={getFieldId("title")}>Task Title *</Label>
                 <Input
-                  ref={titleInputRef}
                   id={getFieldId("title")}
                   placeholder="What needs to be done?"
-                  {...taskForm.register("title")}
+                  {...taskForm.register("title", {
+                    setValueAs: (v) => v,
+                  })}
+                  ref={(el) => {
+                    titleInputRef.current = el;
+                    const { ref } = taskForm.register("title");
+                    if (typeof ref === "function") ref(el);
+                  }}
                 />
                 {taskForm.formState.errors.title && (
                   <p className="text-sm text-red-500 mt-1">
@@ -521,18 +540,17 @@ export function TaskModal({
             </div>
 
             <div className="flex justify-end space-x-2 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-              >
+              <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
               <Button type="submit" disabled={isPending}>
-                {isPending 
-                  ? (isEditing ? "Updating..." : "Creating...") 
-                  : (isEditing ? "Update Task" : "Create Task")
-                }
+                {isPending
+                  ? isEditing
+                    ? "Updating..."
+                    : "Creating..."
+                  : isEditing
+                  ? "Update Task"
+                  : "Create Task"}
               </Button>
             </div>
           </form>
@@ -616,11 +634,7 @@ export function TaskModal({
             </div>
 
             <div className="flex justify-end space-x-2 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-              >
+              <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
               <Button type="submit" disabled={isPending}>
@@ -654,7 +668,7 @@ export function AddItemModal({
   return (
     <>
       {addButtonSize === "sm" ? (
-        <button 
+        <button
           onClick={() => setIsOpen(true)}
           className="flex items-center space-x-2 px-2 py-1 text-xs bg-white/20 hover:bg-white/30 rounded-md transition-colors"
         >
@@ -662,7 +676,7 @@ export function AddItemModal({
           <span>Add</span>
         </button>
       ) : (
-        <button 
+        <button
           onClick={() => setIsOpen(true)}
           className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
         >
@@ -670,7 +684,7 @@ export function AddItemModal({
           <span>Add Task</span>
         </button>
       )}
-      
+
       <TaskModal
         contexts={contexts}
         isOpen={isOpen}
