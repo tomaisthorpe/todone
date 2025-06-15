@@ -1,9 +1,8 @@
 import React from "react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { TaskCard } from "./task-card";
 import { cn } from "@/lib/utils";
-import { Home, Code, Coffee, Car, Briefcase } from "lucide-react";
+import { Home, Code, Coffee, Car, Briefcase, ChevronDown } from "lucide-react";
 import { ContextCollapsible } from "./context-collapsible";
 import type { Task, Context } from "@/lib/data";
 
@@ -55,80 +54,67 @@ export function ContextGroup({ context, tasks }: ContextGroupProps) {
   const completion = getContextCompletion(contextTasks);
   const IconComponent = getIconComponent(context.icon);
 
-  // Count tasks scheduled for today
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const todayTasksInContext = contextTasks.filter((task) => {
-    if (!task.dueDate) return false;
-    const taskDate = new Date(task.dueDate);
-    taskDate.setHours(0, 0, 0, 0);
-    return taskDate.getTime() === today.getTime();
-  }).length;
-
   return (
-    <Card className="overflow-hidden">
-      <CardHeader className={cn("p-4 text-white", context.color)}>
-        <div className="flex items-center justify-between">
-          <ContextCollapsible>
-            <IconComponent className="w-5 h-5" />
-            <div className="text-left">
-              <h3 className="font-semibold">{context.name}</h3>
-              {context.description && (
-                <p className="text-sm opacity-90">{context.description}</p>
-              )}
+    <Card className="overflow-hidden border border-gray-200 shadow-sm">
+      <ContextCollapsible>
+        <div className="flex items-center justify-between p-4 bg-white border-b border-gray-100 hover:bg-gray-50 cursor-pointer">
+          <div className="flex items-center space-x-3">
+            <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center text-white", context.color)}>
+              <IconComponent className="w-4 h-4" />
             </div>
-          </ContextCollapsible>
+            <div>
+              <h3 className="font-semibold text-gray-900">{context.name}</h3>
+              <p className="text-sm text-gray-500">{contextTasks.length} tasks</p>
+            </div>
+          </div>
           
-          <div className="text-right">
-            <Badge
-              variant="secondary"
-              className={cn(
-                "inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-white",
-                getCompletionColor(completion.percentage)
-              )}
-            >
-              {completion.percentage}%
-            </Badge>
-            <p className="text-xs opacity-90 mt-1">
-              {completion.completed}/{completion.total} habits
-            </p>
-            {todayTasksInContext > 0 && (
-              <p className="text-xs opacity-90 mt-1">
-                {todayTasksInContext} in Today
-              </p>
+          <div className="flex items-center space-x-3">
+            {/* Health percentage for habits only */}
+            {completion.total > 0 && (
+              <div className="text-right">
+                <div className={cn("text-sm font-semibold", getCompletionColor(completion.percentage))}>
+                  {completion.percentage}%
+                </div>
+                <div className="w-16 bg-gray-200 rounded-full h-1.5 mt-1">
+                  <div
+                    className={cn(
+                      "h-1.5 rounded-full transition-all duration-300",
+                      completion.percentage >= 80 ? "bg-green-500" :
+                      completion.percentage >= 50 ? "bg-yellow-500" : "bg-red-500"
+                    )}
+                    style={{ width: `${completion.percentage}%` }}
+                  />
+                </div>
+              </div>
             )}
+            
+            <ContextCollapsible.Trigger>
+              <ChevronDown className="w-4 h-4 text-gray-400 transition-transform" />
+            </ContextCollapsible.Trigger>
           </div>
         </div>
 
-        <div className="mt-3">
-          <div className="w-full bg-white bg-opacity-30 rounded-full h-2">
-            <div
-              className="bg-white h-2 rounded-full transition-all duration-300"
-              style={{ width: `${completion.percentage}%` }}
-            />
-          </div>
-        </div>
-      </CardHeader>
-
-      <ContextCollapsible.Content>
-        <CardContent className="p-4">
-          {contextTasks.length > 0 ? (
-            <div className="space-y-1">
-              {contextTasks.map((task) => (
-                <TaskCard
-                  key={task.id}
-                  task={task}
-                  compact
-                />
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-gray-500 text-center py-4">
-              No tasks in this context
-            </p>
-          )}
-        </CardContent>
-      </ContextCollapsible.Content>
+        <ContextCollapsible.Content>
+          <CardContent className="p-0">
+            {contextTasks.length > 0 ? (
+              <div className="divide-y divide-gray-100">
+                {contextTasks.map((task) => (
+                  <div key={task.id} className="px-4 py-2">
+                    <TaskCard
+                      task={task}
+                      compact
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-4 text-center">
+                <p className="text-sm text-gray-500">No tasks in this context</p>
+              </div>
+            )}
+          </CardContent>
+        </ContextCollapsible.Content>
+      </ContextCollapsible>
     </Card>
   );
 }

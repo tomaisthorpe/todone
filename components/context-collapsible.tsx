@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, createContext, useContext } from "react";
-import { ChevronDown, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ChevronDown } from "lucide-react";
 
 interface CollapsibleContextType {
   isCollapsed: boolean;
@@ -34,22 +33,7 @@ export function ContextCollapsible({
 
   return (
     <CollapsibleContext.Provider value={{ isCollapsed, toggle }}>
-      <Button
-        variant="ghost"
-        onClick={toggle}
-        className="w-full flex items-center justify-between hover:bg-white hover:bg-opacity-10 rounded-lg p-2 transition-colors text-white"
-      >
-        <div className="flex items-center space-x-3">
-          <div className="flex items-center space-x-2">
-            {isCollapsed ? (
-              <ChevronRight className="w-4 h-4" />
-            ) : (
-              <ChevronDown className="w-4 h-4" />
-            )}
-            {children}
-          </div>
-        </div>
-      </Button>
+      {children}
     </CollapsibleContext.Provider>
   );
 }
@@ -66,4 +50,28 @@ function Content({ children }: ContentProps) {
   return <>{children}</>;
 }
 
+interface TriggerProps {
+  children?: React.ReactNode;
+}
+
+function Trigger({ children }: TriggerProps) {
+  const { isCollapsed, toggle } = useCollapsible();
+  
+  return (
+    <button
+      onClick={toggle}
+      className="flex items-center justify-center w-6 h-6 rounded hover:bg-gray-100 transition-colors"
+    >
+      {children || (
+        <ChevronDown 
+          className={`w-4 h-4 text-gray-400 transition-transform ${
+            isCollapsed ? '-rotate-90' : 'rotate-0'
+          }`} 
+        />
+      )}
+    </button>
+  );
+}
+
 ContextCollapsible.Content = Content;
+ContextCollapsible.Trigger = Trigger;

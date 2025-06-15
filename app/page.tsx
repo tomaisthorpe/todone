@@ -40,11 +40,10 @@ export default async function Dashboard() {
         {/* Today Section */}
         <TodaySection tasks={tasks} />
 
-        {/* Contexts Grid */}
+        {/* Contexts - Single Column Layout */}
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold text-gray-900">Contexts</h2>
           {contexts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-4">
               {contexts.map((context) => (
                 <ContextGroup
                   key={context.id}

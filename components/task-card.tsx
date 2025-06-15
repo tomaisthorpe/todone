@@ -2,7 +2,6 @@
 
 import React from "react";
 import { 
-  AlertCircle, 
   RotateCcw,
   Dumbbell,
   BookOpen,
@@ -36,7 +35,7 @@ const renderHabitIcon = (iconType: string, className: string) => {
   }
 };
 
-export function TaskCard({ task, compact = false }: TaskCardProps) {
+export function TaskCard({ task }: TaskCardProps) {
   const dateInfo = task.dueDate ? {
     text: formatDate(task.dueDate),
     isOverdue: task.dueDate < new Date()
@@ -50,21 +49,19 @@ export function TaskCard({ task, compact = false }: TaskCardProps) {
   const habitDisplay = getHabitDisplay(task);
 
   return (
-    <div
-      className={cn(
-        "flex items-start space-x-3 p-3 hover:bg-gray-50 rounded-lg",
-        task.completed && "opacity-60"
-      )}
-    >
-      <TaskToggleButton taskId={task.id} completed={task.completed} />
+    <div className="flex items-start space-x-3 py-2">
+      <div className="flex-shrink-0 mt-0.5">
+        <TaskToggleButton taskId={task.id} completed={task.completed} />
+      </div>
 
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <div className="flex items-center space-x-2">
+          <div className="flex-1 min-w-0">
+            {/* Task title and type indicators */}
+            <div className="flex items-center gap-2 mb-1">
               <h3
                 className={cn(
-                  "font-medium text-sm",
+                  "font-medium text-sm truncate",
                   task.completed
                     ? "line-through text-gray-500"
                     : "text-gray-900"
@@ -74,10 +71,10 @@ export function TaskCard({ task, compact = false }: TaskCardProps) {
               </h3>
               
               {task.type === "RECURRING" && (
-                <div className="flex items-center space-x-1">
+                <div className="flex items-center space-x-1 flex-shrink-0">
                   <RotateCcw className="w-3 h-3 text-purple-500" />
                   <span className="text-xs text-purple-600 font-medium">
-                    Every {task.frequency}d
+                    {task.frequency}d
                   </span>
                 </div>
               )}
@@ -85,15 +82,15 @@ export function TaskCard({ task, compact = false }: TaskCardProps) {
               {habitDisplay && (
                 <div
                   className={cn(
-                    "flex items-center space-x-1",
+                    "flex items-center space-x-1 flex-shrink-0",
                     habitDisplay.showLarge &&
-                      "bg-red-50 px-2 py-1 rounded-md border border-red-200"
+                      "bg-red-50 px-2 py-0.5 rounded border border-red-200"
                   )}
                 >
                   {renderHabitIcon(
                     habitDisplay.iconType,
                     cn(
-                      habitDisplay.showLarge ? "w-4 h-4" : "w-3 h-3",
+                      habitDisplay.showLarge ? "w-3.5 h-3.5" : "w-3 h-3",
                       habitDisplay.iconColor
                     )
                   )}
@@ -113,35 +110,31 @@ export function TaskCard({ task, compact = false }: TaskCardProps) {
                   )}
                 </div>
               )}
-              
-              {dateInfo?.isOverdue && (
-                <AlertCircle className="w-3 h-3 text-red-500" />
-              )}
             </div>
             
-            {!compact && (
-              <div className="flex items-center space-x-3 mt-1">
-                {task.project && (
-                  <span className="text-xs text-gray-500">{task.project}</span>
-                )}
-                {task.tags.slice(0, 2).map((tag) => (
-                  <Badge
-                    key={tag}
-                    variant="secondary"
-                    className="text-xs px-1.5 py-0.5"
-                  >
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            )}
+            {/* Project and tags row */}
+            <div className="flex items-center gap-2 text-xs text-gray-500">
+              {task.project && (
+                <span>{task.project}</span>
+              )}
+              {task.project && task.tags.length > 0 && (
+                <span>•</span>
+              )}
+              {task.tags.slice(0, 2).map((tag, index) => (
+                <span key={tag}>
+                  {index > 0 && ", "}
+                  #{tag}
+                </span>
+              ))}
+            </div>
           </div>
 
-          <div className="flex items-center space-x-2 ml-2">
+          {/* Right side: status badges */}
+          <div className="flex items-center gap-1.5 ml-3 flex-shrink-0">
             {habitStatus && (
               <Badge
                 variant="outline"
-                className={cn("text-xs font-medium", habitStatus.color)}
+                className={cn("text-xs font-medium px-1.5 py-0.5", habitStatus.color)}
               >
                 {habitStatus.text}
               </Badge>
@@ -150,7 +143,7 @@ export function TaskCard({ task, compact = false }: TaskCardProps) {
             {dateInfo && (
               <Badge
                 variant={dateInfo.isOverdue ? "destructive" : "secondary"}
-                className="text-xs font-medium"
+                className="text-xs font-medium px-1.5 py-0.5"
               >
                 {dateInfo.text}
               </Badge>
@@ -158,7 +151,10 @@ export function TaskCard({ task, compact = false }: TaskCardProps) {
             
             <Badge
               variant="outline"
-              className={cn("text-xs font-semibold", getUrgencyColor(task.urgency))}
+              className={cn(
+                "text-xs font-semibold px-1.5 py-0.5",
+                getUrgencyColor(task.urgency)
+              )}
             >
               {task.urgency.toFixed(1)}
             </Badge>
