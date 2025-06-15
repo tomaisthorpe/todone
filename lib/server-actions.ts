@@ -7,15 +7,14 @@ import { Session } from "next-auth";
 import { authOptions } from "./auth";
 import { prisma } from "./prisma";
 import { calculateUrgency } from "./utils";
+import { signOut } from "next-auth/react";
 
 // Get authenticated user or redirect
 async function getAuthenticatedUser() {
   const session = await getServerSession(authOptions) as Session | null;
-  
   if (!session?.user?.id) {
     redirect("/auth/signin");
   }
-  
   return session.user.id;
 }
 
@@ -162,4 +161,9 @@ export async function deleteTaskAction(taskId: string) {
   });
   
   revalidatePath("/");
+}
+
+// Sign out action
+export async function signOutAction() {
+  redirect("/api/auth/signout");
 }

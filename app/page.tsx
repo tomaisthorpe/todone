@@ -1,9 +1,22 @@
-import { CheckCircle2, Plus, Settings } from "lucide-react";
+import { CheckCircle2, Plus, Settings, LogOut, User } from "lucide-react";
+import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth/next";
+import { Session } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { TodaySection } from "@/components/today-section";
 import { ContextGroup } from "@/components/context-group";
 import { getTasks, getContexts } from "@/lib/data";
+import { signOutAction } from "@/lib/server-actions";
+import { Button } from "@/components/ui/button";
 
 export default async function Dashboard() {
+  // Check authentication
+  const session = await getServerSession(authOptions) as Session | null;
+  
+  if (!session) {
+    redirect("/auth/signin");
+  }
+
   // Server-side data fetching
   const [tasks, contexts] = await Promise.all([getTasks(), getContexts()]);
 
@@ -20,6 +33,16 @@ export default async function Dashboard() {
               <h1 className="text-2xl font-bold text-gray-900">Todone</h1>
             </div>
             <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-2 text-sm text-gray-600">
+                <User className="w-4 h-4" />
+                <span>{session.user?.name || session.user?.email}</span>
+              </div>
+              <form action={signOutAction}>
+                <Button type="submit" variant="ghost" size="sm">
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign out
+                </Button>
+              </form>
               <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg">
                 <Settings className="w-5 h-5" />
               </button>
