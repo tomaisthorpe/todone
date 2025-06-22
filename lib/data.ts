@@ -2,12 +2,12 @@ import { getServerSession } from "next-auth/next";
 import { Session } from "next-auth";
 import { authOptions } from "./auth";
 import { prisma } from "./prisma";
-import { TaskType, Priority, HabitType } from "@/app/generated/prisma";
+import { TaskType, Priority, HabitType } from "@prisma/client";
 import { calculateUrgency } from "./utils";
 
 // Get authenticated user session
 async function getAuthenticatedSession() {
-  const session = await getServerSession(authOptions) as Session | null;
+  const session = (await getServerSession(authOptions)) as Session | null;
   return session;
 }
 
@@ -82,7 +82,7 @@ export interface Context {
 
 export async function getTasks(): Promise<Task[]> {
   const session = await getAuthenticatedSession();
-  
+
   if (!session?.user?.id) {
     return [];
   }
@@ -92,23 +92,25 @@ export async function getTasks(): Promise<Task[]> {
       where: {
         userId: session.user.id,
       },
-      orderBy: [
-        { completed: 'asc' },
-        { createdAt: 'desc' }
-      ],
+      orderBy: [{ completed: "asc" }, { createdAt: "desc" }],
     });
 
-    const tasksWithUrgency = tasks.map(task => ({
+    const tasksWithUrgency = tasks.map((task) => ({
       ...task,
       priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
       type: task.type as "TASK" | "HABIT" | "RECURRING",
-      habitType: task.habitType as "STREAK" | "LEARNING" | "WELLNESS" | "MAINTENANCE" | null,
+      habitType: task.habitType as
+        | "STREAK"
+        | "LEARNING"
+        | "WELLNESS"
+        | "MAINTENANCE"
+        | null,
       urgency: calculateUrgency({
         priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
         dueDate: task.dueDate,
         createdAt: task.createdAt,
-        tags: task.tags
-      })
+        tags: task.tags,
+      }),
     }));
 
     return tasksWithUrgency.sort((a, b) => {
@@ -123,7 +125,7 @@ export async function getTasks(): Promise<Task[]> {
 
 export async function getContexts(): Promise<Context[]> {
   const session = await getAuthenticatedSession();
-  
+
   if (!session?.user?.id) {
     return [];
   }
@@ -131,12 +133,9 @@ export async function getContexts(): Promise<Context[]> {
   try {
     const contexts = await prisma.context.findMany({
       where: {
-        OR: [
-          { userId: session.user.id },
-          { shared: true }
-        ]
+        OR: [{ userId: session.user.id }, { shared: true }],
       },
-      orderBy: { name: 'asc' },
+      orderBy: { name: "asc" },
     });
 
     return contexts;
@@ -150,12 +149,9 @@ export async function getUserContexts(userId: string): Promise<Context[]> {
   try {
     const contexts = await prisma.context.findMany({
       where: {
-        OR: [
-          { userId: userId },
-          { shared: true }
-        ]
+        OR: [{ userId: userId }, { shared: true }],
       },
-      orderBy: { name: 'asc' },
+      orderBy: { name: "asc" },
     });
 
     return contexts;
@@ -171,23 +167,25 @@ export async function getUserTasks(userId: string): Promise<Task[]> {
       where: {
         userId: userId,
       },
-      orderBy: [
-        { completed: 'asc' },
-        { createdAt: 'desc' }
-      ],
+      orderBy: [{ completed: "asc" }, { createdAt: "desc" }],
     });
 
-    const tasksWithUrgency = tasks.map(task => ({
+    const tasksWithUrgency = tasks.map((task) => ({
       ...task,
       priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
       type: task.type as "TASK" | "HABIT" | "RECURRING",
-      habitType: task.habitType as "STREAK" | "LEARNING" | "WELLNESS" | "MAINTENANCE" | null,
+      habitType: task.habitType as
+        | "STREAK"
+        | "LEARNING"
+        | "WELLNESS"
+        | "MAINTENANCE"
+        | null,
       urgency: calculateUrgency({
         priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
         dueDate: task.dueDate,
         createdAt: task.createdAt,
-        tags: task.tags
-      })
+        tags: task.tags,
+      }),
     }));
 
     return tasksWithUrgency.sort((a, b) => {
@@ -204,7 +202,7 @@ export async function getUserTasks(userId: string): Promise<Task[]> {
 export function getTodayTasks(tasks: Task[]): Task[] {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  
+
   return tasks
     .filter((task) => {
       if (!task.dueDate) return false;
@@ -226,7 +224,7 @@ export function getContextCompletion(tasks: Task[], contextId: string) {
   const contextHabits = tasks.filter(
     (task) => task.contextId === contextId && task.type === "HABIT"
   );
-  
+
   if (contextHabits.length === 0) {
     return { percentage: 100, completed: 0, total: 0 };
   }
