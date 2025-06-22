@@ -300,3 +300,11 @@ npm run db:migrate      # Run database migrations
 npm run db:generate     # Generate Prisma client
 npm run db:studio       # Open Prisma Studio
 ```
+
+## Environment Variables
+
+```bash
+DATABASE_URL="postgresql://username:password@localhost:5432/todone"
+NEXTAUTH_SECRET="your-secret-key-here"
+NEXTAUTH_URL="http://localhost:3000"
+```
