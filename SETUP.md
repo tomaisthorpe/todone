@@ -18,7 +18,7 @@ This is the full-stack version of Todone, a context-based task management app wi
 
 ✅ **Server-First Approach**: Follows React best practices by using Server Components wherever possible  
 ✅ **Server Actions**: All mutations handled server-side for better performance and security  
-✅ **Minimal Client JavaScript**: Only interactive components use `"use client"`  
+✅ **Minimal Client JavaScript**: Interactive components use `"use client"` while maintaining server-first approach  
 ✅ **Optimistic UI**: Task toggling with `useTransition` for immediate feedback  
 ✅ **Type Safety**: Full TypeScript coverage from database to UI  
 
@@ -82,11 +82,11 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ### 5. Demo Account
 
-The application comes with a pre-seeded demo account:
+The application comes with a pre-seeded demo account for immediate testing:
 - **Email**: `demo@todone.app`
 - **Password**: `password123`
 
-This account includes sample contexts and tasks that match the design mockup.
+This account includes sample contexts and tasks that demonstrate all features including different task types, habit tracking, and context health visualization.
 
 ## Application Features
 
@@ -109,9 +109,10 @@ This account includes sample contexts and tasks that match the design mockup.
    - User data isolation and security
 
 4. **Core Components**
-   - TaskCard: Server Component with client-side toggle button
+   - TaskCard: Client Component with interactive task management
    - ContextGroup: Server Component with collapsible client behavior
    - TodaySection: Server Component for today's tasks
+   - TaskToggleButton: Client Component for optimistic task completion
    - Responsive design with mobile support
 
 5. **Task Management**
@@ -208,15 +209,17 @@ npm run db:studio       # Open Prisma Studio
 
 ### Server Components (no "use client")
 - `app/page.tsx` - Main dashboard with server-side data fetching
-- `components/task-card.tsx` - Task display (static rendering)
-- `components/context-group.tsx` - Context display (static rendering)  
 - `components/today-section.tsx` - Today's tasks (static rendering)
+- `components/context-group.tsx` - Context display (static rendering)
 
 ### Client Components ("use client")
+- `components/task-card.tsx` - Task display with interactive elements
 - `components/task-toggle-button.tsx` - Task completion interaction
 - `components/context-collapsible.tsx` - Context collapse/expand
+- `components/add-item-modal.tsx` - Task/context creation modal
 - `components/providers.tsx` - SessionProvider wrapper
 - `app/auth/signin/page.tsx` - Authentication form
+- `components/ui/*` - shadcn/ui interactive components
 
 ## Key Design Decisions
 

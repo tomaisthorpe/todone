@@ -2,27 +2,27 @@
 
 A context-based task management app with customizable urgency scoring and flexible habit tracking.
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Overview
 
-## Getting Started
+This is the **full-stack version** of Todone, utilizing React Server Components and Server Actions for optimal performance. The application has been built according to the specifications in the design documents with a server-first architecture.
 
-First, run the development server:
+## Quick Start
 
+For detailed setup instructions, see [SETUP.md](./SETUP.md).
+
+**Demo Account:**
+- Email: `demo@todone.app` 
+- Password: `password123`
+
+**Development:**
 ```bash
+npm install
+npm run db:push
+npm run db:seed
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open [http://localhost:3000](http://localhost:3000) to see the application.
 
 ## Core Concept
 
@@ -86,11 +86,13 @@ Habits use relaxed, non-judgmental language:
 
 ## Technical Stack
 
-- **Frontend**: Next.js with React
-- **Database**: PostgreSQL
+- **Frontend**: Next.js 15 with App Router, React 19 Server Components, TypeScript
+- **Database**: PostgreSQL with Prisma ORM  
+- **Authentication**: NextAuth.js v4 with credentials provider
 - **Styling**: Tailwind CSS + shadcn/ui components
+- **Data**: Server-side data fetching with Server Actions
 - **Icons**: Lucide React
-- **Data**: Local state (will expand to persistence layer)
+- **Forms**: Server Actions with native form handling
 
 ### UI Component Strategy
 
@@ -116,26 +118,36 @@ This approach gives us speed for common patterns while maintaining full control 
 4. **Text-First Entry** - Quick, natural language task creation
 5. **Visual Scanning** - Important information is immediately visible
 
-## Planned Features
+## Features 
 
-### Phase 1 (MVP)
-- [ ] Basic task CRUD
-- [ ] Context management
-- [ ] Urgency calculation
-- [ ] Habit tracking
-- [ ] Local storage persistence
+**Core Functionality:**
+- ✅ Complete task CRUD with Server Actions
+- ✅ Context management with health tracking
+- ✅ Dynamic urgency calculation
+- ✅ Full habit tracking system with 4 habit types
+- ✅ PostgreSQL database with Prisma ORM
+- ✅ User authentication with NextAuth.js
+- ✅ Server-side rendering and data fetching
 
-### Phase 2 (Enhanced)
-- [ ] Text-based task entry with parsing
-- [ ] Customizable urgency weightings
-- [ ] Task templates
-- [ ] Basic reporting/analytics
+**Task Management:**
+- ✅ Three task types: regular, habits, recurring
+- ✅ Urgency scoring based on priority, age, due dates, tags
+- ✅ Optimistic UI updates with Server Actions
+- ✅ Task completion with habit streak tracking
 
-### Phase 3 (Advanced)
-- [ ] Shared contexts (family/roommates)
-- [ ] Hardware displays for context reminders
-- [ ] Mobile app
-- [ ] Sync across devices
+**UI/UX:**
+- ✅ Responsive design with Tailwind CSS + shadcn/ui
+- ✅ Context health visualization
+- ✅ Collapsible context groups
+- ✅ Today section for due tasks
+- ✅ Relaxed habit status language
+
+### 🔄 Future Enhancements
+- Text-based task entry with natural language parsing
+- Customizable urgency weightings
+- Shared contexts for families/roommates  
+- Mobile app and sync across devices
+- Advanced analytics and reporting
 
 ## Design Reference
 
@@ -176,24 +188,42 @@ This helps maintain context for future development and AI assistance.
 - Status calculation based on frequency vs. days since completion
 - Never use deadline language for habits
 
-## File Structure Suggestions
+## Architecture Highlights
+
+✅ **Server-First Approach**: Follows React best practices by using Server Components wherever possible  
+✅ **Server Actions**: All mutations handled server-side for better performance and security  
+✅ **Minimal Client JavaScript**: Only interactive components use `"use client"`  
+✅ **Optimistic UI**: Task toggling with `useTransition` for immediate feedback  
+✅ **Type Safety**: Full TypeScript coverage from database to UI  
+
+## File Structure
 
 ```
-src/
-├── components/
-│   ├── TaskCard.jsx
-│   ├── ContextGroup.jsx
-│   ├── TodaySection.jsx
-│   └── TaskEntry.jsx
-├── lib/
-│   ├── urgency.js
-│   ├── habits.js
-│   └── storage.js
-├── hooks/
-│   ├── useTasks.js
-│   └── useContexts.js
-└── app/
-    └── page.tsx
+├── app/                          # Next.js App Router
+│   ├── api/                      # API routes (legacy)
+│   ├── auth/signin/              # Authentication pages  
+│   ├── layout.tsx                # Root layout with providers
+│   └── page.tsx                  # Main dashboard (Server Component)
+├── components/                   # React components
+│   ├── ui/                       # shadcn/ui components
+│   ├── task-card.tsx             # Task display component
+│   ├── task-toggle-button.tsx    # Client Component for task interaction
+│   ├── context-group.tsx         # Context management component
+│   ├── today-section.tsx         # Today's tasks component
+│   └── add-item-modal.tsx        # Task/context creation modal
+├── lib/                          # Utility functions
+│   ├── auth.ts                   # NextAuth configuration
+│   ├── prisma.ts                 # Prisma client instance
+│   ├── server-actions.ts         # Server Actions for mutations
+│   ├── data.ts                   # Server-side data fetching
+│   ├── utils.ts                  # Utilities + urgency calculation
+│   └── habits.ts                 # Habit-specific utilities
+├── prisma/                       # Database schema
+│   ├── schema.prisma             # Database schema
+│   └── seed.ts                   # Sample data seeding
+└── docs/                         # Documentation
+    ├── design-decisions.md       # Design philosophy
+    └── ui-patterns.md            # Component patterns
 ```
 
 ## Data Schema
@@ -247,17 +277,19 @@ src/
 
 The goal is to create a tool that helps users maintain both productivity and well-being across different areas of life, with particular attention to making habit formation sustainable and stress-free.
 
-## Next.js Resources
+## Development Commands
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+# Development
+npm run dev              # Start development server
+npm run build           # Build for production
+npm run start           # Start production server
+npm run lint            # Run ESLint
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Database
+npm run db:push         # Push schema changes to database
+npm run db:seed         # Seed database with sample data
+npm run db:migrate      # Run database migrations
+npm run db:generate     # Generate Prisma client
+npm run db:studio       # Open Prisma Studio
+```
