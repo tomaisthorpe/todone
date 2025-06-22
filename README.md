@@ -1,6 +1,11 @@
 # Todone
 
-A context-based task management app with customizable urgency scoring and flexible habit tracking.
+A context-based task management app in early development with customizable urgency scoring and flexible habit tracking.
+
+> [!CAUTION]
+> I'm using this project to experiment with LLM-assisted development. Something I've been curious but cautious about. 
+> The codebase will likely evolve quickly and unconventionally as I experiment with AI tools. 
+> Feedback and observations about this approach are welcome!
 
 ## Overview
 
