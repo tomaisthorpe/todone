@@ -2,15 +2,7 @@ import React from "react";
 import { TaskCard } from "./task-card";
 import { AddItemModal } from "./add-item-modal";
 import { cn } from "@/lib/utils";
-import {
-  Home,
-  Code,
-  Coffee,
-  Car,
-  Briefcase,
-  ChevronDown,
-  Plus,
-} from "lucide-react";
+import { Home, Code, Coffee, Car, Briefcase, ChevronDown } from "lucide-react";
 import {
   ContextCollapsible,
   ContextCollapsibleContent,

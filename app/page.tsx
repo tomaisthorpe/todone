@@ -1,4 +1,4 @@
-import { CheckCircle2, Plus, Settings, LogOut, User } from "lucide-react";
+import { CheckCircle2, Settings, LogOut, User } from "lucide-react";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth/next";
 import { Session } from "next-auth";

@@ -2,47 +2,12 @@ import { getServerSession } from "next-auth/next";
 import { Session } from "next-auth";
 import { authOptions } from "./auth";
 import { prisma } from "./prisma";
-import { TaskType, Priority, HabitType } from "@prisma/client";
 import { calculateUrgency } from "./utils";
 
 // Get authenticated user session
 async function getAuthenticatedSession() {
   const session = (await getServerSession(authOptions)) as Session | null;
   return session;
-}
-
-// Type for task with included context
-interface TaskWithContext {
-  id: string;
-  title: string;
-  project: string | null;
-  priority: "LOW" | "MEDIUM" | "HIGH";
-  tags: string[];
-  contextId: string;
-  dueDate: Date | null;
-  urgency: number;
-  completed: boolean;
-  type: "TASK" | "HABIT" | "RECURRING";
-  userId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  habitType: "STREAK" | "LEARNING" | "WELLNESS" | "MAINTENANCE" | null;
-  streak: number | null;
-  longestStreak: number | null;
-  frequency: number | null;
-  lastCompleted: Date | null;
-  nextDue: Date | null;
-  context: {
-    id: string;
-    name: string;
-    description: string | null;
-    icon: string;
-    color: string;
-    shared: boolean;
-    userId: string;
-    createdAt: Date;
-    updatedAt: Date;
-  } | null;
 }
 
 // Server-side data types
