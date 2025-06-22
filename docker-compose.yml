@@ -1,21 +1,41 @@
-services:
-  db:
-    image: postgres
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: todone_dev
-    ports:
-      - 5432:5432
-    volumes:
-      - pgdata:/var/lib/postgresql/data
+version: "3.8"
 
-  adminer:
-    image: adminer
-    restart: always
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - 5380:8080
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://todone:password@db:5432/todone
+      - NEXTAUTH_URL=http://localhost:3000
+      - NEXTAUTH_SECRET=your-secret-key-here-change-in-production
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./prisma:/app/prisma
+    restart: unless-stopped
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=todone
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=todone
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./prisma/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U todone"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
 volumes:
-  pgdata:
+  postgres_data:
