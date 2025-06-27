@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createTaskAction } from "@/lib/server-actions";
-import { Send, Calendar, Hash, Zap } from "lucide-react";
+import { Send, Calendar, Hash, Zap, Edit3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface SmartTaskInputProps {
@@ -55,7 +56,9 @@ export function SmartTaskInput({
   });
   const [segments, setSegments] = useState<ParsedSegment[]>([]);
   const [isPending, startTransition] = useTransition();
+  const [isEditing, setIsEditing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const highlightRef = useRef<HTMLDivElement>(null);
 
   // Parse the input text
   const parseInput = useCallback((text: string): ParsedTask => {
@@ -71,9 +74,6 @@ export function SmartTaskInput({
     };
     const newSegments: ParsedSegment[] = [];
 
-    // Track original positions
-    const currentOffset = 0;
-
     // Parse context (!contextName)
     const contextMatch = workingText.match(/!([a-zA-Z0-9_-]+)/i);
     if (contextMatch) {
@@ -88,7 +88,6 @@ export function SmartTaskInput({
         result.contextName = contextName;
       }
 
-      // Add segment
       const startIndex = workingText.indexOf(contextMatch[0]);
       newSegments.push({
         text: contextMatch[0],
@@ -106,8 +105,7 @@ export function SmartTaskInput({
       const tagName = match[1];
       result.tags.push(tagName);
 
-      // Add segment
-      const startIndex = text.indexOf(match[0], currentOffset);
+      const startIndex = text.indexOf(match[0]);
       newSegments.push({
         text: match[0],
         type: "tag",
@@ -125,7 +123,6 @@ export function SmartTaskInput({
       result.priority =
         priorityNum === "1" ? "HIGH" : priorityNum === "2" ? "MEDIUM" : "LOW";
 
-      // Add segment
       const startIndex = text.indexOf(priorityMatch[0]);
       newSegments.push({
         text: priorityMatch[0],
@@ -144,7 +141,6 @@ export function SmartTaskInput({
       result.dueDate = chronoResult.start.date();
       result.dueDateText = chronoResult.text;
 
-      // Add segment
       const startIndex = text.indexOf(chronoResult.text);
       if (startIndex !== -1) {
         newSegments.push({
@@ -161,13 +157,12 @@ export function SmartTaskInput({
     // The remaining text is the title
     result.title = workingText.replace(/\s+/g, " ").trim();
 
-    // Create text segments
+    // Create text segments for highlighting
     let lastIndex = 0;
     newSegments.sort((a, b) => a.startIndex - b.startIndex);
 
     const finalSegments: ParsedSegment[] = [];
     newSegments.forEach((segment) => {
-      // Add text before this segment
       if (segment.startIndex > lastIndex) {
         const textBefore = text.slice(lastIndex, segment.startIndex);
         if (textBefore.trim()) {
@@ -183,7 +178,6 @@ export function SmartTaskInput({
       lastIndex = segment.endIndex;
     });
 
-    // Add remaining text
     if (lastIndex < text.length) {
       const textAfter = text.slice(lastIndex);
       if (textAfter.trim()) {
@@ -204,7 +198,14 @@ export function SmartTaskInput({
   useEffect(() => {
     const parsed = parseInput(input);
     setParsedTask(parsed);
-  }, [input, contexts, parseInput]);
+  }, [input, parseInput]);
+
+  // Sync scroll position between input and highlight overlay
+  const handleScroll = () => {
+    if (inputRef.current && highlightRef.current) {
+      highlightRef.current.scrollLeft = inputRef.current.scrollLeft;
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -215,7 +216,6 @@ export function SmartTaskInput({
       formData.append("title", parsedTask.title);
       formData.append("priority", parsedTask.priority);
       
-      // Use the first context if no specific context is found
       const contextId = parsedTask.contextId || contexts[0]?.id;
       if (contextId) {
         formData.append("contextId", contextId);
@@ -230,6 +230,7 @@ export function SmartTaskInput({
       try {
         await createTaskAction(formData);
         setInput("");
+        setIsEditing(false);
         onTaskCreated?.();
       } catch (error) {
         console.error("Failed to create task:", error);
@@ -238,15 +239,17 @@ export function SmartTaskInput({
   };
 
   const renderHighlightedText = () => {
-    if (segments.length === 0) return input;
+    if (segments.length === 0) {
+      return <span className="text-transparent select-none">{input}</span>;
+    }
 
     return segments.map((segment, index) => {
       const colorClass = {
-        text: "text-gray-900",
-        context: "text-blue-600 bg-blue-50 px-1 rounded font-medium",
-        tag: "text-green-600 bg-green-50 px-1 rounded font-medium",
-        priority: "text-purple-600 bg-purple-50 px-1 rounded font-medium",
-        date: "text-orange-600 bg-orange-50 px-1 rounded font-medium",
+        text: "text-transparent",
+        context: "bg-blue-500/20 text-transparent rounded px-0.5",
+        tag: "bg-green-500/20 text-transparent rounded px-0.5",
+        priority: "bg-purple-500/20 text-transparent rounded px-0.5",
+        date: "bg-orange-500/20 text-transparent rounded px-0.5",
       }[segment.type];
 
       return (
@@ -286,117 +289,208 @@ export function SmartTaskInput({
     return date.toLocaleDateString();
   };
 
+  const updateParsedTask = <K extends keyof ParsedTask>(field: K, value: ParsedTask[K]) => {
+    setParsedTask(prev => ({ ...prev, [field]: value }));
+  };
+
   return (
     <div className={cn("w-full", className)}>
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Main Input */}
+        {/* Smart Input with Inline Highlighting */}
         <div className="relative">
+          {/* Highlight overlay */}
+          <div 
+            ref={highlightRef}
+            className="absolute inset-0 px-3 py-2 pointer-events-none overflow-hidden whitespace-nowrap font-mono text-base leading-6"
+            style={{ zIndex: 1 }}
+          >
+            {renderHighlightedText()}
+          </div>
+          
+          {/* Actual input */}
           <Input
             ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onScroll={handleScroll}
             placeholder="Type your task naturally... e.g., 'Setup Todone !Homelab #sideprojects #setup p1 tomorrow'"
-            className="text-base py-3 pr-12 font-mono"
+            className="relative text-base py-2 pr-12 font-mono bg-transparent"
+            style={{ zIndex: 2 }}
             disabled={isPending}
           />
+          
           <Button
             type="submit"
             size="sm"
             disabled={!parsedTask.title.trim() || isPending}
             className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0"
+            style={{ zIndex: 3 }}
           >
             <Send className="w-4 h-4" />
           </Button>
         </div>
 
-        {/* Highlighted Text Preview */}
-        {input && (
-          <div className="text-sm bg-gray-50 p-3 rounded-lg border">
-            <div className="font-medium text-gray-700 mb-2">Parsing:</div>
-            <div className="font-mono leading-relaxed">
-              {renderHighlightedText()}
-            </div>
-          </div>
-        )}
-
-        {/* Parsed Task Preview */}
+        {/* Editable Task Preview */}
         {(parsedTask.title ||
           parsedTask.contextName ||
           parsedTask.tags.length > 0 ||
           parsedTask.priority !== "MEDIUM" ||
           parsedTask.dueDate) && (
-          <div className="bg-white border rounded-lg p-4 space-y-3">
-            <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
-              <Zap className="w-4 h-4" />
-              Task Preview
+          <div className="bg-white rounded-lg border-gray-200 p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                <Zap className="w-4 h-4" />
+                Task Preview
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsEditing(!isEditing)}
+                className="h-6 px-2 text-xs"
+              >
+                <Edit3 className="w-3 h-3 mr-1" />
+                {isEditing ? "Done" : "Edit"}
+              </Button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Title */}
               <div>
                 <Label className="text-xs text-gray-500">Title</Label>
-                <div className="text-sm font-medium">
-                  {parsedTask.title || <span className="text-gray-400">No title</span>}
-                </div>
+                {isEditing ? (
+                  <Input
+                    value={parsedTask.title}
+                    onChange={(e) => updateParsedTask("title", e.target.value)}
+                    className="text-sm mt-1"
+                    placeholder="Task title"
+                  />
+                ) : (
+                  <div className="text-sm font-medium mt-1">
+                    {parsedTask.title || <span className="text-gray-400">No title</span>}
+                  </div>
+                )}
               </div>
 
               {/* Context */}
               <div>
                 <Label className="text-xs text-gray-500">Context</Label>
-                <div className="text-sm">
-                  {parsedTask.contextName ? (
-                    <Badge variant="outline" className="text-blue-600 bg-blue-50 border-blue-200">
-                      {parsedTask.contextName}
-                    </Badge>
-                  ) : (
-                    <span className="text-gray-400">
-                      {contexts[0]?.name || "No context"}
-                    </span>
-                  )}
-                </div>
+                {isEditing ? (
+                  <Select
+                    value={parsedTask.contextId || ""}
+                    onValueChange={(value) => {
+                      const context = contexts.find(c => c.id === value);
+                      updateParsedTask("contextId", value);
+                      updateParsedTask("contextName", context?.name || null);
+                    }}
+                  >
+                    <SelectTrigger className="text-sm mt-1">
+                      <SelectValue placeholder="Select context" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {contexts.map((context) => (
+                        <SelectItem key={context.id} value={context.id}>
+                          {context.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <div className="text-sm mt-1">
+                    {parsedTask.contextName ? (
+                      <Badge variant="outline" className="text-blue-600 bg-blue-50 border-blue-200">
+                        {parsedTask.contextName}
+                      </Badge>
+                    ) : (
+                      <span className="text-gray-400">
+                        {contexts[0]?.name || "No context"}
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Priority */}
               <div>
                 <Label className="text-xs text-gray-500">Priority</Label>
-                <div className="text-sm">
-                  <Badge className={getPriorityColor(parsedTask.priority)}>
-                    {parsedTask.priority}
-                  </Badge>
-                </div>
+                {isEditing ? (
+                  <Select
+                    value={parsedTask.priority}
+                    onValueChange={(value) => updateParsedTask("priority", value as "LOW" | "MEDIUM" | "HIGH")}
+                  >
+                    <SelectTrigger className="text-sm mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="LOW">Low</SelectItem>
+                      <SelectItem value="MEDIUM">Medium</SelectItem>
+                      <SelectItem value="HIGH">High</SelectItem>
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <div className="text-sm mt-1">
+                    <Badge className={getPriorityColor(parsedTask.priority)}>
+                      {parsedTask.priority}
+                    </Badge>
+                  </div>
+                )}
               </div>
 
               {/* Due Date */}
               <div>
                 <Label className="text-xs text-gray-500">Due Date</Label>
-                <div className="text-sm">
-                  {parsedTask.dueDate ? (
-                    <Badge variant="outline" className="text-orange-600 bg-orange-50 border-orange-200">
-                      <Calendar className="w-3 h-3 mr-1" />
-                      {formatDate(parsedTask.dueDate)}
-                    </Badge>
-                  ) : (
-                    <span className="text-gray-400">No due date</span>
-                  )}
-                </div>
+                {isEditing ? (
+                  <Input
+                    type="datetime-local"
+                    value={parsedTask.dueDate?.toISOString().slice(0, 16) || ""}
+                    onChange={(e) => {
+                      const date = e.target.value ? new Date(e.target.value) : null;
+                      updateParsedTask("dueDate", date);
+                    }}
+                    className="text-sm mt-1"
+                  />
+                ) : (
+                  <div className="text-sm mt-1">
+                    {parsedTask.dueDate ? (
+                      <Badge variant="outline" className="text-orange-600 bg-orange-50 border-orange-200">
+                        <Calendar className="w-3 h-3 mr-1" />
+                        {formatDate(parsedTask.dueDate)}
+                      </Badge>
+                    ) : (
+                      <span className="text-gray-400">No due date</span>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Tags */}
-              {parsedTask.tags.length > 0 && (
+              {(parsedTask.tags.length > 0 || isEditing) && (
                 <div className="md:col-span-2">
                   <Label className="text-xs text-gray-500">Tags</Label>
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {parsedTask.tags.map((tag, index) => (
-                      <Badge
-                        key={index}
-                        variant="outline"
-                        className="text-green-600 bg-green-50 border-green-200"
-                      >
-                        <Hash className="w-3 h-3 mr-1" />
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
+                  {isEditing ? (
+                    <Input
+                      value={parsedTask.tags.join(", ")}
+                      onChange={(e) => {
+                        const tags = e.target.value.split(",").map(t => t.trim()).filter(Boolean);
+                        updateParsedTask("tags", tags);
+                      }}
+                      placeholder="Comma-separated tags"
+                      className="text-sm mt-1"
+                    />
+                  ) : (
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {parsedTask.tags.map((tag, index) => (
+                        <Badge
+                          key={index}
+                          variant="outline"
+                          className="text-green-600 bg-green-50 border-green-200"
+                        >
+                          <Hash className="w-3 h-3 mr-1" />
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>

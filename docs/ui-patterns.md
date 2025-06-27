@@ -380,17 +380,20 @@ Card
 ```
 
 **Smart Input Features:**
-- **Context Parsing**: `!contextName` - Blue highlight
-- **Tag Parsing**: `#tagname` - Green highlight  
-- **Priority Parsing**: `p1/p2/p3` - Purple highlight
-- **Date Parsing**: Natural language (tomorrow, next week) - Orange highlight
+- **Context Parsing**: `!contextName` - Blue highlight (semi-transparent background)
+- **Tag Parsing**: `#tagname` - Green highlight (semi-transparent background) 
+- **Priority Parsing**: `p1/p2/p3` - Purple highlight (semi-transparent background)
+- **Date Parsing**: Natural language (tomorrow, next week) - Orange highlight (semi-transparent background)
 - **Title Extraction**: Remaining text after parsing special syntax
+- **Inline Highlighting**: Overlay technique shows highlights directly in input field
+- **Editable Preview**: Toggle edit mode to correct parsing mistakes with form controls
 
 **Visual Feedback:**
-- Monospace font for input field
-- Color-coded highlighting in parsing preview
-- Real-time badge updates in task preview
+- Monospace font for input field with inline highlighting
+- Color-coded highlighting directly in input field using overlay technique
+- Real-time badge updates in editable task preview
 - Disabled submit state until valid title exists
+- Edit mode toggle for correcting parsing mistakes
 
 **Example Usage:**
 ```
