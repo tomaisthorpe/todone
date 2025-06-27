@@ -29,13 +29,12 @@ export async function toggleTaskAction(taskId: string) {
     throw new Error("Task not found");
   }
   
-  // Handle habit completion logic
-  let habitCompletionData = {};
   const now = new Date();
   
+  // Handle different task types
   if (task.type === "HABIT" && !task.completed) {
     // Habit is being completed
-    habitCompletionData = {
+    const habitCompletionData = {
       lastCompleted: now,
       streak: (task.streak || 0) + 1,
       longestStreak: Math.max((task.longestStreak || 0), (task.streak || 0) + 1)
@@ -48,21 +47,67 @@ export async function toggleTaskAction(taskId: string) {
         completedAt: now
       }
     });
+
+    await prisma.task.update({
+      where: { id: taskId },
+      data: {
+        completed: true,
+        completedAt: now,
+        ...habitCompletionData
+      }
+    });
   } else if (task.type === "HABIT" && task.completed) {
     // Habit is being uncompleted
-    habitCompletionData = {
-      streak: Math.max((task.streak || 1) - 1, 0)
-    };
-  }
-  
-  await prisma.task.update({
-    where: { id: taskId },
-    data: {
-      completed: !task.completed,
-      completedAt: !task.completed ? now : null, // Set completedAt when completing, clear when uncompleting
-      ...habitCompletionData
+    await prisma.task.update({
+      where: { id: taskId },
+      data: {
+        completed: false,
+        completedAt: null,
+        streak: Math.max((task.streak || 1) - 1, 0)
+      }
+    });
+  } else if (task.type === "RECURRING" && !task.completed) {
+    // Recurring task is being completed - create next instance
+    if (task.frequency && task.dueDate) {
+      const nextDueDate = new Date(task.dueDate);
+      nextDueDate.setDate(nextDueDate.getDate() + task.frequency);
+      
+      // Create the next recurring task instance
+      await prisma.task.create({
+        data: {
+          title: task.title,
+          project: task.project,
+          priority: task.priority,
+          tags: task.tags,
+          contextId: task.contextId,
+          dueDate: nextDueDate,
+          type: "RECURRING",
+          frequency: task.frequency,
+          nextDue: nextDueDate,
+          userId: task.userId,
+          completed: false
+        }
+      });
     }
-  });
+    
+    // Mark current task as completed
+    await prisma.task.update({
+      where: { id: taskId },
+      data: {
+        completed: true,
+        completedAt: now
+      }
+    });
+  } else {
+    // Regular task or uncompleting a recurring task
+    await prisma.task.update({
+      where: { id: taskId },
+      data: {
+        completed: !task.completed,
+        completedAt: !task.completed ? now : null
+      }
+    });
+  }
   
   revalidatePath("/");
 }
@@ -96,20 +141,31 @@ export async function createTaskAction(formData: FormData) {
   
   const tags = parseTags(tagsString || "");
   
-  // Create task without urgency - it will be calculated dynamically
-  await prisma.task.create({
-    data: {
-      title,
-      project: project || null,
-      priority,
-      tags,
-      contextId,
-      dueDate: dueDate ? new Date(dueDate) : null,
-      type,
-      habitType: type === "HABIT" ? habitType : null,
-      frequency: type === "HABIT" ? frequency : null,
-      userId
+  // Prepare task data based on type
+  const taskData: any = {
+    title,
+    project: project || null,
+    priority,
+    tags,
+    contextId,
+    dueDate: dueDate ? new Date(dueDate) : null,
+    type,
+    userId
+  };
+  
+  // Set type-specific fields
+  if (type === "HABIT") {
+    taskData.habitType = habitType;
+    taskData.frequency = frequency;
+  } else if (type === "RECURRING") {
+    taskData.frequency = frequency;
+    if (dueDate) {
+      taskData.nextDue = new Date(dueDate);
     }
+  }
+  
+  await prisma.task.create({
+    data: taskData
   });
   
   revalidatePath("/");
@@ -162,20 +218,36 @@ export async function updateTaskAction(formData: FormData) {
     tags
   });
   
+  // Prepare update data based on type
+  const updateData: any = {
+    title,
+    project: project || null,
+    priority,
+    tags,
+    contextId,
+    dueDate: dueDate ? new Date(dueDate) : null,
+    urgency,
+    type,
+    // Clear type-specific fields first
+    habitType: null,
+    frequency: null,
+    nextDue: null
+  };
+  
+  // Set type-specific fields
+  if (type === "HABIT") {
+    updateData.habitType = habitType;
+    updateData.frequency = frequency;
+  } else if (type === "RECURRING") {
+    updateData.frequency = frequency;
+    if (dueDate) {
+      updateData.nextDue = new Date(dueDate);
+    }
+  }
+  
   await prisma.task.update({
     where: { id: taskId },
-    data: {
-      title,
-      project: project || null,
-      priority,
-      tags,
-      contextId,
-      dueDate: dueDate ? new Date(dueDate) : null,
-      urgency,
-      type,
-      habitType: type === "HABIT" ? habitType : null,
-      frequency: type === "HABIT" ? frequency : null,
-    }
+    data: updateData
   });
   
   revalidatePath("/");
