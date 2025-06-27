@@ -389,11 +389,12 @@ Card
 - **Editable Preview**: Toggle edit mode to correct parsing mistakes with form controls
 
 **Visual Feedback:**
-- Monospace font for input field with inline highlighting
-- Color-coded highlighting directly in input field using overlay technique
+- Monospace font for input field with pixel-perfect inline highlighting
+- Color-coded highlighting directly in input field using positioned overlay technique
 - Real-time badge updates in editable task preview
 - Disabled submit state until valid title exists
 - Edit mode toggle for correcting parsing mistakes
+- Uses reusable TaskForm component for consistent UX with main modal
 
 **Example Usage:**
 ```
@@ -411,6 +412,26 @@ Parsing:
 - `#tag` for tags (green example)
 - `p1/p2/p3` for priority levels (purple example)
 - Natural date phrases (orange example)
+
+### TaskForm (Reusable Component)
+**Structure:**
+```
+Form Component
+├── Title Field (required in full mode)
+├── Task Type Field (full mode only)
+├── Priority Select
+├── Context Select (with icons & colors)
+├── Due Date Input
+├── Conditional Fields (Habit/Recurring - full mode only)
+├── Project Field (full mode only)
+└── Tags Field (TagsInput in full mode, text input in compact)
+```
+
+**Usage Modes:**
+- **Full Mode**: Complete form with all fields for modal usage
+- **Compact Mode**: Essential fields only for inline editing
+- **Consistent Styling**: Shared field validation and error handling
+- **Icon Integration**: Context icons and visual indicators
 
 ### AddItemModal
 **Structure:**

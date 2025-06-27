@@ -4,9 +4,8 @@ import React, { useState, useEffect, useRef, useTransition, useCallback } from "
 import * as chrono from "chrono-node";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { TaskForm, type TaskFormData } from "@/components/task-form";
 import { createTaskAction } from "@/lib/server-actions";
 import { Send, Calendar, Hash, Zap, Edit3 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -207,6 +206,40 @@ export function SmartTaskInput({
     }
   };
 
+  // Convert parsed task to TaskFormData format
+  const getTaskFormData = (): TaskFormData => ({
+    title: parsedTask.title,
+    project: "",
+    priority: parsedTask.priority,
+    contextId: parsedTask.contextId || contexts[0]?.id || "",
+    dueDate: parsedTask.dueDate?.toISOString().slice(0, 16) || "",
+    type: "TASK",
+    habitType: undefined,
+    frequency: undefined,
+    tags: parsedTask.tags,
+  });
+
+  const handleTaskFormChange = <K extends keyof TaskFormData>(field: K, value: TaskFormData[K]) => {
+    // Update the parsed task state from form changes
+    if (field === "title") {
+      setParsedTask(prev => ({ ...prev, title: value as string }));
+    } else if (field === "priority") {
+      setParsedTask(prev => ({ ...prev, priority: value as "LOW" | "MEDIUM" | "HIGH" }));
+    } else if (field === "contextId") {
+      const context = contexts.find(c => c.id === value);
+      setParsedTask(prev => ({ 
+        ...prev, 
+        contextId: value as string,
+        contextName: context?.name || null
+      }));
+    } else if (field === "dueDate") {
+      const date = value ? new Date(value as string) : null;
+      setParsedTask(prev => ({ ...prev, dueDate: date }));
+    } else if (field === "tags") {
+      setParsedTask(prev => ({ ...prev, tags: value as string[] }));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!parsedTask.title.trim()) return;
@@ -289,22 +322,24 @@ export function SmartTaskInput({
     return date.toLocaleDateString();
   };
 
-  const updateParsedTask = <K extends keyof ParsedTask>(field: K, value: ParsedTask[K]) => {
-    setParsedTask(prev => ({ ...prev, [field]: value }));
-  };
-
   return (
     <div className={cn("w-full", className)}>
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Smart Input with Inline Highlighting */}
         <div className="relative">
-          {/* Highlight overlay */}
+          {/* Highlight overlay - positioned to exactly match input text */}
           <div 
             ref={highlightRef}
-            className="absolute inset-0 px-3 py-2 pointer-events-none overflow-hidden whitespace-nowrap font-mono text-base leading-6"
-            style={{ zIndex: 1 }}
+            className="absolute inset-0 flex text-base leading-6 font-mono pointer-events-none overflow-hidden whitespace-nowrap"
+            style={{ 
+              zIndex: 1,
+              padding: "0.5rem 0.75rem", // matches Input component padding
+              border: "1px solid transparent", // matches Input border
+            }}
           >
-            {renderHighlightedText()}
+            <div className="flex-1 min-w-0">
+              {renderHighlightedText()}
+            </div>
           </div>
           
           {/* Actual input */}
@@ -314,7 +349,7 @@ export function SmartTaskInput({
             onChange={(e) => setInput(e.target.value)}
             onScroll={handleScroll}
             placeholder="Type your task naturally... e.g., 'Setup Todone !Homelab #sideprojects #setup p1 tomorrow'"
-            className="relative text-base py-2 pr-12 font-mono bg-transparent"
+            className="relative text-base font-mono bg-transparent caret-gray-900"
             style={{ zIndex: 2 }}
             disabled={isPending}
           />
@@ -330,7 +365,7 @@ export function SmartTaskInput({
           </Button>
         </div>
 
-        {/* Editable Task Preview */}
+        {/* Task Preview with Editable Form */}
         {(parsedTask.title ||
           parsedTask.contextName ||
           parsedTask.tags.length > 0 ||
@@ -354,49 +389,29 @@ export function SmartTaskInput({
               </Button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Title */}
-              <div>
-                <Label className="text-xs text-gray-500">Title</Label>
-                {isEditing ? (
-                  <Input
-                    value={parsedTask.title}
-                    onChange={(e) => updateParsedTask("title", e.target.value)}
-                    className="text-sm mt-1"
-                    placeholder="Task title"
-                  />
-                ) : (
-                  <div className="text-sm font-medium mt-1">
+            {/* Use TaskForm component in edit mode, simple display in view mode */}
+            {isEditing ? (
+              <TaskForm
+                data={getTaskFormData()}
+                onChange={handleTaskFormChange}
+                contexts={contexts}
+                compact={true}
+                fieldIdPrefix="smart-input"
+              />
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Title */}
+                <div>
+                  <div className="text-xs text-gray-500 mb-1">Title</div>
+                  <div className="text-sm font-medium">
                     {parsedTask.title || <span className="text-gray-400">No title</span>}
                   </div>
-                )}
-              </div>
+                </div>
 
-              {/* Context */}
-              <div>
-                <Label className="text-xs text-gray-500">Context</Label>
-                {isEditing ? (
-                  <Select
-                    value={parsedTask.contextId || ""}
-                    onValueChange={(value) => {
-                      const context = contexts.find(c => c.id === value);
-                      updateParsedTask("contextId", value);
-                      updateParsedTask("contextName", context?.name || null);
-                    }}
-                  >
-                    <SelectTrigger className="text-sm mt-1">
-                      <SelectValue placeholder="Select context" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {contexts.map((context) => (
-                        <SelectItem key={context.id} value={context.id}>
-                          {context.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <div className="text-sm mt-1">
+                {/* Context */}
+                <div>
+                  <div className="text-xs text-gray-500 mb-1">Context</div>
+                  <div className="text-sm">
                     {parsedTask.contextName ? (
                       <Badge variant="outline" className="text-blue-600 bg-blue-50 border-blue-200">
                         {parsedTask.contextName}
@@ -407,50 +422,22 @@ export function SmartTaskInput({
                       </span>
                     )}
                   </div>
-                )}
-              </div>
+                </div>
 
-              {/* Priority */}
-              <div>
-                <Label className="text-xs text-gray-500">Priority</Label>
-                {isEditing ? (
-                  <Select
-                    value={parsedTask.priority}
-                    onValueChange={(value) => updateParsedTask("priority", value as "LOW" | "MEDIUM" | "HIGH")}
-                  >
-                    <SelectTrigger className="text-sm mt-1">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="LOW">Low</SelectItem>
-                      <SelectItem value="MEDIUM">Medium</SelectItem>
-                      <SelectItem value="HIGH">High</SelectItem>
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <div className="text-sm mt-1">
+                {/* Priority */}
+                <div>
+                  <div className="text-xs text-gray-500 mb-1">Priority</div>
+                  <div className="text-sm">
                     <Badge className={getPriorityColor(parsedTask.priority)}>
                       {parsedTask.priority}
                     </Badge>
                   </div>
-                )}
-              </div>
+                </div>
 
-              {/* Due Date */}
-              <div>
-                <Label className="text-xs text-gray-500">Due Date</Label>
-                {isEditing ? (
-                  <Input
-                    type="datetime-local"
-                    value={parsedTask.dueDate?.toISOString().slice(0, 16) || ""}
-                    onChange={(e) => {
-                      const date = e.target.value ? new Date(e.target.value) : null;
-                      updateParsedTask("dueDate", date);
-                    }}
-                    className="text-sm mt-1"
-                  />
-                ) : (
-                  <div className="text-sm mt-1">
+                {/* Due Date */}
+                <div>
+                  <div className="text-xs text-gray-500 mb-1">Due Date</div>
+                  <div className="text-sm">
                     {parsedTask.dueDate ? (
                       <Badge variant="outline" className="text-orange-600 bg-orange-50 border-orange-200">
                         <Calendar className="w-3 h-3 mr-1" />
@@ -460,25 +447,13 @@ export function SmartTaskInput({
                       <span className="text-gray-400">No due date</span>
                     )}
                   </div>
-                )}
-              </div>
+                </div>
 
-              {/* Tags */}
-              {(parsedTask.tags.length > 0 || isEditing) && (
-                <div className="md:col-span-2">
-                  <Label className="text-xs text-gray-500">Tags</Label>
-                  {isEditing ? (
-                    <Input
-                      value={parsedTask.tags.join(", ")}
-                      onChange={(e) => {
-                        const tags = e.target.value.split(",").map(t => t.trim()).filter(Boolean);
-                        updateParsedTask("tags", tags);
-                      }}
-                      placeholder="Comma-separated tags"
-                      className="text-sm mt-1"
-                    />
-                  ) : (
-                    <div className="flex flex-wrap gap-1 mt-1">
+                {/* Tags */}
+                {parsedTask.tags.length > 0 && (
+                  <div className="md:col-span-2">
+                    <div className="text-xs text-gray-500 mb-1">Tags</div>
+                    <div className="flex flex-wrap gap-1">
                       {parsedTask.tags.map((tag, index) => (
                         <Badge
                           key={index}
@@ -490,10 +465,10 @@ export function SmartTaskInput({
                         </Badge>
                       ))}
                     </div>
-                  )}
-                </div>
-              )}
-            </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </form>
