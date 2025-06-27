@@ -92,6 +92,15 @@ const taskSchema = z.object({
     .optional(),
   frequency: z.number().min(1).max(365).optional(),
   tags: z.array(z.string()),
+}).refine((data) => {
+  // Require frequency for RECURRING tasks
+  if (data.type === "RECURRING" && !data.frequency) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Frequency is required for recurring tasks",
+  path: ["frequency"]
 });
 
 const contextSchema = z.object({
@@ -555,6 +564,33 @@ export function TaskModal({
                     />
                   </div>
                 </>
+              )}
+
+              {/* Recurring task-specific fields */}
+              {taskType === "RECURRING" && (
+                <div>
+                  <Label htmlFor={getFieldId("frequency")}>
+                    Frequency (days) *
+                  </Label>
+                  <Input
+                    id={getFieldId("frequency")}
+                    type="number"
+                    min="1"
+                    max="365"
+                    placeholder="1 = daily, 7 = weekly, 30 = monthly"
+                    {...taskForm.register("frequency", {
+                      valueAsNumber: true,
+                    })}
+                  />
+                  {taskForm.formState.errors.frequency && (
+                    <p className="text-sm text-red-500 mt-1">
+                      {taskForm.formState.errors.frequency.message}
+                    </p>
+                  )}
+                  <p className="text-xs text-gray-500 mt-1">
+                    How often this task should repeat (in days)
+                  </p>
+                </div>
               )}
 
               <div className="col-span-2">
