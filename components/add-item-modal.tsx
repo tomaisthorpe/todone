@@ -70,6 +70,7 @@ import {
   Beaker,
   Trash2,
   AlertTriangle,
+  AlertCircle,
 } from "lucide-react";
 import type { Task } from "@/lib/data";
 
@@ -165,6 +166,7 @@ export function TaskModal({
   const [isPending, startTransition] = useTransition();
   const [existingTags, setExistingTags] = useState<string[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [taskFormData, setTaskFormData] = useState<TaskFormData>({
     title: "",
     project: "",
@@ -201,6 +203,7 @@ export function TaskModal({
   // Reset forms when modal opens/closes or task changes
   useEffect(() => {
     if (isOpen) {
+      setError(null); // Clear errors when modal opens
       if (task) {
         // Editing mode - populate form with task data
         setTaskFormData({
@@ -235,6 +238,10 @@ export function TaskModal({
 
   const handleTaskFormChange = <K extends keyof TaskFormData>(field: K, value: TaskFormData[K]) => {
     setTaskFormData(prev => ({ ...prev, [field]: value }));
+    // Clear error when user makes changes
+    if (error) {
+      setError(null);
+    }
   };
 
   const onSubmitTask = (e: React.FormEvent) => {
@@ -244,6 +251,9 @@ export function TaskModal({
     if (!taskFormData.title.trim()) return;
     if (!taskFormData.contextId) return;
     if (taskFormData.type === "RECURRING" && !taskFormData.frequency) return;
+
+    // Clear any previous errors
+    setError(null);
 
     startTransition(async () => {
       const formData = new FormData();
@@ -263,13 +273,17 @@ export function TaskModal({
       // Convert tags array to comma-separated string for form data
       formData.append("tags", taskFormData.tags.join(", "));
 
-      if (isEditing) {
-        await updateTaskAction(formData);
-      } else {
-        await createTaskAction(formData);
+      try {
+        if (isEditing) {
+          await updateTaskAction(formData);
+        } else {
+          await createTaskAction(formData);
+        }
+        onClose();
+      } catch (error) {
+        console.error("Failed to save task:", error);
+        setError(error instanceof Error ? error.message : "Failed to save task");
       }
-
-      onClose();
     });
   };
 
@@ -281,18 +295,29 @@ export function TaskModal({
       formData.append("icon", data.icon);
       formData.append("color", data.color);
 
-      await createContextAction(formData);
-      contextForm.reset();
-      onClose();
+      try {
+        await createContextAction(formData);
+        contextForm.reset();
+        onClose();
+      } catch (error) {
+        console.error("Failed to create context:", error);
+        setError(error instanceof Error ? error.message : "Failed to create context");
+      }
     });
   };
 
   const handleDeleteTask = () => {
     if (!task) return;
     startTransition(async () => {
-      await deleteTaskAction(task.id);
-      setShowDeleteConfirm(false);
-      onClose();
+      try {
+        await deleteTaskAction(task.id);
+        setShowDeleteConfirm(false);
+        onClose();
+      } catch (error) {
+        console.error("Failed to delete task:", error);
+        setError(error instanceof Error ? error.message : "Failed to delete task");
+        setShowDeleteConfirm(false);
+      }
     });
   };
 
@@ -319,6 +344,14 @@ export function TaskModal({
         <DialogHeader>
           <DialogTitle>{isEditing ? "Edit Task" : "Add New Item"}</DialogTitle>
         </DialogHeader>
+
+        {/* Error Display */}
+        {error && (
+          <div className="bg-red-50 text-red-700 p-3 rounded-lg border border-red-200 flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <span className="text-sm">{error}</span>
+          </div>
+        )}
 
         {/* Tab Navigation */}
         <div className="flex gap-2 bg-gray-100 rounded-lg p-1 mt-2 mb-6">
