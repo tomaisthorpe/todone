@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { TaskForm, type TaskFormData } from "@/components/task-form";
 import { createTaskAction, getExistingTags } from "@/lib/server-actions";
-import { Send, Calendar, Hash, Zap, Edit3, AlertCircle } from "lucide-react";
+import { Send, Calendar, Hash, Zap, Edit3, AlertCircle, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface SmartTaskInputProps {
@@ -35,11 +35,14 @@ interface ParsedTask {
   priority: "LOW" | "MEDIUM" | "HIGH";
   dueDate: Date | null;
   dueDateText: string | null;
+  type: "TASK" | "RECURRING";
+  frequency: number | undefined;
+  recurringText: string | null;
 }
 
 interface ParsedSegment {
   text: string;
-  type: "text" | "context" | "tag" | "priority" | "date";
+  type: "text" | "context" | "tag" | "priority" | "date" | "recurring";
   startIndex: number;
   endIndex: number;
 }
@@ -64,6 +67,9 @@ export function SmartTaskInput({
     priority: "MEDIUM",
     dueDate: null,
     dueDateText: null,
+    type: "TASK",
+    frequency: undefined,
+    recurringText: null,
   });
   const [segments, setSegments] = useState<ParsedSegment[]>([]);
   const [isPending, startTransition] = useTransition();
@@ -265,6 +271,9 @@ export function SmartTaskInput({
         priority: "MEDIUM",
         dueDate: null,
         dueDateText: null,
+        type: "TASK",
+        frequency: undefined,
+        recurringText: null,
       };
       const newSegments: ParsedSegment[] = [];
 
@@ -326,6 +335,64 @@ export function SmartTaskInput({
         });
 
         workingText = workingText.replace(priorityMatch[0], " ");
+      }
+
+      // Parse recurring patterns (daily, weekly, monthly, etc.)
+      const recurringPatterns = [
+        { pattern: /\bdaily\b/i, frequency: 1, text: "daily" },
+        { pattern: /\bweekly\b/i, frequency: 7, text: "weekly" },
+        { pattern: /\bfortnightly\b/i, frequency: 14, text: "fortnightly" },
+        { pattern: /\bbiweekly\b/i, frequency: 14, text: "biweekly" },
+        { pattern: /\bmonthly\b/i, frequency: 30, text: "monthly" },
+        { pattern: /\byearly\b/i, frequency: 365, text: "yearly" },
+        { pattern: /\bannually\b/i, frequency: 365, text: "annually" },
+        { pattern: /\bevery\s+(\d+)\s+days?\b/i, frequency: null, text: null }, // Special case
+        { pattern: /\bevery\s+(\d+)\s+weeks?\b/i, frequency: null, text: null }, // Special case
+        { pattern: /\bevery\s+(\d+)\s+months?\b/i, frequency: null, text: null }, // Special case
+      ];
+
+      let recurringMatch = null;
+      for (const { pattern, frequency, text: patternText } of recurringPatterns) {
+        const match = workingText.match(pattern);
+        if (match) {
+          let actualFrequency = frequency;
+          let actualText = patternText;
+          
+          // Handle "every X days/weeks/months" patterns
+          if (frequency === null && match[1]) {
+            const num = parseInt(match[1]);
+            if (pattern.source.includes("days")) {
+              actualFrequency = num;
+              actualText = `every ${num} day${num === 1 ? '' : 's'}`;
+            } else if (pattern.source.includes("weeks")) {
+              actualFrequency = num * 7;
+              actualText = `every ${num} week${num === 1 ? '' : 's'}`;
+            } else if (pattern.source.includes("months")) {
+              actualFrequency = num * 30;
+              actualText = `every ${num} month${num === 1 ? '' : 's'}`;
+            }
+          }
+          
+          if (actualFrequency && actualText) {
+            result.type = "RECURRING";
+            result.frequency = actualFrequency;
+            result.recurringText = actualText;
+
+            const startIndex = text.indexOf(match[0]);
+            if (startIndex !== -1) {
+              newSegments.push({
+                text: match[0],
+                type: "recurring",
+                startIndex,
+                endIndex: startIndex + match[0].length,
+              });
+            }
+
+            workingText = workingText.replace(match[0], " ");
+            recurringMatch = match;
+            break;
+          }
+        }
       }
 
       // Parse date using chrono
@@ -410,9 +477,9 @@ export function SmartTaskInput({
     priority: parsedTask.priority,
     contextId: parsedTask.contextId || "",
     dueDate: parsedTask.dueDate?.toISOString().slice(0, 16) || "",
-    type: "TASK",
+    type: parsedTask.type,
     habitType: undefined,
-    frequency: undefined,
+    frequency: parsedTask.frequency,
     tags: parsedTask.tags,
   });
 
@@ -440,6 +507,8 @@ export function SmartTaskInput({
       setParsedTask((prev) => ({ ...prev, dueDate: date }));
     } else if (field === "tags") {
       setParsedTask((prev) => ({ ...prev, tags: value as string[] }));
+    } else if (field === "frequency") {
+      setParsedTask((prev) => ({ ...prev, frequency: value as number | undefined }));
     }
   };
 
@@ -466,7 +535,10 @@ export function SmartTaskInput({
           parsedTask.dueDate.toISOString().slice(0, 16)
         );
       }
-      formData.append("type", "TASK");
+      formData.append("type", parsedTask.type);
+      if (parsedTask.frequency) {
+        formData.append("frequency", parsedTask.frequency.toString());
+      }
       formData.append("tags", parsedTask.tags.join(", "));
 
       try {
@@ -510,6 +582,7 @@ export function SmartTaskInput({
         tag: "bg-green-500/20 text-transparent rounded px-1 py-0.5",
         priority: "bg-purple-500/20 text-transparent rounded px-1 py-0.5",
         date: "bg-orange-500/20 text-transparent rounded px-1 py-0.5",
+        recurring: "bg-cyan-500/20 text-transparent rounded px-1 py-0.5",
       }[segment.type];
 
       return (
@@ -587,7 +660,7 @@ export function SmartTaskInput({
             onSelect={handleCursorChange}
             onClick={handleCursorChange}
             onBlur={handleInputBlur}
-            placeholder="Type your task naturally... e.g., 'Setup Todone !Homelab #sideprojects #setup p1 tomorrow'"
+            placeholder="Type your task naturally... e.g., 'Setup Todone !Homelab #sideprojects #setup p1 tomorrow' or 'Team standup weekly !Work #meetings'"
             className="relative text-base font-mono bg-transparent caret-gray-900"
             style={{ zIndex: 2 }}
             disabled={isPending}
@@ -646,7 +719,8 @@ export function SmartTaskInput({
           parsedTask.contextName ||
           parsedTask.tags.length > 0 ||
           parsedTask.priority !== "MEDIUM" ||
-          parsedTask.dueDate) && (
+          parsedTask.dueDate ||
+          parsedTask.type === "RECURRING") && (
           <div className="bg-white rounded-lg border-gray-200 p-4 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
@@ -747,6 +821,22 @@ export function SmartTaskInput({
                   </div>
                 </div>
 
+                {/* Recurring Info */}
+                {parsedTask.type === "RECURRING" && (
+                  <div className="md:col-span-2">
+                    <div className="text-xs text-gray-500 mb-1">Recurring</div>
+                    <div className="text-sm">
+                      <Badge
+                        variant="outline"
+                        className="text-cyan-600 bg-cyan-50 border-cyan-200"
+                      >
+                        <RotateCcw className="w-3 h-3 mr-1" />
+                        {parsedTask.recurringText} ({parsedTask.frequency} days)
+                      </Badge>
+                    </div>
+                  </div>
+                )}
+
                 {/* Tags */}
                 {parsedTask.tags.length > 0 && (
                   <div className="md:col-span-2">
@@ -800,6 +890,12 @@ export function SmartTaskInput({
               tomorrow, next week, in 3 days
             </code>{" "}
             for due dates
+          </div>
+          <div>
+            <code className="bg-cyan-50 text-cyan-600 px-1 rounded">
+              daily, weekly, monthly, every 4 days
+            </code>{" "}
+            for recurring tasks
           </div>
         </div>
       </div>
