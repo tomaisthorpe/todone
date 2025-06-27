@@ -38,10 +38,12 @@ export function calculateUrgency(task: {
       (task.dueDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
     );
     
-    if (daysUntilDue <= 0) {
+    if (daysUntilDue < 0) {
       urgency += 3.0; // Overdue
-    } else if (daysUntilDue <= 1) {
-      urgency += 2.0; // Due today/tomorrow
+    } else if (daysUntilDue === 0) {
+      urgency += 2.5; // Due today
+    } else if (daysUntilDue === 1) {
+      urgency += 2.0; // Due tomorrow
     } else if (daysUntilDue <= 3) {
       urgency += 1.0; // Due soon
     }
@@ -100,12 +102,15 @@ export function explainUrgency(task: {
       (task.dueDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
     );
     
-    if (daysUntilDue <= 0) {
+    if (daysUntilDue < 0) {
       urgency += 3.0;
       explanation.push(`Overdue (${Math.abs(daysUntilDue)} days): +3.0`);
-    } else if (daysUntilDue <= 1) {
+    } else if (daysUntilDue === 0) {
+      urgency += 2.5;
+      explanation.push(`Due today: +2.5`);
+    } else if (daysUntilDue === 1) {
       urgency += 2.0;
-      explanation.push(`Due ${daysUntilDue === 0 ? 'today' : 'tomorrow'}: +2.0`);
+      explanation.push(`Due tomorrow: +2.0`);
     } else if (daysUntilDue <= 3) {
       urgency += 1.0;
       explanation.push(`Due in ${daysUntilDue} days: +1.0`);
