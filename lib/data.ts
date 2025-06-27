@@ -201,3 +201,96 @@ export function getContextCompletion(tasks: Task[], contextId: string) {
 
   return { percentage, completed, total };
 }
+
+// Pagination interface
+export interface PaginatedResults<T> {
+  data: T[];
+  totalCount: number;
+  currentPage: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
+// Get completed tasks with pagination
+export async function getCompletedTasks(
+  page: number = 1,
+  pageSize: number = 20
+): Promise<PaginatedResults<Task>> {
+  const session = await getAuthenticatedSession();
+
+  if (!session?.user?.id) {
+    return {
+      data: [],
+      totalCount: 0,
+      currentPage: page,
+      totalPages: 0,
+      hasNextPage: false,
+      hasPreviousPage: false,
+    };
+  }
+
+  try {
+    const skip = (page - 1) * pageSize;
+
+    // Get total count of completed tasks
+    const totalCount = await prisma.task.count({
+      where: {
+        userId: session.user.id,
+        completed: true,
+        completedAt: { not: null },
+      },
+    });
+
+    // Get paginated completed tasks
+    const tasks = await prisma.task.findMany({
+      where: {
+        userId: session.user.id,
+        completed: true,
+        completedAt: { not: null },
+      },
+      orderBy: { completedAt: "desc" }, // Most recently completed first
+      skip,
+      take: pageSize,
+    });
+
+    const tasksWithUrgency = tasks.map((task) => ({
+      ...task,
+      priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
+      type: task.type as "TASK" | "HABIT" | "RECURRING",
+      habitType: task.habitType as
+        | "STREAK"
+        | "LEARNING"
+        | "WELLNESS"
+        | "MAINTENANCE"
+        | null,
+      urgency: calculateUrgency({
+        priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
+        dueDate: task.dueDate,
+        createdAt: task.createdAt,
+        tags: task.tags,
+      }),
+    }));
+
+    const totalPages = Math.ceil(totalCount / pageSize);
+
+    return {
+      data: tasksWithUrgency,
+      totalCount,
+      currentPage: page,
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPreviousPage: page > 1,
+    };
+  } catch (error) {
+    console.error("Error fetching completed tasks:", error);
+    return {
+      data: [],
+      totalCount: 0,
+      currentPage: page,
+      totalPages: 0,
+      hasNextPage: false,
+      hasPreviousPage: false,
+    };
+  }
+}
