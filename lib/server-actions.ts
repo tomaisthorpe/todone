@@ -337,7 +337,7 @@ export async function getExistingTags(): Promise<string[]> {
 
     const allTags = new Set<string>();
     tasks.forEach((task: { tags: string[] }) => {
-      task.tags.forEach((tag) => allTags.add(tag));
+      task.tags.forEach(tag => allTags.add(tag));
     });
 
     return Array.from(allTags).sort();
