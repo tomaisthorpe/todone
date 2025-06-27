@@ -357,10 +357,12 @@ const Todone = () => {
         (dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
       );
       
-      if (daysUntilDue <= 0) {
+      if (daysUntilDue < 0) {
         urgency += 3.0; // Overdue
-      } else if (daysUntilDue <= 1) {
-        urgency += 2.0; // Due today/tomorrow
+      } else if (daysUntilDue === 0) {
+        urgency += 2.5; // Due today
+      } else if (daysUntilDue === 1) {
+        urgency += 2.0; // Due tomorrow
       } else if (daysUntilDue <= 3) {
         urgency += 1.0; // Due soon
       }
