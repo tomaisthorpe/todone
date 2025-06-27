@@ -112,6 +112,7 @@ model Task {
   dueDate   DateTime?
   urgency   Float     @default(5.0)
   completed Boolean   @default(false)
+  completedAt DateTime? // When the task was marked complete
   type      TaskType  @default(TASK)
   userId    String
   createdAt DateTime  @default(now())

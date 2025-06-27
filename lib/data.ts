@@ -21,6 +21,7 @@ export interface Task {
   dueDate: Date | null;
   urgency: number;
   completed: boolean;
+  completedAt: Date | null;
   type: "TASK" | "HABIT" | "RECURRING";
   userId: string;
   createdAt: Date;

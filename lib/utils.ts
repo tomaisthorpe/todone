@@ -219,15 +219,15 @@ export function formatDateForTask(date: Date | null): { text: string; color: str
   };
 }
 
-export function shouldHideCompletedTask(task: { completed: boolean; updatedAt: Date | null }): boolean {
-  if (!task.completed || !task.updatedAt) {
-    return false; // Don't hide uncompleted tasks or tasks without updatedAt
+export function shouldHideCompletedTask(task: { completed: boolean; completedAt: Date | null }): boolean {
+  if (!task.completed || !task.completedAt) {
+    return false; // Don't hide uncompleted tasks or tasks without completedAt
   }
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const completedDate = new Date(task.updatedAt);
+  const completedDate = new Date(task.completedAt);
   const completedDateOnly = new Date(completedDate);
   completedDateOnly.setHours(0, 0, 0, 0);
   
