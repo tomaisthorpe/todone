@@ -81,6 +81,7 @@ export function SmartTaskInput({
   } | null>(null);
 
   const [error, setError] = useState<string | null>(null);
+
   const inputRef = useRef<HTMLInputElement>(null);
   const highlightRef = useRef<HTMLDivElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
@@ -694,6 +695,16 @@ export function SmartTaskInput({
                   </div>
                 </div>
 
+                {/* Priority */}
+                <div>
+                  <div className="text-xs text-gray-500 mb-1">Priority</div>
+                  <div className="text-sm">
+                    <Badge className={getPriorityColor(parsedTask.priority)}>
+                      {parsedTask.priority}
+                    </Badge>
+                  </div>
+                </div>
+
                 {/* Context */}
                 <div>
                   <div className="text-xs text-gray-500 mb-1">Context</div>
@@ -715,16 +726,6 @@ export function SmartTaskInput({
                     ) : (
                       <span className="text-red-400">No context selected</span>
                     )}
-                  </div>
-                </div>
-
-                {/* Priority */}
-                <div>
-                  <div className="text-xs text-gray-500 mb-1">Priority</div>
-                  <div className="text-sm">
-                    <Badge className={getPriorityColor(parsedTask.priority)}>
-                      {parsedTask.priority}
-                    </Badge>
                   </div>
                 </div>
 
