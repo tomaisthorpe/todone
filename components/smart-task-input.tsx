@@ -69,13 +69,17 @@ export function SmartTaskInput({
   const [isPending, startTransition] = useTransition();
   const [isEditing, setIsEditing] = useState(false);
   const [existingTags, setExistingTags] = useState<string[]>([]);
-  
+
   // Suggestions state
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
-  const [suggestionTrigger, setSuggestionTrigger] = useState<{ type: "tag" | "context"; startPos: number; query: string } | null>(null);
-  
+  const [suggestionTrigger, setSuggestionTrigger] = useState<{
+    type: "tag" | "context";
+    startPos: number;
+    query: string;
+  } | null>(null);
+
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const highlightRef = useRef<HTMLDivElement>(null);
@@ -87,102 +91,117 @@ export function SmartTaskInput({
   }, []);
 
   // Check for suggestion triggers and update suggestions
-  const updateSuggestions = useCallback((text: string, cursorPos: number) => {
-    // Check if we're typing after # or !
-    let triggerPos = -1;
-    let triggerType: "tag" | "context" | null = null;
-    
-    // Find the last # or ! before the cursor
-    for (let i = cursorPos - 1; i >= 0; i--) {
-      const char = text[i];
-      if (char === '#') {
-        triggerType = "tag";
-        triggerPos = i;
-        break;
-      } else if (char === '!') {
-        triggerType = "context";
-        triggerPos = i;
-        break;
-      } else if (char === ' ') {
-        // Stop searching if we hit a space
-        break;
-      }
-    }
+  const updateSuggestions = useCallback(
+    (text: string, cursorPos: number) => {
+      // Check if we're typing after # or !
+      let triggerPos = -1;
+      let triggerType: "tag" | "context" | null = null;
 
-    if (triggerType && triggerPos !== -1) {
-      const query = text.slice(triggerPos + 1, cursorPos);
-      setSuggestionTrigger({ type: triggerType, startPos: triggerPos, query });
-      
-      // Generate suggestions based on type
-      let filteredSuggestions: Suggestion[] = [];
-      
-      if (triggerType === "tag") {
-        filteredSuggestions = existingTags
-          .filter(tag => 
-            tag.toLowerCase().includes(query.toLowerCase()) &&
-            !parsedTask.tags.includes(tag) &&
-            query.trim() !== ""
-          )
-          .map(tag => ({
-            text: tag,
-            type: "tag" as const,
-            displayText: `#${tag}`
-          }));
-      } else if (triggerType === "context") {
-        filteredSuggestions = contexts
-          .filter(context => 
-            context.name.toLowerCase().includes(query.toLowerCase()) &&
-            query.trim() !== ""
-          )
-          .map(context => ({
-            text: context.name,
-            type: "context" as const,
-            displayText: `!${context.name}`
-          }));
+      // Find the last # or ! before the cursor
+      for (let i = cursorPos - 1; i >= 0; i--) {
+        const char = text[i];
+        if (char === "#") {
+          triggerType = "tag";
+          triggerPos = i;
+          break;
+        } else if (char === "!") {
+          triggerType = "context";
+          triggerPos = i;
+          break;
+        } else if (char === " ") {
+          // Stop searching if we hit a space
+          break;
+        }
       }
-      
-      setSuggestions(filteredSuggestions);
-      setShowSuggestions(filteredSuggestions.length > 0);
-      setSelectedSuggestionIndex(-1);
-    } else {
-      setSuggestionTrigger(null);
-      setShowSuggestions(false);
-      setSuggestions([]);
-      setSelectedSuggestionIndex(-1);
-    }
-  }, [existingTags, contexts, parsedTask.tags]);
+
+      if (triggerType && triggerPos !== -1) {
+        const query = text.slice(triggerPos + 1, cursorPos);
+        setSuggestionTrigger({
+          type: triggerType,
+          startPos: triggerPos,
+          query,
+        });
+
+        // Generate suggestions based on type
+        let filteredSuggestions: Suggestion[] = [];
+
+        if (triggerType === "tag") {
+          filteredSuggestions = existingTags
+            .filter(
+              (tag) =>
+                tag.toLowerCase().includes(query.toLowerCase()) &&
+                !parsedTask.tags.includes(tag) &&
+                query.trim() !== ""
+            )
+            .map((tag) => ({
+              text: tag,
+              type: "tag" as const,
+              displayText: `#${tag}`,
+            }));
+        } else if (triggerType === "context") {
+          filteredSuggestions = contexts
+            .filter(
+              (context) =>
+                context.name.toLowerCase().includes(query.toLowerCase()) &&
+                query.trim() !== ""
+            )
+            .map((context) => ({
+              text: context.name,
+              type: "context" as const,
+              displayText: `!${context.name}`,
+            }));
+        }
+
+        setSuggestions(filteredSuggestions);
+        setShowSuggestions(filteredSuggestions.length > 0);
+        setSelectedSuggestionIndex(-1);
+      } else {
+        setSuggestionTrigger(null);
+        setShowSuggestions(false);
+        setSuggestions([]);
+        setSelectedSuggestionIndex(-1);
+      }
+    },
+    [existingTags, contexts, parsedTask.tags]
+  );
 
   // Handle input change with suggestions
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     const cursorPos = e.target.selectionStart || 0;
-    
+
     setInput(newValue);
     updateSuggestions(newValue, cursorPos);
   };
 
   // Handle suggestion selection
-  const selectSuggestion = useCallback((suggestion: Suggestion) => {
-    if (!suggestionTrigger) return;
-    
-    const beforeTrigger = input.substring(0, suggestionTrigger.startPos);
-    const afterQuery = input.substring(suggestionTrigger.startPos + 1 + suggestionTrigger.query.length);
-    const newInput = `${beforeTrigger}${suggestion.displayText} ${afterQuery}`;
-    
-    setInput(newInput);
-    setShowSuggestions(false);
-    setSuggestionTrigger(null);
-    setSelectedSuggestionIndex(-1);
-    
-    // Focus back to input and position cursor after the suggestion
-    setTimeout(() => {
-      if (inputRef.current) {
-        const newCursorPos = beforeTrigger.length + suggestion.displayText.length + 1;
-        inputRef.current.focus();
-        inputRef.current.setSelectionRange(newCursorPos, newCursorPos);
-      }
-    }, 0);
-  }, [input, suggestionTrigger]);
+  const selectSuggestion = useCallback(
+    (suggestion: Suggestion) => {
+      if (!suggestionTrigger) return;
+
+      const beforeTrigger = input.substring(0, suggestionTrigger.startPos);
+      const afterQuery = input.substring(
+        suggestionTrigger.startPos + 1 + suggestionTrigger.query.length
+      );
+      const newInput = `${beforeTrigger}${suggestion.displayText} ${afterQuery}`;
+
+      setInput(newInput);
+      setShowSuggestions(false);
+      setSuggestionTrigger(null);
+      setSelectedSuggestionIndex(-1);
+
+      // Focus back to input and position cursor after the suggestion
+      setTimeout(() => {
+        if (inputRef.current) {
+          const newCursorPos =
+            beforeTrigger.length + suggestion.displayText.length + 1;
+          inputRef.current.focus();
+          inputRef.current.setSelectionRange(newCursorPos, newCursorPos);
+        }
+      }, 0);
+    },
+    [input, suggestionTrigger]
+  );
 
   // Handle keyboard navigation for suggestions
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -190,13 +209,13 @@ export function SmartTaskInput({
       switch (e.key) {
         case "ArrowDown":
           e.preventDefault();
-          setSelectedSuggestionIndex(prev => 
+          setSelectedSuggestionIndex((prev) =>
             prev < suggestions.length - 1 ? prev + 1 : 0
           );
           break;
         case "ArrowUp":
           e.preventDefault();
-          setSelectedSuggestionIndex(prev => 
+          setSelectedSuggestionIndex((prev) =>
             prev > 0 ? prev - 1 : suggestions.length - 1
           );
           break;
@@ -425,7 +444,7 @@ export function SmartTaskInput({
     } else if (field === "tags") {
       setParsedTask((prev) => ({ ...prev, tags: value as string[] }));
     }
-    
+
     // Clear error when user makes changes
     if (error) {
       setError(null);
@@ -444,10 +463,6 @@ export function SmartTaskInput({
       formData.append("title", parsedTask.title);
       formData.append("priority", parsedTask.priority);
 
-      const contextId = parsedTask.contextId || contexts[0]?.id;
-      if (contextId) {
-        formData.append("contextId", contextId);
-      
       // Don't use fallback context - let server validation handle missing context
       if (parsedTask.contextId) {
         formData.append("contextId", parsedTask.contextId);
@@ -463,14 +478,22 @@ export function SmartTaskInput({
       formData.append("tags", parsedTask.tags.join(", "));
 
       try {
+        // Call server action outside of startTransition to properly catch errors
         await createTaskAction(formData);
-        setInput("");
-        setIsEditing(false);
-        setError(null);
+
+        // Use startTransition only for UI state updates after successful submission
+        startTransition(() => {
+          setInput("");
+          setIsEditing(false);
+          setError(null);
+        });
+
         onTaskCreated?.();
       } catch (error) {
         console.error("Failed to create task:", error);
-        setError(error instanceof Error ? error.message : "Failed to create task");
+        setError(
+          error instanceof Error ? error.message : "Failed to create task"
+        );
       }
     });
   };
@@ -588,10 +611,10 @@ export function SmartTaskInput({
 
           {/* Suggestions dropdown */}
           {showSuggestions && suggestions.length > 0 && (
-            <div 
+            <div
               ref={suggestionsRef}
               className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto"
-              style={{ top: '100%' }}
+              style={{ top: "100%" }}
             >
               {suggestions.map((suggestion, index) => (
                 <button
@@ -599,7 +622,8 @@ export function SmartTaskInput({
                   type="button"
                   className={cn(
                     "w-full px-3 py-2 text-left text-sm hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 flex items-center gap-2",
-                    index === selectedSuggestionIndex && "bg-blue-50 text-blue-900"
+                    index === selectedSuggestionIndex &&
+                      "bg-blue-50 text-blue-900"
                   )}
                   onClick={() => selectSuggestion(suggestion)}
                   onMouseEnter={() => setSelectedSuggestionIndex(index)}
@@ -611,7 +635,9 @@ export function SmartTaskInput({
                   )}
                   <span className="font-mono">{suggestion.displayText}</span>
                   {suggestion.type === "context" && (
-                    <span className="text-xs text-gray-500 ml-auto">context</span>
+                    <span className="text-xs text-gray-500 ml-auto">
+                      context
+                    </span>
                   )}
                   {suggestion.type === "tag" && (
                     <span className="text-xs text-gray-500 ml-auto">tag</span>
@@ -654,7 +680,15 @@ export function SmartTaskInput({
                 contexts={contexts}
                 compact={true}
                 fieldIdPrefix="smart-input"
-                errors={error ? { contextId: parsedTask.contextId ? undefined : "Context is required" } : undefined}
+                errors={
+                  error
+                    ? {
+                        contextId: parsedTask.contextId
+                          ? undefined
+                          : "Context is required",
+                      }
+                    : undefined
+                }
               />
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -673,11 +707,17 @@ export function SmartTaskInput({
                   <div className="text-xs text-gray-500 mb-1">Context</div>
                   <div className="text-sm">
                     {parsedTask.contextName && parsedTask.contextId ? (
-                      <Badge variant="outline" className="text-blue-600 bg-blue-50 border-blue-200">
+                      <Badge
+                        variant="outline"
+                        className="text-blue-600 bg-blue-50 border-blue-200"
+                      >
                         {parsedTask.contextName}
                       </Badge>
                     ) : parsedTask.contextName ? (
-                      <Badge variant="outline" className="text-red-600 bg-red-50 border-red-200">
+                      <Badge
+                        variant="outline"
+                        className="text-red-600 bg-red-50 border-red-200"
+                      >
                         {parsedTask.contextName} (not found)
                       </Badge>
                     ) : (
@@ -742,10 +782,32 @@ export function SmartTaskInput({
       <div className="text-xs text-gray-500 mt-2">
         <div className="font-medium mb-1">Quick syntax:</div>
         <div className="space-y-1">
-          <div><code className="bg-blue-50 text-blue-600 px-1 rounded">!context</code> for context <span className="text-gray-400">(type ! to see suggestions)</span></div>
-          <div><code className="bg-green-50 text-green-600 px-1 rounded">#tag</code> for tags <span className="text-gray-400">(type # to see suggestions)</span></div>
-          <div><code className="bg-purple-50 text-purple-600 px-1 rounded">p1/p2/p3</code> for priority (high/medium/low)</div>
-          <div><code className="bg-orange-50 text-orange-600 px-1 rounded">tomorrow, next week, in 3 days</code> for due dates</div>
+          <div>
+            <code className="bg-blue-50 text-blue-600 px-1 rounded">
+              !context
+            </code>{" "}
+            for context{" "}
+            <span className="text-gray-400">(type ! to see suggestions)</span>
+          </div>
+          <div>
+            <code className="bg-green-50 text-green-600 px-1 rounded">
+              #tag
+            </code>{" "}
+            for tags{" "}
+            <span className="text-gray-400">(type # to see suggestions)</span>
+          </div>
+          <div>
+            <code className="bg-purple-50 text-purple-600 px-1 rounded">
+              p1/p2/p3
+            </code>{" "}
+            for priority (high/medium/low)
+          </div>
+          <div>
+            <code className="bg-orange-50 text-orange-600 px-1 rounded">
+              tomorrow, next week, in 3 days
+            </code>{" "}
+            for due dates
+          </div>
         </div>
       </div>
     </div>
