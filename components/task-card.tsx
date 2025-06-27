@@ -184,7 +184,7 @@ export function TaskCard({ task, contexts }: TaskCardProps) {
                     {task.urgency.toFixed(1)}
                   </div>
                 </TooltipTrigger>
-                <TooltipContent className="max-w-xs">
+                <TooltipContent className="max-w-xs opacity-100">
                   <div className="text-sm">
                     <div className="font-semibold mb-1">Urgency Calculation:</div>
                     {urgencyExplanation.explanation.map((line, index) => (
