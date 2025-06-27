@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useTransition, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useTransition,
+  useCallback,
+} from "react";
 import * as chrono from "chrono-node";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -227,138 +233,141 @@ export function SmartTaskInput({
   };
 
   // Parse the input text
-  const parseInput = useCallback((text: string): ParsedTask => {
-    let workingText = text;
-    const result: ParsedTask = {
-      title: "",
-      contextId: null,
-      contextName: null,
-      tags: [],
-      priority: "MEDIUM",
-      dueDate: null,
-      dueDateText: null,
-    };
-    const newSegments: ParsedSegment[] = [];
+  const parseInput = useCallback(
+    (text: string): ParsedTask => {
+      let workingText = text;
+      const result: ParsedTask = {
+        title: "",
+        contextId: null,
+        contextName: null,
+        tags: [],
+        priority: "MEDIUM",
+        dueDate: null,
+        dueDateText: null,
+      };
+      const newSegments: ParsedSegment[] = [];
 
-    // Parse context (!contextName)
-    const contextMatch = workingText.match(/!([a-zA-Z0-9_-]+)/i);
-    if (contextMatch) {
-      const contextName = contextMatch[1];
-      const matchedContext = contexts.find(
-        (ctx) => ctx.name.toLowerCase() === contextName.toLowerCase()
-      );
-      if (matchedContext) {
-        result.contextId = matchedContext.id;
-        result.contextName = matchedContext.name;
-      } else {
-        result.contextName = contextName;
-      }
+      // Parse context (!contextName)
+      const contextMatch = workingText.match(/!([a-zA-Z0-9_-]+)/i);
+      if (contextMatch) {
+        const contextName = contextMatch[1];
+        const matchedContext = contexts.find(
+          (ctx) => ctx.name.toLowerCase() === contextName.toLowerCase()
+        );
+        if (matchedContext) {
+          result.contextId = matchedContext.id;
+          result.contextName = matchedContext.name;
+        } else {
+          result.contextName = contextName;
+        }
 
-      const startIndex = workingText.indexOf(contextMatch[0]);
-      newSegments.push({
-        text: contextMatch[0],
-        type: "context",
-        startIndex,
-        endIndex: startIndex + contextMatch[0].length,
-      });
-
-      workingText = workingText.replace(contextMatch[0], " ");
-    }
-
-    // Parse tags (#tagname)
-    const tagMatches = [...workingText.matchAll(/#([a-zA-Z0-9_-]+)/gi)];
-    tagMatches.forEach((match) => {
-      const tagName = match[1];
-      result.tags.push(tagName);
-
-      const startIndex = text.indexOf(match[0]);
-      newSegments.push({
-        text: match[0],
-        type: "tag",
-        startIndex,
-        endIndex: startIndex + match[0].length,
-      });
-
-      workingText = workingText.replace(match[0], " ");
-    });
-
-    // Parse priority (p1, p2, p3)
-    const priorityMatch = workingText.match(/\bp([123])\b/i);
-    if (priorityMatch) {
-      const priorityNum = priorityMatch[1];
-      result.priority =
-        priorityNum === "1" ? "HIGH" : priorityNum === "2" ? "MEDIUM" : "LOW";
-
-      const startIndex = text.indexOf(priorityMatch[0]);
-      newSegments.push({
-        text: priorityMatch[0],
-        type: "priority",
-        startIndex,
-        endIndex: startIndex + priorityMatch[0].length,
-      });
-
-      workingText = workingText.replace(priorityMatch[0], " ");
-    }
-
-    // Parse date using chrono
-    const chronoResults = chrono.parse(workingText);
-    if (chronoResults.length > 0) {
-      const chronoResult = chronoResults[0];
-      result.dueDate = chronoResult.start.date();
-      result.dueDateText = chronoResult.text;
-
-      const startIndex = text.indexOf(chronoResult.text);
-      if (startIndex !== -1) {
+        const startIndex = workingText.indexOf(contextMatch[0]);
         newSegments.push({
-          text: chronoResult.text,
-          type: "date",
+          text: contextMatch[0],
+          type: "context",
           startIndex,
-          endIndex: startIndex + chronoResult.text.length,
+          endIndex: startIndex + contextMatch[0].length,
         });
+
+        workingText = workingText.replace(contextMatch[0], " ");
       }
 
-      workingText = workingText.replace(chronoResult.text, " ");
-    }
+      // Parse tags (#tagname)
+      const tagMatches = [...workingText.matchAll(/#([a-zA-Z0-9_-]+)/gi)];
+      tagMatches.forEach((match) => {
+        const tagName = match[1];
+        result.tags.push(tagName);
 
-    // The remaining text is the title
-    result.title = workingText.replace(/\s+/g, " ").trim();
+        const startIndex = text.indexOf(match[0]);
+        newSegments.push({
+          text: match[0],
+          type: "tag",
+          startIndex,
+          endIndex: startIndex + match[0].length,
+        });
 
-    // Create text segments for highlighting
-    let lastIndex = 0;
-    newSegments.sort((a, b) => a.startIndex - b.startIndex);
+        workingText = workingText.replace(match[0], " ");
+      });
 
-    const finalSegments: ParsedSegment[] = [];
-    newSegments.forEach((segment) => {
-      if (segment.startIndex > lastIndex) {
-        const textBefore = text.slice(lastIndex, segment.startIndex);
-        if (textBefore.trim()) {
+      // Parse priority (p1, p2, p3)
+      const priorityMatch = workingText.match(/\bp([123])\b/i);
+      if (priorityMatch) {
+        const priorityNum = priorityMatch[1];
+        result.priority =
+          priorityNum === "1" ? "HIGH" : priorityNum === "2" ? "MEDIUM" : "LOW";
+
+        const startIndex = text.indexOf(priorityMatch[0]);
+        newSegments.push({
+          text: priorityMatch[0],
+          type: "priority",
+          startIndex,
+          endIndex: startIndex + priorityMatch[0].length,
+        });
+
+        workingText = workingText.replace(priorityMatch[0], " ");
+      }
+
+      // Parse date using chrono
+      const chronoResults = chrono.parse(workingText);
+      if (chronoResults.length > 0) {
+        const chronoResult = chronoResults[0];
+        result.dueDate = chronoResult.start.date();
+        result.dueDateText = chronoResult.text;
+
+        const startIndex = text.indexOf(chronoResult.text);
+        if (startIndex !== -1) {
+          newSegments.push({
+            text: chronoResult.text,
+            type: "date",
+            startIndex,
+            endIndex: startIndex + chronoResult.text.length,
+          });
+        }
+
+        workingText = workingText.replace(chronoResult.text, " ");
+      }
+
+      // The remaining text is the title
+      result.title = workingText.replace(/\s+/g, " ").trim();
+
+      // Create text segments for highlighting
+      let lastIndex = 0;
+      newSegments.sort((a, b) => a.startIndex - b.startIndex);
+
+      const finalSegments: ParsedSegment[] = [];
+      newSegments.forEach((segment) => {
+        if (segment.startIndex > lastIndex) {
+          const textBefore = text.slice(lastIndex, segment.startIndex);
+          if (textBefore.trim()) {
+            finalSegments.push({
+              text: textBefore,
+              type: "text",
+              startIndex: lastIndex,
+              endIndex: segment.startIndex,
+            });
+          }
+        }
+        finalSegments.push(segment);
+        lastIndex = segment.endIndex;
+      });
+
+      if (lastIndex < text.length) {
+        const textAfter = text.slice(lastIndex);
+        if (textAfter.trim()) {
           finalSegments.push({
-            text: textBefore,
+            text: textAfter,
             type: "text",
             startIndex: lastIndex,
-            endIndex: segment.startIndex,
+            endIndex: text.length,
           });
         }
       }
-      finalSegments.push(segment);
-      lastIndex = segment.endIndex;
-    });
 
-    if (lastIndex < text.length) {
-      const textAfter = text.slice(lastIndex);
-      if (textAfter.trim()) {
-        finalSegments.push({
-          text: textAfter,
-          type: "text",
-          startIndex: lastIndex,
-          endIndex: text.length,
-        });
-      }
-    }
-
-    setSegments(finalSegments);
-    return result;
-  }, [contexts]);
+      setSegments(finalSegments);
+      return result;
+    },
+    [contexts]
+  );
 
   // Update parsing when input changes
   useEffect(() => {
@@ -386,24 +395,30 @@ export function SmartTaskInput({
     tags: parsedTask.tags,
   });
 
-  const handleTaskFormChange = <K extends keyof TaskFormData>(field: K, value: TaskFormData[K]) => {
+  const handleTaskFormChange = <K extends keyof TaskFormData>(
+    field: K,
+    value: TaskFormData[K]
+  ) => {
     // Update the parsed task state from form changes
     if (field === "title") {
-      setParsedTask(prev => ({ ...prev, title: value as string }));
+      setParsedTask((prev) => ({ ...prev, title: value as string }));
     } else if (field === "priority") {
-      setParsedTask(prev => ({ ...prev, priority: value as "LOW" | "MEDIUM" | "HIGH" }));
+      setParsedTask((prev) => ({
+        ...prev,
+        priority: value as "LOW" | "MEDIUM" | "HIGH",
+      }));
     } else if (field === "contextId") {
-      const context = contexts.find(c => c.id === value);
-      setParsedTask(prev => ({ 
-        ...prev, 
+      const context = contexts.find((c) => c.id === value);
+      setParsedTask((prev) => ({
+        ...prev,
         contextId: value as string,
-        contextName: context?.name || null
+        contextName: context?.name || null,
       }));
     } else if (field === "dueDate") {
       const date = value ? new Date(value as string) : null;
-      setParsedTask(prev => ({ ...prev, dueDate: date }));
+      setParsedTask((prev) => ({ ...prev, dueDate: date }));
     } else if (field === "tags") {
-      setParsedTask(prev => ({ ...prev, tags: value as string[] }));
+      setParsedTask((prev) => ({ ...prev, tags: value as string[] }));
     }
   };
 
@@ -415,14 +430,17 @@ export function SmartTaskInput({
       const formData = new FormData();
       formData.append("title", parsedTask.title);
       formData.append("priority", parsedTask.priority);
-      
+
       const contextId = parsedTask.contextId || contexts[0]?.id;
       if (contextId) {
         formData.append("contextId", contextId);
       }
-      
+
       if (parsedTask.dueDate) {
-        formData.append("dueDate", parsedTask.dueDate.toISOString().slice(0, 16));
+        formData.append(
+          "dueDate",
+          parsedTask.dueDate.toISOString().slice(0, 16)
+        );
       }
       formData.append("type", "TASK");
       formData.append("tags", parsedTask.tags.join(", "));
@@ -443,13 +461,21 @@ export function SmartTaskInput({
       return <span className="text-transparent select-none">{input}</span>;
     }
 
-    return segments.map((segment, index) => {
+    // Replace spaces with non-breaking spaces
+    const segmentsWithNbsp = segments.map((segment) => {
+      return {
+        ...segment,
+        text: segment.text.replace(/\s/g, "\u00A0"),
+      };
+    });
+
+    return segmentsWithNbsp.map((segment, index) => {
       const colorClass = {
         text: "text-transparent",
-        context: "bg-blue-500/20 text-transparent rounded px-0.5",
-        tag: "bg-green-500/20 text-transparent rounded px-0.5",
-        priority: "bg-purple-500/20 text-transparent rounded px-0.5",
-        date: "bg-orange-500/20 text-transparent rounded px-0.5",
+        context: "bg-blue-500/20 text-transparent rounded px-1 py-0.5",
+        tag: "bg-green-500/20 text-transparent rounded px-1 py-0.5",
+        priority: "bg-purple-500/20 text-transparent rounded px-1 py-0.5",
+        date: "bg-orange-500/20 text-transparent rounded px-1 py-0.5",
       }[segment.type];
 
       return (
@@ -475,7 +501,7 @@ export function SmartTaskInput({
 
   const formatDate = (date: Date | null) => {
     if (!date) return null;
-    
+
     const today = new Date();
     const diffTime = date.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -485,7 +511,7 @@ export function SmartTaskInput({
     if (diffDays === -1) return "Yesterday";
     if (diffDays < 0) return `${Math.abs(diffDays)}d ago`;
     if (diffDays < 7) return `In ${diffDays}d`;
-    
+
     return date.toLocaleDateString();
   };
 
@@ -495,20 +521,18 @@ export function SmartTaskInput({
         {/* Smart Input with Inline Highlighting */}
         <div className="relative">
           {/* Highlight overlay - positioned to exactly match input text */}
-          <div 
+          <div
             ref={highlightRef}
-            className="absolute inset-0 flex text-base leading-6 font-mono pointer-events-none overflow-hidden whitespace-nowrap"
-            style={{ 
+            className="absolute inset-0 flex text-base leading-6 font-mono pointer-events-none overflow-hidden whitespace-nowrap md:text-sm"
+            style={{
               zIndex: 1,
-              padding: "0.5rem 0.75rem", // matches Input component padding
+              padding: "0.25rem 0.5rem", // matches Input component padding
               border: "1px solid transparent", // matches Input border
             }}
           >
-            <div className="flex-1 min-w-0">
-              {renderHighlightedText()}
-            </div>
+            <div className="flex-1 min-w-0">{renderHighlightedText()}</div>
           </div>
-          
+
           {/* Actual input */}
           <Input
             ref={inputRef}
@@ -524,7 +548,7 @@ export function SmartTaskInput({
             style={{ zIndex: 2 }}
             disabled={isPending}
           />
-          
+
           <Button
             type="submit"
             size="sm"
@@ -610,7 +634,9 @@ export function SmartTaskInput({
                 <div>
                   <div className="text-xs text-gray-500 mb-1">Title</div>
                   <div className="text-sm font-medium">
-                    {parsedTask.title || <span className="text-gray-400">No title</span>}
+                    {parsedTask.title || (
+                      <span className="text-gray-400">No title</span>
+                    )}
                   </div>
                 </div>
 
@@ -619,7 +645,10 @@ export function SmartTaskInput({
                   <div className="text-xs text-gray-500 mb-1">Context</div>
                   <div className="text-sm">
                     {parsedTask.contextName ? (
-                      <Badge variant="outline" className="text-blue-600 bg-blue-50 border-blue-200">
+                      <Badge
+                        variant="outline"
+                        className="text-blue-600 bg-blue-50 border-blue-200"
+                      >
                         {parsedTask.contextName}
                       </Badge>
                     ) : (
@@ -645,7 +674,10 @@ export function SmartTaskInput({
                   <div className="text-xs text-gray-500 mb-1">Due Date</div>
                   <div className="text-sm">
                     {parsedTask.dueDate ? (
-                      <Badge variant="outline" className="text-orange-600 bg-orange-50 border-orange-200">
+                      <Badge
+                        variant="outline"
+                        className="text-orange-600 bg-orange-50 border-orange-200"
+                      >
                         <Calendar className="w-3 h-3 mr-1" />
                         {formatDate(parsedTask.dueDate)}
                       </Badge>

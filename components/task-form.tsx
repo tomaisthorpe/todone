@@ -3,15 +3,58 @@
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { TagsInput } from "@/components/ui/tags-input";
-import { 
-  CheckSquare, RotateCcw, Dumbbell, BookOpen, Heart, Wrench, Home, Calendar,
-  Code, Coffee, Building, Pizza, UtensilsCrossed, ChefHat, Wine, Beer, Grape,
-  Salad, CookingPot, Croissant, IceCreamCone, Cake, Sandwich, Soup, Wallet,
-  Coins, PiggyBank, CreditCard, Banknote, TrendingUp, Calculator, Receipt,
-  Leaf, TreePine, Sprout, Flower, TreeDeciduous, Flower2, LeafyGreen, Trees,
-  FlaskConical, TestTube, Beaker
+import {
+  CheckSquare,
+  RotateCcw,
+  Dumbbell,
+  BookOpen,
+  Heart,
+  Wrench,
+  Home,
+  Calendar,
+  Code,
+  Coffee,
+  Building,
+  Pizza,
+  UtensilsCrossed,
+  ChefHat,
+  Wine,
+  Beer,
+  Grape,
+  Salad,
+  CookingPot,
+  Croissant,
+  IceCreamCone,
+  Cake,
+  Sandwich,
+  Soup,
+  Wallet,
+  Coins,
+  PiggyBank,
+  CreditCard,
+  Banknote,
+  TrendingUp,
+  Calculator,
+  Receipt,
+  Leaf,
+  TreePine,
+  Sprout,
+  Flower,
+  TreeDeciduous,
+  Flower2,
+  LeafyGreen,
+  Trees,
+  FlaskConical,
+  TestTube,
+  Beaker,
 } from "lucide-react";
 
 const contextIcons = [
@@ -78,7 +121,10 @@ export interface TaskFormData {
 
 interface TaskFormProps {
   data: TaskFormData;
-  onChange: <K extends keyof TaskFormData>(field: K, value: TaskFormData[K]) => void;
+  onChange: <K extends keyof TaskFormData>(
+    field: K,
+    value: TaskFormData[K]
+  ) => void;
   contexts: Array<{
     id: string;
     name: string;
@@ -109,7 +155,7 @@ export function TaskForm({
 }: TaskFormProps) {
   const getFieldId = (fieldName: string) => `${fieldIdPrefix}-${fieldName}`;
 
-  const gridCols = compact ? "grid-cols-1" : "grid-cols-2";
+  const gridCols = "grid-cols-2";
   const gap = compact ? "gap-2" : "gap-4";
   const spacing = compact ? "space-y-2" : "space-y-4";
 
@@ -118,7 +164,10 @@ export function TaskForm({
       <div className={`grid ${gridCols} ${gap}`}>
         {/* Title */}
         <div className={compact ? "" : "col-span-2"}>
-          <Label htmlFor={getFieldId("title")} className={compact ? "text-xs" : ""}>
+          <Label
+            htmlFor={getFieldId("title")}
+            className={compact ? "text-xs" : ""}
+          >
             Task Title {!compact && "*"}
           </Label>
           <Input
@@ -150,7 +199,9 @@ export function TaskForm({
             <Label htmlFor={getFieldId("type")}>Task Type</Label>
             <Select
               value={data.type}
-              onValueChange={(value) => onChange("type", value as "TASK" | "HABIT" | "RECURRING")}
+              onValueChange={(value) =>
+                onChange("type", value as "TASK" | "HABIT" | "RECURRING")
+              }
             >
               <SelectTrigger>
                 <SelectValue />
@@ -175,12 +226,17 @@ export function TaskForm({
 
         {/* Priority */}
         <div>
-          <Label htmlFor={getFieldId("priority")} className={compact ? "text-xs" : ""}>
+          <Label
+            htmlFor={getFieldId("priority")}
+            className={compact ? "text-xs" : ""}
+          >
             Priority
           </Label>
           <Select
             value={data.priority}
-            onValueChange={(value) => onChange("priority", value as "LOW" | "MEDIUM" | "HIGH")}
+            onValueChange={(value) =>
+              onChange("priority", value as "LOW" | "MEDIUM" | "HIGH")
+            }
           >
             <SelectTrigger className={compact ? "text-sm mt-1" : ""}>
               <SelectValue />
@@ -195,7 +251,10 @@ export function TaskForm({
 
         {/* Context */}
         <div>
-          <Label htmlFor={getFieldId("context")} className={compact ? "text-xs" : ""}>
+          <Label
+            htmlFor={getFieldId("context")}
+            className={compact ? "text-xs" : ""}
+          >
             Context {!compact && "*"}
           </Label>
           <Select
@@ -207,11 +266,15 @@ export function TaskForm({
             </SelectTrigger>
             <SelectContent>
               {contexts.map((context) => {
-                const IconComponent = contextIcons.find((c) => c.value === context.icon)?.icon || Home;
+                const IconComponent =
+                  contextIcons.find((c) => c.value === context.icon)?.icon ||
+                  Home;
                 return (
                   <SelectItem key={context.id} value={context.id}>
                     <div className="flex items-center">
-                      <div className={`w-3 h-3 rounded-full ${context.color} mr-2`} />
+                      <div
+                        className={`w-3 h-3 rounded-full ${context.color} mr-2`}
+                      />
                       <IconComponent className="w-4 h-4 mr-2" />
                       {context.name}
                     </div>
@@ -227,7 +290,10 @@ export function TaskForm({
 
         {/* Due Date */}
         <div>
-          <Label htmlFor={getFieldId("dueDate")} className={compact ? "text-xs" : ""}>
+          <Label
+            htmlFor={getFieldId("dueDate")}
+            className={compact ? "text-xs" : ""}
+          >
             Due Date
           </Label>
           <Input
@@ -246,18 +312,25 @@ export function TaskForm({
               <Label htmlFor={getFieldId("habitType")}>Habit Type</Label>
               <Select
                 value={data.habitType || ""}
-                onValueChange={(value) => onChange("habitType", value as "STREAK" | "LEARNING" | "WELLNESS" | "MAINTENANCE")}
+                onValueChange={(value) =>
+                  onChange(
+                    "habitType",
+                    value as "STREAK" | "LEARNING" | "WELLNESS" | "MAINTENANCE"
+                  )
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select habit type" />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(habitTypeIcons).map(([type, { icon: Icon, color }]) => (
-                    <SelectItem key={type} value={type}>
-                      <Icon className={`w-4 h-4 inline mr-2 ${color}`} />
-                      {type.charAt(0) + type.slice(1).toLowerCase()}
-                    </SelectItem>
-                  ))}
+                  {Object.entries(habitTypeIcons).map(
+                    ([type, { icon: Icon, color }]) => (
+                      <SelectItem key={type} value={type}>
+                        <Icon className={`w-4 h-4 inline mr-2 ${color}`} />
+                        {type.charAt(0) + type.slice(1).toLowerCase()}
+                      </SelectItem>
+                    )
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -270,7 +343,9 @@ export function TaskForm({
                 max="365"
                 placeholder="1 = daily, 7 = weekly"
                 value={data.frequency || ""}
-                onChange={(e) => onChange("frequency", parseInt(e.target.value) || undefined)}
+                onChange={(e) =>
+                  onChange("frequency", parseInt(e.target.value) || undefined)
+                }
               />
             </div>
           </>
@@ -287,7 +362,9 @@ export function TaskForm({
               max="365"
               placeholder="1 = daily, 7 = weekly, 30 = monthly"
               value={data.frequency || ""}
-              onChange={(e) => onChange("frequency", parseInt(e.target.value) || undefined)}
+              onChange={(e) =>
+                onChange("frequency", parseInt(e.target.value) || undefined)
+              }
             />
             {errors.frequency && (
               <p className="text-sm text-red-500 mt-1">{errors.frequency}</p>
@@ -313,14 +390,20 @@ export function TaskForm({
 
         {/* Tags */}
         <div className={compact ? "" : "col-span-2"}>
-          <Label htmlFor={getFieldId("tags")} className={compact ? "text-xs" : ""}>
+          <Label
+            htmlFor={getFieldId("tags")}
+            className={compact ? "text-xs" : ""}
+          >
             Tags
           </Label>
           {compact ? (
             <Input
               value={data.tags.join(", ")}
               onChange={(e) => {
-                const tags = e.target.value.split(",").map(t => t.trim()).filter(Boolean);
+                const tags = e.target.value
+                  .split(",")
+                  .map((t) => t.trim())
+                  .filter(Boolean);
                 onChange("tags", tags);
               }}
               placeholder="Comma-separated tags"
@@ -335,7 +418,8 @@ export function TaskForm({
                 placeholder="Add tags (e.g., urgent, work, fitness)"
               />
               <p className="text-xs text-gray-500 mt-1">
-                Type tags and press Enter or comma to add. Start typing to see suggestions from existing tags.
+                Type tags and press Enter or comma to add. Start typing to see
+                suggestions from existing tags.
               </p>
             </>
           )}
