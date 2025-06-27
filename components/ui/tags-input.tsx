@@ -124,7 +124,7 @@ export function TagsInput({
     <div className={cn("relative", className)}>
       <div
         className={cn(
-          "flex flex-wrap gap-1 p-2 border bg-white rounded-md min-h-10",
+          "flex flex-wrap gap-1 p-2 border-input border bg-white rounded-md min-h-10",
           "focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
           disabled && "opacity-50 cursor-not-allowed"
         )}

@@ -4,3 +4,4 @@ globs:
 alwaysApply: true
 ---
 - Ensure you use the newer format for bg opacity which is bg-color/opacity, eg: bg-white/30 or bg-red-300/10
+- `border` is black, do not use it without specifying a color, or just omit it entirely
