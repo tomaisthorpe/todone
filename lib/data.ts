@@ -4,6 +4,30 @@ import { authOptions } from "./auth";
 import { prisma } from "./prisma";
 import { calculateUrgency } from "./utils";
 
+// Type for raw Prisma task data
+type PrismaTaskData = {
+  id: string;
+  title: string;
+  project: string | null;
+  priority: string;
+  tags: string[];
+  contextId: string;
+  dueDate: Date | null;
+  urgency: number;
+  completed: boolean;
+  completedAt: Date | null;
+  type: string;
+  userId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  habitType: string | null;
+  streak: number | null;
+  longestStreak: number | null;
+  frequency: number | null;
+  lastCompleted: Date | null;
+  nextDue: Date | null;
+};
+
 // Get authenticated user session
 async function getAuthenticatedSession() {
   const session = (await getServerSession(authOptions)) as Session | null;
@@ -61,7 +85,7 @@ export async function getTasks(): Promise<Task[]> {
       orderBy: [{ completed: "asc" }, { createdAt: "desc" }],
     });
 
-    const tasksWithUrgency = tasks.map((task) => ({
+    const tasksWithUrgency = tasks.map((task: PrismaTaskData) => ({
       ...task,
       priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
       type: task.type as "TASK" | "HABIT" | "RECURRING",
@@ -79,7 +103,7 @@ export async function getTasks(): Promise<Task[]> {
       }),
     }));
 
-    return tasksWithUrgency.sort((a, b) => {
+    return tasksWithUrgency.sort((a: Task, b: Task) => {
       if (a.completed !== b.completed) return a.completed ? 1 : -1;
       return b.urgency - a.urgency;
     });
@@ -136,7 +160,7 @@ export async function getUserTasks(userId: string): Promise<Task[]> {
       orderBy: [{ completed: "asc" }, { createdAt: "desc" }],
     });
 
-    const tasksWithUrgency = tasks.map((task) => ({
+    const tasksWithUrgency = tasks.map((task: PrismaTaskData) => ({
       ...task,
       priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
       type: task.type as "TASK" | "HABIT" | "RECURRING",
@@ -154,7 +178,7 @@ export async function getUserTasks(userId: string): Promise<Task[]> {
       }),
     }));
 
-    return tasksWithUrgency.sort((a, b) => {
+    return tasksWithUrgency.sort((a: Task, b: Task) => {
       if (a.completed !== b.completed) return a.completed ? 1 : -1;
       return b.urgency - a.urgency;
     });
@@ -176,7 +200,7 @@ export function getTodayTasks(tasks: Task[]): Task[] {
       taskDate.setHours(0, 0, 0, 0);
       return taskDate.getTime() === today.getTime();
     })
-    .sort((a, b) => {
+    .sort((a: Task, b: Task) => {
       // Sort completed tasks to bottom
       if (a.completed !== b.completed) return a.completed ? 1 : -1;
       // Sort by urgency (highest first)
@@ -254,7 +278,7 @@ export async function getCompletedTasks(
       take: pageSize,
     });
 
-    const tasksWithUrgency = tasks.map((task) => ({
+    const tasksWithUrgency = tasks.map((task: PrismaTaskData) => ({
       ...task,
       priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
       type: task.type as "TASK" | "HABIT" | "RECURRING",

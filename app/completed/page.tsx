@@ -11,9 +11,9 @@ import { Pagination } from "@/components/pagination";
 import Link from "next/link";
 
 interface CompletedPageProps {
-  searchParams: {
+  searchParams: Promise<{
     page?: string;
-  };
+  }>;
 }
 
 export default async function CompletedPage({ searchParams }: CompletedPageProps) {
@@ -25,7 +25,8 @@ export default async function CompletedPage({ searchParams }: CompletedPageProps
   }
 
   // Parse page parameter
-  const page = searchParams.page ? parseInt(searchParams.page, 10) : 1;
+  const resolvedSearchParams = await searchParams;
+  const page = resolvedSearchParams.page ? parseInt(resolvedSearchParams.page, 10) : 1;
   const pageSize = 20;
 
   // Server-side data fetching

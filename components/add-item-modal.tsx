@@ -713,7 +713,7 @@ export function TaskModal({
           </DialogHeader>
           <div className="py-4">
             <p className="text-gray-600">
-              Are you sure you want to delete "<span className="font-medium">{task?.title}</span>"? This action cannot be undone.
+              Are you sure you want to delete &quot;<span className="font-medium">{task?.title}</span>&quot;? This action cannot be undone.
             </p>
           </div>
           <div className="flex justify-end space-x-2">
