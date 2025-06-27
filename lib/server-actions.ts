@@ -31,10 +31,12 @@ export async function toggleTaskAction(taskId: string) {
   
   // Handle habit completion logic
   let habitCompletionData = {};
+  const now = new Date();
+  
   if (task.type === "HABIT" && !task.completed) {
     // Habit is being completed
     habitCompletionData = {
-      lastCompleted: new Date(),
+      lastCompleted: now,
       streak: (task.streak || 0) + 1,
       longestStreak: Math.max((task.longestStreak || 0), (task.streak || 0) + 1)
     };
@@ -43,7 +45,7 @@ export async function toggleTaskAction(taskId: string) {
     await prisma.habitCompletion.create({
       data: {
         taskId: taskId,
-        completedAt: new Date()
+        completedAt: now
       }
     });
   } else if (task.type === "HABIT" && task.completed) {
@@ -57,6 +59,7 @@ export async function toggleTaskAction(taskId: string) {
     where: { id: taskId },
     data: {
       completed: !task.completed,
+      completedAt: !task.completed ? now : null, // Set completedAt when completing, clear when uncompleting
       ...habitCompletionData
     }
   });

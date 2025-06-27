@@ -218,3 +218,34 @@ export function formatDateForTask(date: Date | null): { text: string; color: str
     isOverdue: false,
   };
 }
+
+export function shouldHideCompletedTask(task: { completed: boolean; completedAt: Date | null }): boolean {
+  if (!task.completed || !task.completedAt) {
+    return false; // Don't hide uncompleted tasks or tasks without completedAt
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const completedDate = new Date(task.completedAt);
+  const completedDateOnly = new Date(completedDate);
+  completedDateOnly.setHours(0, 0, 0, 0);
+  
+  // If task was completed before today
+  if (completedDateOnly.getTime() < today.getTime()) {
+    // Check if it was completed less than an hour ago
+    const now = new Date();
+    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+    
+    // If completed less than an hour ago, don't hide it
+    if (completedDate >= oneHourAgo) {
+      return false;
+    } else {
+      // Hide tasks completed before today that are more than an hour old
+      return true;
+    }
+  }
+
+  // Don't hide tasks completed today
+  return false;
+}

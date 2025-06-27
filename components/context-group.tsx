@@ -1,7 +1,7 @@
 import React from "react";
 import { TaskCard } from "./task-card";
 import { AddItemModal } from "./add-item-modal";
-import { cn } from "@/lib/utils";
+import { cn, shouldHideCompletedTask } from "@/lib/utils";
 import { Home, Code, Coffee, Car, Briefcase, ChevronDown } from "lucide-react";
 import {
   ContextCollapsible,
@@ -54,7 +54,15 @@ export function ContextGroup({
   allContexts,
 }: ContextGroupProps) {
   const contextTasks = tasks
-    .filter((task) => task.contextId === context.id)
+    .filter((task) => {
+      // Only include tasks in this context
+      if (task.contextId !== context.id) return false;
+      
+      // Hide completed tasks from previous days (except if completed within the last hour)
+      if (shouldHideCompletedTask(task)) return false;
+      
+      return true;
+    })
     .sort((a, b) => {
       if (a.completed !== b.completed) return a.completed ? 1 : -1;
       return b.urgency - a.urgency;
