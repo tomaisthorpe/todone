@@ -393,10 +393,6 @@ export function SmartTaskInput({
   useEffect(() => {
     const parsed = parseInput(input);
     setParsedTask(parsed);
-    // Clear error when user makes changes
-    if (error) {
-      setError(null);
-    }
   }, [input, parseInput, error]);
 
   // Sync scroll position between input and highlight overlay
@@ -443,11 +439,6 @@ export function SmartTaskInput({
       setParsedTask((prev) => ({ ...prev, dueDate: date }));
     } else if (field === "tags") {
       setParsedTask((prev) => ({ ...prev, tags: value as string[] }));
-    }
-
-    // Clear error when user makes changes
-    if (error) {
-      setError(null);
     }
   };
 
@@ -557,6 +548,8 @@ export function SmartTaskInput({
     return date.toLocaleDateString();
   };
 
+  console.log(error);
+
   return (
     <div className={cn("w-full", className)}>
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -647,7 +640,6 @@ export function SmartTaskInput({
             </div>
           )}
         </div>
-
         {/* Task Preview with Editable Form */}
         {(parsedTask.title ||
           parsedTask.contextName ||
