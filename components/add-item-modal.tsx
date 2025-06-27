@@ -26,6 +26,7 @@ import {
   createTaskAction,
   updateTaskAction,
   createContextAction,
+  deleteTaskAction,
   getExistingTags,
 } from "@/lib/server-actions";
 import {
@@ -73,6 +74,8 @@ import {
   TestTube,
   Beaker,
   Calendar,
+  Trash2,
+  AlertTriangle,
 } from "lucide-react";
 import type { Task } from "@/lib/data";
 
@@ -189,6 +192,7 @@ export function TaskModal({
   const [activeTab, setActiveTab] = useState<"task" | "context">("task");
   const [isPending, startTransition] = useTransition();
   const [existingTags, setExistingTags] = useState<string[]>([]);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const titleInputRef = useRef<HTMLInputElement>(null);
 
   // Generate unique IDs for this modal instance to prevent conflicts
@@ -299,6 +303,15 @@ export function TaskModal({
 
       await createContextAction(formData);
       contextForm.reset();
+      onClose();
+    });
+  };
+
+  const handleDeleteTask = () => {
+    if (!task) return;
+    startTransition(async () => {
+      await deleteTaskAction(task.id);
+      setShowDeleteConfirm(false);
       onClose();
     });
   };
@@ -567,19 +580,35 @@ export function TaskModal({
               </div>
             </div>
 
-            <div className="flex justify-end space-x-2 pt-4">
-              <Button type="button" variant="outline" onClick={onClose}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isPending}>
-                {isPending
-                  ? isEditing
-                    ? "Updating..."
-                    : "Creating..."
-                  : isEditing
-                  ? "Update Task"
-                  : "Create Task"}
-              </Button>
+            <div className="flex justify-between pt-4">
+              <div>
+                {isEditing && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowDeleteConfirm(true)}
+                    disabled={isPending}
+                    className="text-red-600 border-red-300 hover:bg-red-50 hover:border-red-400"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete Task
+                  </Button>
+                )}
+              </div>
+              <div className="flex space-x-2">
+                <Button type="button" variant="outline" onClick={onClose}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isPending}>
+                  {isPending
+                    ? isEditing
+                      ? "Updating..."
+                      : "Creating..."
+                    : isEditing
+                    ? "Update Task"
+                    : "Create Task"}
+                </Button>
+              </div>
             </div>
           </form>
         )}
@@ -672,6 +701,41 @@ export function TaskModal({
           </form>
         )}
       </DialogContent>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent className="max-w-md bg-white shadow-xl rounded-2xl border-0">
+          <DialogHeader>
+            <DialogTitle className="flex items-center text-red-600">
+              <AlertTriangle className="w-5 h-5 mr-2" />
+              Delete Task
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-600">
+              Are you sure you want to delete "<span className="font-medium">{task?.title}</span>"? This action cannot be undone.
+            </p>
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowDeleteConfirm(false)}
+              disabled={isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={handleDeleteTask}
+              disabled={isPending}
+              className="bg-red-600 text-white hover:bg-red-700"
+            >
+              {isPending ? "Deleting..." : "Delete Task"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 }
