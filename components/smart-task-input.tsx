@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { TaskForm, type TaskFormData } from "@/components/task-form";
 import { createTaskAction, getExistingTags } from "@/lib/server-actions";
-import { Send, Calendar, Hash, Zap, Edit3 } from "lucide-react";
+import { Send, Calendar, Hash, Zap, Edit3, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface SmartTaskInputProps {
@@ -79,6 +79,8 @@ export function SmartTaskInput({
     startPos: number;
     query: string;
   } | null>(null);
+
+  const [error, setError] = useState<string | null>(null);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const highlightRef = useRef<HTMLDivElement>(null);
@@ -392,7 +394,7 @@ export function SmartTaskInput({
   useEffect(() => {
     const parsed = parseInput(input);
     setParsedTask(parsed);
-  }, [input, parseInput]);
+  }, [input, parseInput, error]);
 
   // Sync scroll position between input and highlight overlay
   const handleScroll = () => {
@@ -406,7 +408,7 @@ export function SmartTaskInput({
     title: parsedTask.title,
     project: "",
     priority: parsedTask.priority,
-    contextId: parsedTask.contextId || contexts[0]?.id || "",
+    contextId: parsedTask.contextId || "",
     dueDate: parsedTask.dueDate?.toISOString().slice(0, 16) || "",
     type: "TASK",
     habitType: undefined,
@@ -445,14 +447,17 @@ export function SmartTaskInput({
     e.preventDefault();
     if (!parsedTask.title.trim()) return;
 
+    // Clear any previous errors
+    setError(null);
+
     startTransition(async () => {
       const formData = new FormData();
       formData.append("title", parsedTask.title);
       formData.append("priority", parsedTask.priority);
 
-      const contextId = parsedTask.contextId || contexts[0]?.id;
-      if (contextId) {
-        formData.append("contextId", contextId);
+      // Don't use fallback context - let server validation handle missing context
+      if (parsedTask.contextId) {
+        formData.append("contextId", parsedTask.contextId);
       }
 
       if (parsedTask.dueDate) {
@@ -465,12 +470,22 @@ export function SmartTaskInput({
       formData.append("tags", parsedTask.tags.join(", "));
 
       try {
+        // Call server action outside of startTransition to properly catch errors
         await createTaskAction(formData);
-        setInput("");
-        setIsEditing(false);
+
+        // Use startTransition only for UI state updates after successful submission
+        startTransition(() => {
+          setInput("");
+          setIsEditing(false);
+          setError(null);
+        });
+
         onTaskCreated?.();
       } catch (error) {
         console.error("Failed to create task:", error);
+        setError(
+          error instanceof Error ? error.message : "Failed to create task"
+        );
       }
     });
   };
@@ -534,9 +549,19 @@ export function SmartTaskInput({
     return date.toLocaleDateString();
   };
 
+  console.log(error);
+
   return (
     <div className={cn("w-full", className)}>
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Error Display */}
+        {error && (
+          <div className="bg-red-50 text-red-700 p-3 rounded-lg border border-red-200 flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <span className="text-sm">{error}</span>
+          </div>
+        )}
+
         {/* Smart Input with Inline Highlighting */}
         <div className="relative">
           {/* Highlight overlay - positioned to exactly match input text */}
@@ -616,7 +641,6 @@ export function SmartTaskInput({
             </div>
           )}
         </div>
-
         {/* Task Preview with Editable Form */}
         {(parsedTask.title ||
           parsedTask.contextName ||
@@ -649,6 +673,15 @@ export function SmartTaskInput({
                 contexts={contexts}
                 compact={true}
                 fieldIdPrefix="smart-input"
+                errors={
+                  error
+                    ? {
+                        contextId: parsedTask.contextId
+                          ? undefined
+                          : "Context is required",
+                      }
+                    : undefined
+                }
               />
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -676,17 +709,22 @@ export function SmartTaskInput({
                 <div>
                   <div className="text-xs text-gray-500 mb-1">Context</div>
                   <div className="text-sm">
-                    {parsedTask.contextName ? (
+                    {parsedTask.contextName && parsedTask.contextId ? (
                       <Badge
                         variant="outline"
                         className="text-blue-600 bg-blue-50 border-blue-200"
                       >
                         {parsedTask.contextName}
                       </Badge>
+                    ) : parsedTask.contextName ? (
+                      <Badge
+                        variant="outline"
+                        className="text-red-600 bg-red-50 border-red-200"
+                      >
+                        {parsedTask.contextName} (not found)
+                      </Badge>
                     ) : (
-                      <span className="text-gray-400">
-                        {contexts[0]?.name || "No context"}
-                      </span>
+                      <span className="text-red-400">No context selected</span>
                     )}
                   </div>
                 </div>

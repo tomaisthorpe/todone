@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useEffect, useId } from "react";
+import { useState, useEffect, useId } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -70,6 +70,7 @@ import {
   Beaker,
   Trash2,
   AlertTriangle,
+  AlertCircle,
 } from "lucide-react";
 import type { Task } from "@/lib/data";
 
@@ -162,9 +163,10 @@ export function TaskModal({
   defaultContextId,
 }: TaskModalProps) {
   const [activeTab, setActiveTab] = useState<"task" | "context">("task");
-  const [isPending, startTransition] = useTransition();
+  const [isLoading, setIsLoading] = useState(false);
   const [existingTags, setExistingTags] = useState<string[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [taskFormData, setTaskFormData] = useState<TaskFormData>({
     title: "",
     project: "",
@@ -201,6 +203,7 @@ export function TaskModal({
   // Reset forms when modal opens/closes or task changes
   useEffect(() => {
     if (isOpen) {
+      setError(null); // Clear errors when modal opens
       if (task) {
         // Editing mode - populate form with task data
         setTaskFormData({
@@ -233,67 +236,101 @@ export function TaskModal({
     }
   }, [isOpen, task, defaultContextId]);
 
-  const handleTaskFormChange = <K extends keyof TaskFormData>(field: K, value: TaskFormData[K]) => {
-    setTaskFormData(prev => ({ ...prev, [field]: value }));
+  const handleTaskFormChange = <K extends keyof TaskFormData>(
+    field: K,
+    value: TaskFormData[K]
+  ) => {
+    setTaskFormData((prev) => ({ ...prev, [field]: value }));
+    // Clear error when user makes changes
+    if (error) {
+      setError(null);
+    }
   };
 
-  const onSubmitTask = (e: React.FormEvent) => {
+  const onSubmitTask = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Basic validation
     if (!taskFormData.title.trim()) return;
     if (!taskFormData.contextId) return;
     if (taskFormData.type === "RECURRING" && !taskFormData.frequency) return;
 
-    startTransition(async () => {
-      const formData = new FormData();
-      if (isEditing && task) {
-        formData.append("taskId", task.id);
-      }
-      formData.append("title", taskFormData.title);
-      if (taskFormData.project) formData.append("project", taskFormData.project);
-      formData.append("priority", taskFormData.priority);
-      formData.append("contextId", taskFormData.contextId);
-      if (taskFormData.dueDate) formData.append("dueDate", taskFormData.dueDate);
-      formData.append("type", taskFormData.type);
-      if (taskFormData.habitType) formData.append("habitType", taskFormData.habitType);
-      if (taskFormData.frequency)
-        formData.append("frequency", taskFormData.frequency.toString());
+    // Clear any previous errors and set loading state
+    setError(null);
+    setIsLoading(true);
 
-      // Convert tags array to comma-separated string for form data
-      formData.append("tags", taskFormData.tags.join(", "));
+    const formData = new FormData();
+    if (isEditing && task) {
+      formData.append("taskId", task.id);
+    }
+    formData.append("title", taskFormData.title);
+    if (taskFormData.project) formData.append("project", taskFormData.project);
+    formData.append("priority", taskFormData.priority);
+    formData.append("contextId", taskFormData.contextId);
+    if (taskFormData.dueDate) formData.append("dueDate", taskFormData.dueDate);
+    formData.append("type", taskFormData.type);
+    if (taskFormData.habitType)
+      formData.append("habitType", taskFormData.habitType);
+    if (taskFormData.frequency)
+      formData.append("frequency", taskFormData.frequency.toString());
 
+    // Convert tags array to comma-separated string for form data
+    formData.append("tags", taskFormData.tags.join(", "));
+
+    try {
       if (isEditing) {
         await updateTaskAction(formData);
       } else {
         await createTaskAction(formData);
       }
-
       onClose();
-    });
+    } catch (error) {
+      console.error("Failed to save task:", error);
+      setError(error instanceof Error ? error.message : "Failed to save task");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const onSubmitContext = (data: ContextFormData) => {
-    startTransition(async () => {
-      const formData = new FormData();
-      formData.append("name", data.name);
-      if (data.description) formData.append("description", data.description);
-      formData.append("icon", data.icon);
-      formData.append("color", data.color);
+  const onSubmitContext = async (data: ContextFormData) => {
+    setIsLoading(true);
+    const formData = new FormData();
+    formData.append("name", data.name);
+    if (data.description) formData.append("description", data.description);
+    formData.append("icon", data.icon);
+    formData.append("color", data.color);
 
+    try {
       await createContextAction(formData);
       contextForm.reset();
       onClose();
-    });
+    } catch (error) {
+      console.error("Failed to create context:", error);
+      setError(
+        error instanceof Error ? error.message : "Failed to create context"
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleDeleteTask = () => {
+  const handleDeleteTask = async () => {
     if (!task) return;
-    startTransition(async () => {
+    setIsLoading(true);
+
+    try {
       await deleteTaskAction(task.id);
       setShowDeleteConfirm(false);
       onClose();
-    });
+    } catch (error) {
+      console.error("Failed to delete task:", error);
+      setError(
+        error instanceof Error ? error.message : "Failed to delete task"
+      );
+      setShowDeleteConfirm(false);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Validation errors for TaskForm
@@ -313,12 +350,18 @@ export function TaskModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent
-        className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white shadow-xl rounded-2xl border-0"
-      >
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white shadow-xl rounded-2xl border-0">
         <DialogHeader>
           <DialogTitle>{isEditing ? "Edit Task" : "Add New Item"}</DialogTitle>
         </DialogHeader>
+
+        {/* Error Display */}
+        {error && (
+          <div className="bg-red-50 text-red-700 p-3 rounded-lg border border-red-200 flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <span className="text-sm">{error}</span>
+          </div>
+        )}
 
         {/* Tab Navigation */}
         <div className="flex gap-2 bg-gray-100 rounded-lg p-1 mt-2 mb-6">
@@ -376,7 +419,7 @@ export function TaskModal({
                     type="button"
                     variant="outline"
                     onClick={() => setShowDeleteConfirm(true)}
-                    disabled={isPending}
+                    disabled={isLoading}
                     className="text-red-600 border-red-300 hover:bg-red-50 hover:border-red-400"
                   >
                     <Trash2 className="w-4 h-4 mr-2" />
@@ -388,8 +431,8 @@ export function TaskModal({
                 <Button type="button" variant="outline" onClick={onClose}>
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isPending}>
-                  {isPending
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading
                     ? isEditing
                       ? "Updating..."
                       : "Creating..."
@@ -483,8 +526,8 @@ export function TaskModal({
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={isPending}>
-                {isPending ? "Creating..." : "Create Context"}
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? "Creating..." : "Create Context"}
               </Button>
             </div>
           </form>
@@ -512,17 +555,17 @@ export function TaskModal({
               type="button"
               variant="outline"
               onClick={() => setShowDeleteConfirm(false)}
-              disabled={isPending}
+              disabled={isLoading}
             >
               Cancel
             </Button>
             <Button
               type="button"
               onClick={handleDeleteTask}
-              disabled={isPending}
+              disabled={isLoading}
               className="bg-red-600 text-white hover:bg-red-700"
             >
-              {isPending ? "Deleting..." : "Delete Task"}
+              {isLoading ? "Deleting..." : "Delete Task"}
             </Button>
           </div>
         </DialogContent>
