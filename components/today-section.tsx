@@ -1,6 +1,7 @@
 import React from "react";
 import { Calendar } from "lucide-react";
 import { TaskCard } from "./task-card";
+import { shouldHideCompletedTask } from "@/lib/utils";
 import type { Task } from "@/lib/data";
 
 interface TodaySectionProps {
@@ -16,32 +17,12 @@ interface TodaySectionProps {
 function getTodayTasks(tasks: Task[]): Task[] {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
 
   return tasks
     .filter((task) => {
-      // Hide tasks completed yesterday, except if completed less than an hour ago
-      if (task.completed && task.updatedAt) {
-        const completedDate = new Date(task.updatedAt);
-        const completedDateOnly = new Date(completedDate);
-        completedDateOnly.setHours(0, 0, 0, 0);
-        
-        // If task was completed yesterday
-        if (completedDateOnly.getTime() === yesterday.getTime()) {
-          // Check if it was completed less than an hour ago
-          const now = new Date();
-          const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
-          
-          // If completed less than an hour ago, keep it visible
-          if (completedDate >= oneHourAgo) {
-            // Continue to next filter checks
-          } else {
-            // Hide tasks completed yesterday that are more than an hour old
-            return false;
-          }
-        }
+      // Hide completed tasks from previous days (except if completed within the last hour)
+      if (shouldHideCompletedTask(task)) {
+        return false;
       }
 
       // Include tasks due today or overdue
