@@ -9,6 +9,7 @@ import { AddItemModal } from "@/components/add-item-modal";
 import { getTasks, getContexts } from "@/lib/data";
 import { signOutAction } from "@/lib/server-actions";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default async function Dashboard() {
   // Check authentication
@@ -90,6 +91,12 @@ export default async function Dashboard() {
                   Sign out
                 </Button>
               </form>
+              <Link href="/completed">
+                <Button variant="ghost" size="sm">
+                  <CheckCircle2 className="w-4 h-4 mr-2" />
+                  Completed
+                </Button>
+              </Link>
               <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg">
                 <Settings className="w-5 h-5" />
               </button>
