@@ -278,6 +278,89 @@ Empty State
 </div>
 ```
 
+## Navigation Patterns
+
+### Header Navigation
+```
+Header
+├── Logo + Title (linkable to dashboard)
+├── Breadcrumb (for sub-pages)
+├── User Info + Actions
+│   ├── User Avatar/Name
+│   ├── Sign Out Button
+│   ├── Completed Tasks Link
+│   ├── Settings Button
+│   └── Add Task Modal
+```
+
+**Completed Tasks Link:**
+- Ghost button style with CheckCircle2 icon
+- Positioned between Sign Out and Settings
+- Maintains header spacing consistency
+
+## Page Patterns
+
+### Completed Tasks Page
+```
+Page Layout
+├── Header (with breadcrumb navigation)
+├── Page Header
+│   ├── Icon + Title + Description
+│   └── Back to Dashboard Button
+└── Content Area
+    ├── Task List (with completion timestamps)
+    └── Pagination
+```
+
+**Page Header:**
+- Clock icon in green background circle
+- Task count in description
+- Right-aligned back button
+
+**Task List Item:**
+```
+Row
+├── TaskCard (existing component)
+└── Completion Timestamp
+    ├── "Completed" label
+    ├── Date (localized)
+    └── Time (HH:MM format)
+```
+
+## Pagination Patterns
+
+### Pagination Component
+```
+Pagination Bar
+├── Mobile View (Previous/Next only)
+└── Desktop View
+    ├── Results Summary ("Showing X to Y of Z")
+    └── Page Navigation
+        ├── Previous Button
+        ├── Page Numbers (with ellipsis)
+        └── Next Button
+```
+
+**Page Navigation Logic:**
+- Always show first and last page numbers
+- Show ellipsis when gaps exist
+- Show current page ±1 pages when possible
+- Maximum 5 visible page numbers
+- Hide pagination if only 1 page
+
+**Pagination Styling:**
+- Border-top separator from content
+- White background with padding
+- Blue highlight for current page
+- Disabled state for unavailable actions
+- Responsive: full controls on desktop, simplified on mobile
+
+**URL Integration:**
+- Uses URLSearchParams for page state
+- Removes 'page' param when on page 1
+- Preserves other search parameters
+- Client-side navigation with Next.js router
+
 ## Modal Patterns
 
 ### AddItemModal
