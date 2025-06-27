@@ -6,6 +6,7 @@ import { authOptions } from "@/lib/auth";
 import { TodaySection } from "@/components/today-section";
 import { ContextGroup } from "@/components/context-group";
 import { AddItemModal } from "@/components/add-item-modal";
+import { SmartTaskInput } from "@/components/smart-task-input";
 import { getTasks, getContexts } from "@/lib/data";
 import { signOutAction } from "@/lib/server-actions";
 import { Button } from "@/components/ui/button";
@@ -107,6 +108,17 @@ export default async function Dashboard() {
       </div>
 
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+        {/* Smart Task Input */}
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">Quick Add Task</h2>
+            <p className="text-sm text-gray-600">
+              Type your task naturally and watch it parse automatically
+            </p>
+          </div>
+          <SmartTaskInput contexts={contexts} />
+        </div>
+
         {/* Today Section */}
         <TodaySection tasks={tasks} contexts={contexts} />
 

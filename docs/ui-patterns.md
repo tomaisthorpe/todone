@@ -12,6 +12,7 @@ Header (fixed)
 └── Settings
 
 Main Container (max-width, centered)
+├── Smart Task Input (natural language parsing)
 ├── Today Section
 └── Contexts Grid (2 columns on desktop)
 ```
@@ -362,6 +363,51 @@ Pagination Bar
 - Client-side navigation with Next.js router
 
 ## Modal Patterns
+
+### SmartTaskInput
+**Structure:**
+```
+Card
+├── Header ("Quick Add Task")
+├── Smart Input Field
+│   ├── Natural Language Input
+│   ├── Send Button (inline)
+│   └── Real-time Parsing Preview
+├── Parsed Task Preview
+│   ├── Preview Header ("Task Preview")
+│   └── Field Grid (Title, Context, Priority, Due Date, Tags)
+└── Help Text (syntax guide)
+```
+
+**Smart Input Features:**
+- **Context Parsing**: `!contextName` - Blue highlight
+- **Tag Parsing**: `#tagname` - Green highlight  
+- **Priority Parsing**: `p1/p2/p3` - Purple highlight
+- **Date Parsing**: Natural language (tomorrow, next week) - Orange highlight
+- **Title Extraction**: Remaining text after parsing special syntax
+
+**Visual Feedback:**
+- Monospace font for input field
+- Color-coded highlighting in parsing preview
+- Real-time badge updates in task preview
+- Disabled submit state until valid title exists
+
+**Example Usage:**
+```
+Input: "Setup Todone !Homelab #sideprojects #setup p1 tomorrow"
+Parsing:
+- Title: "Setup Todone"
+- Context: "Homelab" (blue badge)
+- Tags: ["sideprojects", "setup"] (green badges)
+- Priority: "HIGH" (red badge)
+- Due Date: "Tomorrow" (orange badge)
+```
+
+**Syntax Guide Display:**
+- `!context` for context (blue example)
+- `#tag` for tags (green example)
+- `p1/p2/p3` for priority levels (purple example)
+- Natural date phrases (orange example)
 
 ### AddItemModal
 **Structure:**
