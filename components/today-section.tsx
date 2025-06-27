@@ -22,12 +22,25 @@ function getTodayTasks(tasks: Task[]): Task[] {
 
   return tasks
     .filter((task) => {
-      // Hide tasks completed yesterday
+      // Hide tasks completed yesterday, except if completed less than an hour ago
       if (task.completed && task.updatedAt) {
         const completedDate = new Date(task.updatedAt);
-        completedDate.setHours(0, 0, 0, 0);
-        if (completedDate.getTime() === yesterday.getTime()) {
-          return false;
+        const completedDateOnly = new Date(completedDate);
+        completedDateOnly.setHours(0, 0, 0, 0);
+        
+        // If task was completed yesterday
+        if (completedDateOnly.getTime() === yesterday.getTime()) {
+          // Check if it was completed less than an hour ago
+          const now = new Date();
+          const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+          
+          // If completed less than an hour ago, keep it visible
+          if (completedDate >= oneHourAgo) {
+            // Continue to next filter checks
+          } else {
+            // Hide tasks completed yesterday that are more than an hour old
+            return false;
+          }
         }
       }
 
