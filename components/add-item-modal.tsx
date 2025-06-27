@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useEffect, useId, useRef } from "react";
+import { useState, useTransition, useEffect, useId } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { TagsInput } from "@/components/ui/tags-input";
+import { TaskForm, type TaskFormData } from "@/components/task-form";
 import {
   createTaskAction,
   updateTaskAction,
@@ -31,11 +31,6 @@ import {
 } from "@/lib/server-actions";
 import {
   CheckSquare,
-  RotateCcw,
-  Dumbbell,
-  BookOpen,
-  Heart,
-  Wrench,
   Home,
   Code,
   Coffee,
@@ -73,36 +68,12 @@ import {
   FlaskConical,
   TestTube,
   Beaker,
-  Calendar,
   Trash2,
   AlertTriangle,
 } from "lucide-react";
 import type { Task } from "@/lib/data";
 
-// Form schemas
-const taskSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  project: z.string().optional(),
-  priority: z.enum(["LOW", "MEDIUM", "HIGH"]),
-  contextId: z.string().min(1, "Context is required"),
-  dueDate: z.string().optional(),
-  type: z.enum(["TASK", "HABIT", "RECURRING"]),
-  habitType: z
-    .enum(["STREAK", "LEARNING", "WELLNESS", "MAINTENANCE"])
-    .optional(),
-  frequency: z.number().min(1).max(365).optional(),
-  tags: z.array(z.string()),
-}).refine((data) => {
-  // Require frequency for RECURRING tasks
-  if (data.type === "RECURRING" && !data.frequency) {
-    return false;
-  }
-  return true;
-}, {
-  message: "Frequency is required for recurring tasks",
-  path: ["frequency"]
-});
-
+// Context form schema
 const contextSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().optional(),
@@ -110,7 +81,6 @@ const contextSchema = z.object({
   color: z.string(),
 });
 
-type TaskFormData = z.infer<typeof taskSchema>;
 type ContextFormData = z.infer<typeof contextSchema>;
 
 interface TaskModalProps {
@@ -184,13 +154,6 @@ const contextColors = [
   { value: "bg-indigo-500", label: "Indigo", color: "bg-indigo-500" },
 ];
 
-const habitTypeIcons = {
-  STREAK: { icon: Dumbbell, color: "text-red-500" },
-  LEARNING: { icon: BookOpen, color: "text-blue-500" },
-  WELLNESS: { icon: Heart, color: "text-green-500" },
-  MAINTENANCE: { icon: Wrench, color: "text-gray-500" },
-};
-
 export function TaskModal({
   contexts,
   task,
@@ -202,23 +165,23 @@ export function TaskModal({
   const [isPending, startTransition] = useTransition();
   const [existingTags, setExistingTags] = useState<string[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const titleInputRef = useRef<HTMLInputElement>(null);
+  const [taskFormData, setTaskFormData] = useState<TaskFormData>({
+    title: "",
+    project: "",
+    priority: "MEDIUM",
+    contextId: defaultContextId || "",
+    dueDate: "",
+    type: "TASK",
+    habitType: undefined,
+    frequency: undefined,
+    tags: [],
+  });
 
   // Generate unique IDs for this modal instance to prevent conflicts
   const modalId = useId();
   const getFieldId = (fieldName: string) => `${modalId}-${fieldName}`;
 
   const isEditing = !!task;
-
-  const taskForm = useForm<TaskFormData>({
-    resolver: zodResolver(taskSchema),
-    defaultValues: {
-      priority: "MEDIUM",
-      type: "TASK",
-      tags: [],
-      contextId: defaultContextId || "",
-    },
-  });
 
   const contextForm = useForm<ContextFormData>({
     resolver: zodResolver(contextSchema),
@@ -240,7 +203,7 @@ export function TaskModal({
     if (isOpen) {
       if (task) {
         // Editing mode - populate form with task data
-        taskForm.reset({
+        setTaskFormData({
           title: task.title,
           project: task.project || "",
           priority: task.priority,
@@ -255,42 +218,50 @@ export function TaskModal({
         });
       } else {
         // Adding mode - reset to defaults
-        taskForm.reset({
+        setTaskFormData({
+          title: "",
+          project: "",
           priority: "MEDIUM",
-          type: "TASK",
-          tags: [],
           contextId: defaultContextId || "",
+          dueDate: "",
+          type: "TASK",
+          habitType: undefined,
+          frequency: undefined,
+          tags: [],
         });
       }
-
-      // Auto-focus title input
-      setTimeout(() => {
-        titleInputRef.current?.focus();
-        titleInputRef.current?.select();
-      }, 100);
     }
-  }, [isOpen, task, defaultContextId, taskForm]);
+  }, [isOpen, task, defaultContextId]);
 
-  const taskType = taskForm.watch("type");
+  const handleTaskFormChange = <K extends keyof TaskFormData>(field: K, value: TaskFormData[K]) => {
+    setTaskFormData(prev => ({ ...prev, [field]: value }));
+  };
 
-  const onSubmitTask = (data: TaskFormData) => {
+  const onSubmitTask = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Basic validation
+    if (!taskFormData.title.trim()) return;
+    if (!taskFormData.contextId) return;
+    if (taskFormData.type === "RECURRING" && !taskFormData.frequency) return;
+
     startTransition(async () => {
       const formData = new FormData();
-      if (isEditing) {
+      if (isEditing && task) {
         formData.append("taskId", task.id);
       }
-      formData.append("title", data.title);
-      if (data.project) formData.append("project", data.project);
-      formData.append("priority", data.priority);
-      formData.append("contextId", data.contextId);
-      if (data.dueDate) formData.append("dueDate", data.dueDate);
-      formData.append("type", data.type);
-      if (data.habitType) formData.append("habitType", data.habitType);
-      if (data.frequency)
-        formData.append("frequency", data.frequency.toString());
+      formData.append("title", taskFormData.title);
+      if (taskFormData.project) formData.append("project", taskFormData.project);
+      formData.append("priority", taskFormData.priority);
+      formData.append("contextId", taskFormData.contextId);
+      if (taskFormData.dueDate) formData.append("dueDate", taskFormData.dueDate);
+      formData.append("type", taskFormData.type);
+      if (taskFormData.habitType) formData.append("habitType", taskFormData.habitType);
+      if (taskFormData.frequency)
+        formData.append("frequency", taskFormData.frequency.toString());
 
       // Convert tags array to comma-separated string for form data
-      formData.append("tags", data.tags.join(", "));
+      formData.append("tags", taskFormData.tags.join(", "));
 
       if (isEditing) {
         await updateTaskAction(formData);
@@ -325,17 +296,25 @@ export function TaskModal({
     });
   };
 
+  // Validation errors for TaskForm
+  const getTaskFormErrors = () => {
+    const errors: Partial<Record<keyof TaskFormData, string>> = {};
+    if (!taskFormData.title.trim()) {
+      errors.title = "Title is required";
+    }
+    if (!taskFormData.contextId) {
+      errors.contextId = "Context is required";
+    }
+    if (taskFormData.type === "RECURRING" && !taskFormData.frequency) {
+      errors.frequency = "Frequency is required for recurring tasks";
+    }
+    return errors;
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
         className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white shadow-xl rounded-2xl border-0"
-        onOpenAutoFocus={(e) => {
-          e.preventDefault();
-          if (titleInputRef.current) {
-            titleInputRef.current.focus();
-            titleInputRef.current.select();
-          }
-        }}
       >
         <DialogHeader>
           <DialogTitle>{isEditing ? "Edit Task" : "Add New Item"}</DialogTitle>
@@ -377,245 +356,18 @@ export function TaskModal({
 
         {/* Task Form */}
         {activeTab === "task" && (
-          <form
-            onSubmit={taskForm.handleSubmit(onSubmitTask)}
-            className="space-y-4"
-          >
-            <div className="grid grid-cols-2 gap-4">
-              <div className="col-span-2">
-                <Label htmlFor={getFieldId("title")}>Task Title *</Label>
-                <Input
-                  id={getFieldId("title")}
-                  placeholder="What needs to be done?"
-                  {...taskForm.register("title", {
-                    setValueAs: (v) => v,
-                  })}
-                  ref={(el) => {
-                    titleInputRef.current = el;
-                    const { ref } = taskForm.register("title");
-                    if (typeof ref === "function") ref(el);
-                  }}
-                />
-                {taskForm.formState.errors.title && (
-                  <p className="text-sm text-red-500 mt-1">
-                    {taskForm.formState.errors.title.message}
-                  </p>
-                )}
-              </div>
-
-              {/* Show creation date when editing */}
-              {isEditing && task && (
-                <div className="col-span-2">
-                  <Label>Created On</Label>
-                  <div className="flex items-center space-x-2 px-3 py-2 bg-gray-50 rounded-md text-sm text-gray-600">
-                    <Calendar className="w-4 h-4" />
-                    <span>{new Date(task.createdAt).toLocaleString()}</span>
-                  </div>
-                </div>
-              )}
-
-              <div>
-                <Label htmlFor={getFieldId("type")}>Task Type</Label>
-                <Select
-                  value={taskForm.watch("type")}
-                  onValueChange={(value) =>
-                    taskForm.setValue(
-                      "type",
-                      value as "TASK" | "HABIT" | "RECURRING"
-                    )
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="TASK">
-                      <CheckSquare className="w-4 h-4 inline mr-2" />
-                      Regular Task
-                    </SelectItem>
-                    <SelectItem value="HABIT">
-                      <Dumbbell className="w-4 h-4 inline mr-2" />
-                      Habit
-                    </SelectItem>
-                    <SelectItem value="RECURRING">
-                      <RotateCcw className="w-4 h-4 inline mr-2" />
-                      Recurring Task
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor={getFieldId("priority")}>Priority</Label>
-                <Select
-                  value={taskForm.watch("priority")}
-                  onValueChange={(value) =>
-                    taskForm.setValue(
-                      "priority",
-                      value as "LOW" | "MEDIUM" | "HIGH"
-                    )
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="LOW">Low</SelectItem>
-                    <SelectItem value="MEDIUM">Medium</SelectItem>
-                    <SelectItem value="HIGH">High</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor={getFieldId("context")}>Context *</Label>
-                <Select
-                  value={taskForm.watch("contextId")}
-                  onValueChange={(value) =>
-                    taskForm.setValue("contextId", value)
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select context" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {contexts.map((context) => {
-                      const IconComponent =
-                        contextIcons.find((c) => c.value === context.icon)
-                          ?.icon || Home;
-                      return (
-                        <SelectItem key={context.id} value={context.id}>
-                          <div className="flex items-center">
-                            <div
-                              className={`w-3 h-3 rounded-full ${context.color} mr-2`}
-                            />
-                            <IconComponent className="w-4 h-4 mr-2" />
-                            {context.name}
-                          </div>
-                        </SelectItem>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
-                {taskForm.formState.errors.contextId && (
-                  <p className="text-sm text-red-500 mt-1">
-                    {taskForm.formState.errors.contextId.message}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <Label htmlFor={getFieldId("dueDate")}>Due Date</Label>
-                <Input
-                  id={getFieldId("dueDate")}
-                  type="datetime-local"
-                  {...taskForm.register("dueDate")}
-                />
-              </div>
-
-              {/* Habit-specific fields */}
-              {taskType === "HABIT" && (
-                <>
-                  <div>
-                    <Label htmlFor={getFieldId("habitType")}>Habit Type</Label>
-                    <Select
-                      value={taskForm.watch("habitType")}
-                      onValueChange={(value) =>
-                        taskForm.setValue(
-                          "habitType",
-                          value as
-                            | "STREAK"
-                            | "LEARNING"
-                            | "WELLNESS"
-                            | "MAINTENANCE"
-                        )
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select habit type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.entries(habitTypeIcons).map(
-                          ([type, { icon: Icon, color }]) => (
-                            <SelectItem key={type} value={type}>
-                              <Icon
-                                className={`w-4 h-4 inline mr-2 ${color}`}
-                              />
-                              {type.charAt(0) + type.slice(1).toLowerCase()}
-                            </SelectItem>
-                          )
-                        )}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor={getFieldId("frequency")}>
-                      Frequency (days)
-                    </Label>
-                    <Input
-                      id={getFieldId("frequency")}
-                      type="number"
-                      min="1"
-                      max="365"
-                      placeholder="1 = daily, 7 = weekly"
-                      {...taskForm.register("frequency", {
-                        valueAsNumber: true,
-                      })}
-                    />
-                  </div>
-                </>
-              )}
-
-              {/* Recurring task-specific fields */}
-              {taskType === "RECURRING" && (
-                <div>
-                  <Label htmlFor={getFieldId("frequency")}>
-                    Frequency (days) *
-                  </Label>
-                  <Input
-                    id={getFieldId("frequency")}
-                    type="number"
-                    min="1"
-                    max="365"
-                    placeholder="1 = daily, 7 = weekly, 30 = monthly"
-                    {...taskForm.register("frequency", {
-                      valueAsNumber: true,
-                    })}
-                  />
-                  {taskForm.formState.errors.frequency && (
-                    <p className="text-sm text-red-500 mt-1">
-                      {taskForm.formState.errors.frequency.message}
-                    </p>
-                  )}
-                  <p className="text-xs text-gray-500 mt-1">
-                    How often this task should repeat (in days)
-                  </p>
-                </div>
-              )}
-
-              <div className="col-span-2">
-                <Label htmlFor={getFieldId("project")}>Project</Label>
-                <Input
-                  id={getFieldId("project")}
-                  placeholder="Optional project name"
-                  {...taskForm.register("project")}
-                />
-              </div>
-
-              <div className="col-span-2">
-                <Label htmlFor={getFieldId("tags")}>Tags</Label>
-                <TagsInput
-                  value={taskForm.watch("tags")}
-                  onChange={(tags) => taskForm.setValue("tags", tags)}
-                  suggestions={existingTags}
-                  placeholder="Add tags (e.g., urgent, work, fitness)"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Type tags and press Enter or comma to add. Start typing to see
-                  suggestions from existing tags.
-                </p>
-              </div>
-            </div>
+          <form onSubmit={onSubmitTask} className="space-y-4">
+            <TaskForm
+              data={taskFormData}
+              onChange={handleTaskFormChange}
+              contexts={contexts}
+              existingTags={existingTags}
+              errors={getTaskFormErrors()}
+              compact={false}
+              isEditing={isEditing}
+              task={task}
+              fieldIdPrefix={modalId}
+            />
 
             <div className="flex justify-between pt-4">
               <div>
