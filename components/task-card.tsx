@@ -1,20 +1,20 @@
 "use client";
 
 import React, { useState } from "react";
-import { 
+import {
   RotateCcw,
   Dumbbell,
   BookOpen,
   Flame,
   Wrench,
-  AlertCircle
+  AlertCircle,
 } from "lucide-react";
 import { formatDateForTask, explainUrgency } from "@/lib/utils";
 import { getHabitStatus, getHabitDisplay } from "@/lib/habits";
 import { cn } from "@/lib/utils";
 import { TaskToggleButton } from "./task-toggle-button";
 import { TaskModal } from "./add-item-modal";
-import { 
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -50,31 +50,31 @@ const renderHabitIcon = (iconType: string, className: string) => {
 export function TaskCard({ task, contexts }: TaskCardProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const dateInfo = formatDateForTask(task.dueDate);
-  const habitStatus = task.type === "HABIT" ? getHabitStatus({
-    lastCompleted: task.lastCompleted,
-    frequency: task.frequency
-  }) : null;
+  const habitStatus =
+    task.type === "HABIT"
+      ? getHabitStatus({
+          lastCompleted: task.lastCompleted,
+          frequency: task.frequency,
+        })
+      : null;
   const habitDisplay = getHabitDisplay(task);
   const urgencyExplanation = explainUrgency({
     priority: task.priority,
     dueDate: task.dueDate,
     createdAt: task.createdAt,
-    tags: task.tags
+    tags: task.tags,
   });
 
   return (
     <TooltipProvider>
-      <div
-        className={cn(
-          "flex items-start space-x-3 p-3 hover:bg-gray-50 rounded-lg",
-          task.completed && "opacity-60"
-        )}
-      >
-        <TaskToggleButton taskId={task.id} completed={task.completed} />
+      <div className="flex items-start space-x-3 p-3 hover:bg-gray-50 rounded-lg">
+        <div className={cn(task.completed && "opacity-60")}>
+          <TaskToggleButton taskId={task.id} completed={task.completed} />
+        </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between">
-            <div className="flex-1">
+            <div className={cn("flex-1", task.completed && "opacity-60")}>
               <div className="flex items-center space-x-2">
                 <h3
                   className={cn(
@@ -88,7 +88,7 @@ export function TaskCard({ task, contexts }: TaskCardProps) {
                 >
                   {task.title}
                 </h3>
-                
+
                 {task.type === "RECURRING" && (
                   <div className="flex items-center space-x-1">
                     <RotateCcw className="w-3 h-3 text-purple-500" />
@@ -97,7 +97,7 @@ export function TaskCard({ task, contexts }: TaskCardProps) {
                     </span>
                   </div>
                 )}
-                
+
                 {habitDisplay && (
                   <div
                     className={cn(
@@ -129,12 +129,12 @@ export function TaskCard({ task, contexts }: TaskCardProps) {
                     )}
                   </div>
                 )}
-                
+
                 {dateInfo?.isOverdue && (
                   <AlertCircle className="w-3 h-3 text-red-500" />
                 )}
               </div>
-              
+
               <div className="flex items-center space-x-3 mt-1">
                 <span className="text-xs text-gray-500">{task.project}</span>
                 {task.tags.slice(0, 2).map((tag) => (
@@ -148,11 +148,11 @@ export function TaskCard({ task, contexts }: TaskCardProps) {
               </div>
             </div>
 
-            <div className="flex items-center space-x-2 ml-2">
+            <div className="flex items-center ml-2">
               {habitStatus && (
                 <div
                   className={cn(
-                    "px-1.5 py-0.5 rounded text-xs font-medium",
+                    "px-1.5 py-0.5 rounded text-xs font-medium mr-2",
                     habitStatus.color
                   )}
                 >
@@ -162,7 +162,7 @@ export function TaskCard({ task, contexts }: TaskCardProps) {
               {dateInfo && (
                 <div
                   className={cn(
-                    "px-1.5 py-0.5 rounded text-xs font-medium",
+                    "px-1.5 py-0.5 rounded text-xs font-medium mr-2",
                     dateInfo.color
                   )}
                 >
@@ -170,7 +170,7 @@ export function TaskCard({ task, contexts }: TaskCardProps) {
                 </div>
               )}
               <Tooltip>
-                <TooltipTrigger>
+                <TooltipTrigger asChild>
                   <div
                     className={cn(
                       "px-1.5 py-0.5 rounded text-xs font-semibold cursor-help",
@@ -184,9 +184,11 @@ export function TaskCard({ task, contexts }: TaskCardProps) {
                     {task.urgency.toFixed(1)}
                   </div>
                 </TooltipTrigger>
-                <TooltipContent className="max-w-xs opacity-100">
+                <TooltipContent className="max-w-xs">
                   <div className="text-sm">
-                    <div className="font-semibold mb-1">Urgency Calculation:</div>
+                    <div className="font-semibold mb-1">
+                      Urgency Calculation:
+                    </div>
                     {urgencyExplanation.explanation.map((line, index) => (
                       <div key={index} className="text-xs">
                         {line}
