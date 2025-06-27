@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useEffect, useId } from "react";
+import { useState, useEffect, useId } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -163,7 +163,6 @@ export function TaskModal({
   defaultContextId,
 }: TaskModalProps) {
   const [activeTab, setActiveTab] = useState<"task" | "context">("task");
-  const [isPending, startTransition] = useTransition();
   const [isLoading, setIsLoading] = useState(false);
   const [existingTags, setExistingTags] = useState<string[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -237,8 +236,11 @@ export function TaskModal({
     }
   }, [isOpen, task, defaultContextId]);
 
-  const handleTaskFormChange = <K extends keyof TaskFormData>(field: K, value: TaskFormData[K]) => {
-    setTaskFormData(prev => ({ ...prev, [field]: value }));
+  const handleTaskFormChange = <K extends keyof TaskFormData>(
+    field: K,
+    value: TaskFormData[K]
+  ) => {
+    setTaskFormData((prev) => ({ ...prev, [field]: value }));
     // Clear error when user makes changes
     if (error) {
       setError(null);
@@ -247,7 +249,7 @@ export function TaskModal({
 
   const onSubmitTask = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Basic validation
     if (!taskFormData.title.trim()) return;
     if (!taskFormData.contextId) return;
@@ -267,7 +269,8 @@ export function TaskModal({
     formData.append("contextId", taskFormData.contextId);
     if (taskFormData.dueDate) formData.append("dueDate", taskFormData.dueDate);
     formData.append("type", taskFormData.type);
-    if (taskFormData.habitType) formData.append("habitType", taskFormData.habitType);
+    if (taskFormData.habitType)
+      formData.append("habitType", taskFormData.habitType);
     if (taskFormData.frequency)
       formData.append("frequency", taskFormData.frequency.toString());
 
@@ -303,7 +306,9 @@ export function TaskModal({
       onClose();
     } catch (error) {
       console.error("Failed to create context:", error);
-      setError(error instanceof Error ? error.message : "Failed to create context");
+      setError(
+        error instanceof Error ? error.message : "Failed to create context"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -312,14 +317,16 @@ export function TaskModal({
   const handleDeleteTask = async () => {
     if (!task) return;
     setIsLoading(true);
-    
+
     try {
       await deleteTaskAction(task.id);
       setShowDeleteConfirm(false);
       onClose();
     } catch (error) {
       console.error("Failed to delete task:", error);
-      setError(error instanceof Error ? error.message : "Failed to delete task");
+      setError(
+        error instanceof Error ? error.message : "Failed to delete task"
+      );
       setShowDeleteConfirm(false);
     } finally {
       setIsLoading(false);
@@ -343,9 +350,7 @@ export function TaskModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent
-        className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white shadow-xl rounded-2xl border-0"
-      >
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white shadow-xl rounded-2xl border-0">
         <DialogHeader>
           <DialogTitle>{isEditing ? "Edit Task" : "Add New Item"}</DialogTitle>
         </DialogHeader>
