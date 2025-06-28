@@ -68,9 +68,18 @@ export async function toggleTaskAction(taskId: string) {
     });
   } else if (task.type === "RECURRING" && !task.completed) {
     // Recurring task is being completed - create next instance
-    if (task.frequency && task.dueDate) {
-      const nextDueDate = new Date(task.dueDate);
-      nextDueDate.setDate(nextDueDate.getDate() + task.frequency);
+    if (task.frequency) {
+      let nextDueDate: Date;
+      
+      if (task.dueDate) {
+        // If task has a due date, calculate next due date from the original due date
+        nextDueDate = new Date(task.dueDate);
+        nextDueDate.setDate(nextDueDate.getDate() + task.frequency);
+      } else {
+        // If task has no due date, calculate next due date from completion date
+        nextDueDate = new Date(now);
+        nextDueDate.setDate(nextDueDate.getDate() + task.frequency);
+      }
 
       // Create the next recurring task instance
       await prisma.task.create({
