@@ -13,7 +13,15 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { TaskForm, type TaskFormData } from "@/components/task-form";
 import { createTaskAction, getExistingTags } from "@/lib/server-actions";
-import { Send, Calendar, Hash, Zap, Edit3, AlertCircle, RotateCcw } from "lucide-react";
+import {
+  Send,
+  Calendar,
+  Hash,
+  Zap,
+  Edit3,
+  AlertCircle,
+  RotateCcw,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface SmartTaskInputProps {
@@ -348,31 +356,38 @@ export function SmartTaskInput({
         { pattern: /\bannually\b/i, frequency: 365, text: "annually" },
         { pattern: /\bevery\s+(\d+)\s+days?\b/i, frequency: null, text: null }, // Special case
         { pattern: /\bevery\s+(\d+)\s+weeks?\b/i, frequency: null, text: null }, // Special case
-        { pattern: /\bevery\s+(\d+)\s+months?\b/i, frequency: null, text: null }, // Special case
+        {
+          pattern: /\bevery\s+(\d+)\s+months?\b/i,
+          frequency: null,
+          text: null,
+        }, // Special case
       ];
 
-      let recurringMatch = null;
-      for (const { pattern, frequency, text: patternText } of recurringPatterns) {
+      for (const {
+        pattern,
+        frequency,
+        text: patternText,
+      } of recurringPatterns) {
         const match = workingText.match(pattern);
         if (match) {
           let actualFrequency = frequency;
           let actualText = patternText;
-          
+
           // Handle "every X days/weeks/months" patterns
           if (frequency === null && match[1]) {
             const num = parseInt(match[1]);
             if (pattern.source.includes("days")) {
               actualFrequency = num;
-              actualText = `every ${num} day${num === 1 ? '' : 's'}`;
+              actualText = `every ${num} day${num === 1 ? "" : "s"}`;
             } else if (pattern.source.includes("weeks")) {
               actualFrequency = num * 7;
-              actualText = `every ${num} week${num === 1 ? '' : 's'}`;
+              actualText = `every ${num} week${num === 1 ? "" : "s"}`;
             } else if (pattern.source.includes("months")) {
               actualFrequency = num * 30;
-              actualText = `every ${num} month${num === 1 ? '' : 's'}`;
+              actualText = `every ${num} month${num === 1 ? "" : "s"}`;
             }
           }
-          
+
           if (actualFrequency && actualText) {
             result.type = "RECURRING";
             result.frequency = actualFrequency;
@@ -389,7 +404,6 @@ export function SmartTaskInput({
             }
 
             workingText = workingText.replace(match[0], " ");
-            recurringMatch = match;
             break;
           }
         }
@@ -508,7 +522,10 @@ export function SmartTaskInput({
     } else if (field === "tags") {
       setParsedTask((prev) => ({ ...prev, tags: value as string[] }));
     } else if (field === "frequency") {
-      setParsedTask((prev) => ({ ...prev, frequency: value as number | undefined }));
+      setParsedTask((prev) => ({
+        ...prev,
+        frequency: value as number | undefined,
+      }));
     }
   };
 
