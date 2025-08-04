@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
@@ -17,7 +17,6 @@ export const metadata: Metadata = {
   title: "Todone - Context-Based Task Management",
   description: "A context-based task management app with customizable urgency scoring and flexible habit tracking.",
   manifest: "/manifest.json",
-  themeColor: "#000000",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -37,6 +36,10 @@ export const metadata: Metadata = {
     title: "Todone - Context-Based Task Management",
     description: "A context-based task management app with customizable urgency scoring and flexible habit tracking.",
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#000000",
 };
 
 export default function RootLayout({
