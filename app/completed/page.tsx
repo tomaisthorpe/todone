@@ -1,4 +1,4 @@
-import { CheckCircle2, Settings, LogOut, User, Clock } from "lucide-react";
+import { CheckCircle2, LogOut, Clock } from "lucide-react";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth/next";
 import { Session } from "next-auth";
@@ -16,7 +16,9 @@ interface CompletedPageProps {
   }>;
 }
 
-export default async function CompletedPage({ searchParams }: CompletedPageProps) {
+export default async function CompletedPage({
+  searchParams,
+}: CompletedPageProps) {
   // Check authentication
   const session = (await getServerSession(authOptions)) as Session | null;
 
@@ -26,7 +28,9 @@ export default async function CompletedPage({ searchParams }: CompletedPageProps
 
   // Parse page parameter
   const resolvedSearchParams = await searchParams;
-  const page = resolvedSearchParams.page ? parseInt(resolvedSearchParams.page, 10) : 1;
+  const page = resolvedSearchParams.page
+    ? parseInt(resolvedSearchParams.page, 10)
+    : 1;
   const pageSize = 20;
 
   // Server-side data fetching
@@ -42,29 +46,29 @@ export default async function CompletedPage({ searchParams }: CompletedPageProps
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
+              <Link
+                href="/"
+                className="flex items-center hover:opacity-80 transition-opacity"
+              >
                 <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                   <CheckCircle2 className="w-5 h-5 text-white" />
                 </div>
-                <h1 className="text-2xl font-bold text-gray-900">Todone</h1>
+                <h1 className="hidden md:block text-2xl font-bold text-gray-900 ml-3">
+                  Todone
+                </h1>
               </Link>
               <span className="text-gray-400">/</span>
-              <h2 className="text-xl font-semibold text-gray-700">Completed Tasks</h2>
+              <h2 className="text-xl font-semibold text-gray-700">
+                Completed Tasks
+              </h2>
             </div>
             <div className="flex items-center space-x-3">
-              <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <User className="w-4 h-4" />
-                <span>{session.user?.name || session.user?.email}</span>
-              </div>
               <form action={signOutAction}>
                 <Button type="submit" variant="ghost" size="sm">
                   <LogOut className="w-4 h-4 mr-2" />
                   Sign out
                 </Button>
               </form>
-              <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg">
-                <Settings className="w-5 h-5" />
-              </button>
             </div>
           </div>
         </div>
@@ -79,16 +83,17 @@ export default async function CompletedPage({ searchParams }: CompletedPageProps
                 <Clock className="w-5 h-5 text-green-600" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Completed Tasks</h1>
+                <h1 className="text-2xl font-bold text-gray-900">
+                  Completed Tasks
+                </h1>
                 <p className="text-sm text-gray-600">
-                  {completedResult.totalCount} tasks completed, ordered by completion date
+                  {completedResult.totalCount} tasks completed, ordered by
+                  completion date
                 </p>
               </div>
             </div>
             <Link href="/">
-              <Button variant="outline">
-                Back to Dashboard
-              </Button>
+              <Button variant="outline">Back to Dashboard</Button>
             </Link>
           </div>
         </div>
@@ -98,7 +103,9 @@ export default async function CompletedPage({ searchParams }: CompletedPageProps
           <div className="bg-white rounded-lg shadow-sm">
             <div className="divide-y divide-gray-200">
               {completedResult.data.map((task) => {
-                const completedDate = task.completedAt ? new Date(task.completedAt) : null;
+                const completedDate = task.completedAt
+                  ? new Date(task.completedAt)
+                  : null;
                 return (
                   <div key={task.id} className="p-4">
                     <div className="flex items-start justify-between mb-2">
@@ -110,9 +117,9 @@ export default async function CompletedPage({ searchParams }: CompletedPageProps
                             {completedDate.toLocaleDateString()}
                           </div>
                           <div className="text-xs text-gray-500">
-                            {completedDate.toLocaleTimeString([], { 
-                              hour: '2-digit', 
-                              minute: '2-digit' 
+                            {completedDate.toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
                             })}
                           </div>
                         </div>
@@ -144,12 +151,11 @@ export default async function CompletedPage({ searchParams }: CompletedPageProps
                 No completed tasks yet
               </h3>
               <p className="text-gray-600 mb-6">
-                Tasks you complete will appear here, ordered by when you finished them.
+                Tasks you complete will appear here, ordered by when you
+                finished them.
               </p>
               <Link href="/">
-                <Button>
-                  Go to Dashboard
-                </Button>
+                <Button>Go to Dashboard</Button>
               </Link>
             </div>
           </div>

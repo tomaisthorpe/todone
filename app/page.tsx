@@ -1,4 +1,4 @@
-import { CheckCircle2, Settings, LogOut, User } from "lucide-react";
+import { CheckCircle2, LogOut } from "lucide-react";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth/next";
 import { Session } from "next-auth";
@@ -79,29 +79,23 @@ export default async function Dashboard() {
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                 <CheckCircle2 className="w-5 h-5 text-white" />
               </div>
-              <h1 className="text-2xl font-bold text-gray-900">Todone</h1>
+              <h1 className="hidden md:block text-2xl font-bold text-gray-900">
+                Todone
+              </h1>
             </div>
             <div className="flex items-center space-x-3">
-              <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <User className="w-4 h-4" />
-                <span>{session.user?.name || session.user?.email}</span>
-              </div>
-              <form action={signOutAction}>
-                <Button type="submit" variant="ghost" size="sm">
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Sign out
-                </Button>
-              </form>
               <Link href="/completed">
                 <Button variant="ghost" size="sm">
                   <CheckCircle2 className="w-4 h-4 mr-2" />
                   Completed
                 </Button>
               </Link>
-              <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg">
-                <Settings className="w-5 h-5" />
-              </button>
-              <AddItemModal contexts={contexts} />
+              <form action={signOutAction}>
+                <Button type="submit" variant="ghost" size="sm">
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign out
+                </Button>
+              </form>
             </div>
           </div>
         </div>
@@ -111,7 +105,9 @@ export default async function Dashboard() {
         {/* Smart Task Input */}
         <div className="bg-white rounded-xl shadow-sm p-6">
           <div className="mb-4">
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">Quick Add Task</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">
+              Quick Add Task
+            </h2>
             <p className="text-sm text-gray-600">
               Type your task naturally and watch it parse automatically
             </p>
@@ -144,6 +140,9 @@ export default async function Dashboard() {
             </div>
           )}
         </div>
+      </div>
+      <div className="flex justify-center mt-2 pb-16">
+        <AddItemModal contexts={contexts} />
       </div>
     </div>
   );
