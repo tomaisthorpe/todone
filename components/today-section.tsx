@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Calendar } from "lucide-react";
+import { Calendar, ChevronDown, ChevronUp } from "lucide-react";
 import { TaskCard } from "./task-card";
 import { shouldHideCompletedTask } from "@/lib/utils";
 import type { Task } from "@/lib/data";
@@ -80,8 +80,18 @@ export function TodaySection({ tasks, contexts }: TodaySectionProps) {
             ))}
             {todayTasks.length > 5 && (
               <div className="pt-2 text-center">
-                <Button variant="ghost" size="sm" onClick={() => setShowAll((v) => !v)}>
-                  {showAll ? "Show less" : `Show all (${todayTasks.length})`}
+                <Button variant="outline" size="sm" onClick={() => setShowAll((v) => !v)}>
+                  {showAll ? (
+                    <>
+                      <ChevronUp className="w-4 h-4" />
+                      <span>Show less</span>
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown className="w-4 h-4" />
+                      <span>{`Show all (${todayTasks.length})`}</span>
+                    </>
+                  )}
                 </Button>
               </div>
             )}
