@@ -73,7 +73,7 @@ export function ContextGroup({
     if (!task.dueDate) return false;
     const taskDate = new Date(task.dueDate);
     taskDate.setHours(0, 0, 0, 0);
-    return taskDate.getTime() === today.getTime();
+    return taskDate.getTime() <= today.getTime();
   }).length;
 
   return (
@@ -101,7 +101,7 @@ export function ContextGroup({
                   />
                   {todayTasksInContext > 0 && (
                     <p className="text-xs opacity-90">
-                      {todayTasksInContext} due today
+                      {todayTasksInContext} tasks due
                     </p>
                   )}
                 </div>
