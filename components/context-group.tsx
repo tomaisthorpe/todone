@@ -42,12 +42,6 @@ function getContextCompletion(tasks: Task[]) {
   return { percentage, completed, total };
 }
 
-function getCompletionColor(percentage: number): string {
-  if (percentage >= 80) return "text-green-700";
-  if (percentage >= 50) return "text-yellow-700";
-  return "text-red-700";
-}
-
 export function ContextGroup({
   context,
   tasks,
@@ -70,6 +64,7 @@ export function ContextGroup({
 
   const completion = getContextCompletion(contextTasks);
   const IconComponent = getIconComponent(context.icon);
+  const hasHabits = completion.total > 0;
 
   // Count tasks scheduled for today
   const today = new Date();
@@ -98,43 +93,35 @@ export function ContextGroup({
                 </div>
               </div>
               <div className="text-right">
-                <div
-                  className={cn(
-                    "inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-white",
-                    getCompletionColor(completion.percentage)
+                <div className="flex flex-col items-end gap-1">
+                  <AddItemModal
+                    contexts={allContexts}
+                    defaultContextId={context.id}
+                    addButtonSize="sm"
+                  />
+                  {todayTasksInContext > 0 && (
+                    <p className="text-xs opacity-90">
+                      {todayTasksInContext} due today
+                    </p>
                   )}
-                >
-                  {completion.percentage}%
                 </div>
-                <p className="text-xs opacity-90 mt-1">
-                  {completion.completed}/{completion.total} habits
-                </p>
-                {todayTasksInContext > 0 && (
-                  <p className="text-xs opacity-90 mt-1">
-                    {todayTasksInContext} in Today
-                  </p>
-                )}
               </div>
             </div>
           </ContextCollapsibleTrigger>
 
-          <div className="mt-1 flex items-center justify-between">
-            <div className="w-full bg-white/30 rounded-full h-2">
-              <div
-                className="bg-white h-2 rounded-full transition-all duration-300"
-                style={{ width: `${completion.percentage}%` }}
-              />
+          {hasHabits && (
+            <div className="mt-1 flex items-center justify-between">
+              <div className="w-full bg-white/30 rounded-full h-2">
+                <div
+                  className="bg-white h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${completion.percentage}%` }}
+                />
+              </div>
+              <p className="text-xs opacity-90 ml-2 whitespace-nowrap flex-shrink-0">
+                {completion.completed}/{completion.total} habits
+              </p>
             </div>
-
-            {/* Add Task Button - Always Visible */}
-            <div className="ml-3 flex-shrink-0">
-              <AddItemModal
-                contexts={allContexts}
-                defaultContextId={context.id}
-                addButtonSize="sm"
-              />
-            </div>
-          </div>
+          )}
         </div>
 
         <ContextCollapsibleContent>
