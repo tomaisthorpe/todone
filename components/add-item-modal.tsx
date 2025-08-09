@@ -26,6 +26,7 @@ import {
   createTaskAction,
   updateTaskAction,
   createContextAction,
+  updateContextAction,
   deleteTaskAction,
   getExistingTags,
 } from "@/lib/server-actions";
@@ -72,7 +73,7 @@ import {
   AlertTriangle,
   AlertCircle,
 } from "lucide-react";
-import type { Task } from "@/lib/data";
+import type { Task, Context } from "@/lib/data";
 
 // Context form schema
 const contextSchema = z.object({
@@ -95,6 +96,7 @@ interface TaskModalProps {
   isOpen: boolean;
   onClose: () => void;
   defaultContextId?: string;
+  contextToEdit?: Context;
 }
 
 const contextIcons = [
@@ -161,6 +163,7 @@ export function TaskModal({
   isOpen,
   onClose,
   defaultContextId,
+  contextToEdit,
 }: TaskModalProps) {
   const [activeTab, setActiveTab] = useState<"task" | "context">("task");
   const [isLoading, setIsLoading] = useState(false);
@@ -184,6 +187,7 @@ export function TaskModal({
   const getFieldId = (fieldName: string) => `${modalId}-${fieldName}`;
 
   const isEditing = !!task;
+  const isEditingContext = !!contextToEdit;
 
   const contextForm = useForm<ContextFormData>({
     resolver: zodResolver(contextSchema),
@@ -219,6 +223,16 @@ export function TaskModal({
           frequency: task.frequency || undefined,
           tags: task.tags,
         });
+        setActiveTab("task");
+      } else if (contextToEdit) {
+        // Editing a context - populate context form
+        contextForm.reset({
+          name: contextToEdit.name,
+          description: contextToEdit.description || "",
+          icon: contextToEdit.icon,
+          color: contextToEdit.color,
+        });
+        setActiveTab("context");
       } else {
         // Adding mode - reset to defaults
         setTaskFormData({
@@ -232,9 +246,10 @@ export function TaskModal({
           frequency: undefined,
           tags: [],
         });
+        setActiveTab("task");
       }
     }
-  }, [isOpen, task, defaultContextId]);
+  }, [isOpen, task, defaultContextId, contextToEdit]);
 
   const handleTaskFormChange = <K extends keyof TaskFormData>(
     field: K,
@@ -295,20 +310,25 @@ export function TaskModal({
   const onSubmitContext = async (data: ContextFormData) => {
     setIsLoading(true);
     const formData = new FormData();
+    if (isEditingContext && contextToEdit) {
+      formData.append("contextId", contextToEdit.id);
+    }
     formData.append("name", data.name);
     if (data.description) formData.append("description", data.description);
     formData.append("icon", data.icon);
     formData.append("color", data.color);
 
     try {
-      await createContextAction(formData);
+      if (isEditingContext) {
+        await updateContextAction(formData);
+      } else {
+        await createContextAction(formData);
+      }
       contextForm.reset();
       onClose();
     } catch (error) {
-      console.error("Failed to create context:", error);
-      setError(
-        error instanceof Error ? error.message : "Failed to create context"
-      );
+      console.error("Failed to save context:", error);
+      setError(error instanceof Error ? error.message : "Failed to save context");
     } finally {
       setIsLoading(false);
     }
@@ -352,7 +372,9 @@ export function TaskModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white shadow-xl rounded-2xl border-0">
         <DialogHeader>
-          <DialogTitle>{isEditing ? "Edit Task" : "Add New Item"}</DialogTitle>
+          <DialogTitle>
+            {isEditing ? "Edit Task" : isEditingContext ? "Edit Context" : "Add New Item"}
+          </DialogTitle>
         </DialogHeader>
 
         {/* Error Display */}
@@ -365,20 +387,22 @@ export function TaskModal({
 
         {/* Tab Navigation */}
         <div className="flex gap-2 bg-gray-100 rounded-lg p-1 mt-2 mb-6">
-          <button
-            onClick={() => setActiveTab("task")}
-            className={`flex-1 px-4 py-2 text-sm font-medium rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400
-              ${
-                activeTab === "task"
-                  ? "bg-blue-50 text-blue-700 shadow-sm"
-                  : "bg-transparent text-gray-500 hover:text-gray-700"
-              }
-            `}
-            type="button"
-          >
-            <CheckSquare className="w-4 h-4 inline mr-2" />
-            {isEditing ? "Edit Task" : "Add Task"}
-          </button>
+          {!isEditingContext && (
+            <button
+              onClick={() => setActiveTab("task")}
+              className={`flex-1 px-4 py-2 text-sm font-medium rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400
+                ${
+                  activeTab === "task"
+                    ? "bg-blue-50 text-blue-700 shadow-sm"
+                    : "bg-transparent text-gray-500 hover:text-gray-700"
+                }
+              `}
+              type="button"
+            >
+              <CheckSquare className="w-4 h-4 inline mr-2" />
+              {isEditing ? "Edit Task" : "Add Task"}
+            </button>
+          )}
           {!isEditing && (
             <button
               onClick={() => setActiveTab("context")}
@@ -392,7 +416,7 @@ export function TaskModal({
               type="button"
             >
               <Home className="w-4 h-4 inline mr-2" />
-              Add Context
+              {isEditingContext ? "Edit Context" : "Add Context"}
             </button>
           )}
         </div>
@@ -527,7 +551,7 @@ export function TaskModal({
                 Cancel
               </Button>
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Creating..." : "Create Context"}
+                {isLoading ? (isEditingContext ? "Updating..." : "Creating...") : isEditingContext ? "Update Context" : "Create Context"}
               </Button>
             </div>
           </form>
