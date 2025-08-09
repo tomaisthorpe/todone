@@ -306,6 +306,42 @@ export async function createContextAction(formData: FormData) {
   revalidatePath("/");
 }
 
+// Server action to update an existing context
+export async function updateContextAction(formData: FormData) {
+  const userId = await getAuthenticatedUser();
+
+  const contextId = formData.get("contextId") as string;
+  const name = formData.get("name") as string;
+  const description = formData.get("description") as string;
+  const icon = (formData.get("icon") as string) || "Home";
+  const color = (formData.get("color") as string) || "bg-gray-500";
+
+  if (!contextId || !name) {
+    throw new Error("Context ID and name are required");
+  }
+
+  // Verify context belongs to user
+  const existingContext = await prisma.context.findFirst({
+    where: { id: contextId, userId },
+  });
+
+  if (!existingContext) {
+    throw new Error("Context not found");
+  }
+
+  await prisma.context.update({
+    where: { id: contextId },
+    data: {
+      name,
+      description: description || null,
+      icon,
+      color,
+    },
+  });
+
+  revalidatePath("/");
+}
+
 // Server action to delete a task
 export async function deleteTaskAction(taskId: string) {
   const userId = await getAuthenticatedUser();

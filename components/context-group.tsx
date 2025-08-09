@@ -1,8 +1,18 @@
-import React from "react";
+"use client";
+import React, { useState } from "react";
 import { TaskCard } from "./task-card";
 import { AddItemModal } from "./add-item-modal";
+import { TaskModal } from "./add-item-modal";
 import { cn, shouldHideCompletedTask } from "@/lib/utils";
-import { Home, Code, Coffee, Car, Briefcase, ChevronDown } from "lucide-react";
+import {
+  Home,
+  Code,
+  Coffee,
+  Car,
+  Briefcase,
+  ChevronDown,
+  Pencil,
+} from "lucide-react";
 import {
   ContextCollapsible,
   ContextCollapsibleContent,
@@ -47,6 +57,7 @@ export function ContextGroup({
   tasks,
   allContexts,
 }: ContextGroupProps) {
+  const [isEditContextOpen, setIsEditContextOpen] = useState(false);
   const contextTasks = tasks
     .filter((task) => {
       // Only include tasks in this context
@@ -94,11 +105,21 @@ export function ContextGroup({
               </div>
               <div className="text-right">
                 <div className="flex flex-col items-end gap-1">
-                  <AddItemModal
-                    contexts={allContexts}
-                    defaultContextId={context.id}
-                    addButtonSize="sm"
-                  />
+                  <div className="ml-3 flex items-center gap-2 flex-shrink-0">
+                    <button
+                      onClick={() => setIsEditContextOpen(true)}
+                      className="flex items-center space-x-2 px-2 py-1 text-xs bg-white/20 hover:bg-white/30 rounded-md transition-colors"
+                      title="Edit context"
+                    >
+                      <Pencil className="w-3 h-3" />
+                      <span>Edit</span>
+                    </button>
+                    <AddItemModal
+                      contexts={allContexts}
+                      defaultContextId={context.id}
+                      addButtonSize="sm"
+                    />
+                  </div>
                   {todayTasksInContext > 0 && (
                     <p className="text-xs opacity-90">
                       {todayTasksInContext} tasks due
@@ -140,6 +161,13 @@ export function ContextGroup({
           </div>
         </ContextCollapsibleContent>
       </ContextCollapsible>
+      {/* Edit Context Modal */}
+      <TaskModal
+        contexts={allContexts}
+        isOpen={isEditContextOpen}
+        onClose={() => setIsEditContextOpen(false)}
+        contextToEdit={context}
+      />
     </div>
   );
 }
