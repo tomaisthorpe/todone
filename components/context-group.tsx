@@ -78,7 +78,7 @@ export function ContextGroup({
 
   return (
     <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-      <ContextCollapsible>
+      <ContextCollapsible defaultCollapsed={contextTasks.length === 0}>
         <div className={cn("py-2 px-4 text-white", context.color)}>
           <ContextCollapsibleTrigger>
             <div className="w-full flex items-center justify-between rounded-lg p-2 transition-colors">
