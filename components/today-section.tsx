@@ -80,7 +80,12 @@ export function TodaySection({ tasks, contexts }: TodaySectionProps) {
             ))}
             {todayTasks.length > 5 && (
               <div className="pt-2 text-center">
-                <Button variant="outline" size="sm" onClick={() => setShowAll((v) => !v)}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-gray-500 hover:text-gray-700 text-xs"
+                  onClick={() => setShowAll((v) => !v)}
+                >
                   {showAll ? (
                     <>
                       <ChevronUp className="w-4 h-4" />
