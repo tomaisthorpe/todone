@@ -1,14 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  RotateCcw,
-  Dumbbell,
-  BookOpen,
-  Flame,
-  Wrench,
-  AlertCircle,
-} from "lucide-react";
+import { RotateCcw, Dumbbell, BookOpen, Flame, Wrench } from "lucide-react";
 import { formatDateForTask, explainUrgency } from "@/lib/utils";
 import { getHabitStatus, getHabitDisplay } from "@/lib/habits";
 import { cn } from "@/lib/utils";
@@ -75,7 +68,7 @@ export function TaskCard({ task, contexts }: TaskCardProps) {
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between">
             <div className={cn("flex-1", task.completed && "opacity-60")}>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center flex-wrap space-x-2">
                 <h3
                   className={cn(
                     "font-medium text-sm cursor-pointer hover:text-blue-600 transition-colors",
@@ -129,10 +122,6 @@ export function TaskCard({ task, contexts }: TaskCardProps) {
                     )}
                   </div>
                 )}
-
-                {dateInfo?.isOverdue && (
-                  <AlertCircle className="w-3 h-3 text-red-500" />
-                )}
               </div>
 
               {(task.project || task.tags.length > 0) && (
@@ -142,7 +131,7 @@ export function TaskCard({ task, contexts }: TaskCardProps) {
                       {task.project}
                     </span>
                   )}
-                  {task.tags.slice(0, 2).map((tag) => (
+                  {task.tags.map((tag) => (
                     <span
                       key={tag}
                       className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-gray-100 text-gray-600"
@@ -154,11 +143,11 @@ export function TaskCard({ task, contexts }: TaskCardProps) {
               )}
             </div>
 
-            <div className="flex items-center ml-2">
+            <div className="flex items-center ml-2 justify-end flex-wrap gap-2 max-w-1/2">
               {habitStatus && (
                 <div
                   className={cn(
-                    "px-1.5 py-0.5 rounded text-xs font-medium mr-2",
+                    "px-1.5 py-0.5 rounded text-xs font-medium whitespace-nowrap",
                     habitStatus.color
                   )}
                 >
@@ -168,7 +157,7 @@ export function TaskCard({ task, contexts }: TaskCardProps) {
               {dateInfo && (
                 <div
                   className={cn(
-                    "px-1.5 py-0.5 rounded text-xs font-medium mr-2",
+                    "px-1.5 py-0.5 rounded text-xs font-medium whitespace-nowrap",
                     dateInfo.color
                   )}
                 >
