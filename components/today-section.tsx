@@ -42,20 +42,46 @@ function getTodayTasks(tasks: Task[]): Task[] {
     });
 }
 
+function getUrgentTasks(tasks: Task[]): Task[] {
+  return tasks
+    .filter((task) => {
+      // Hide completed tasks from previous days (except if completed within the last hour)
+      if (shouldHideCompletedTask(task)) {
+        return false;
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      // Sort completed tasks to bottom
+      if (a.completed !== b.completed) return a.completed ? 1 : -1;
+      // Sort by urgency (highest first)
+      return b.urgency - a.urgency;
+    });
+}
+
 export function TodaySection({ tasks, contexts }: TodaySectionProps) {
+  const [activeTab, setActiveTab] = useState<"urgency" | "today">("urgency");
+
+  const urgentTasks = getUrgentTasks(tasks);
   const todayTasks = getTodayTasks(tasks);
-  const completedCount = todayTasks.filter(task => task.completed).length;
-  const overdueCount = todayTasks.filter(task => {
-    if (!task.dueDate || task.completed) return false;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const taskDate = new Date(task.dueDate);
-    taskDate.setHours(0, 0, 0, 0);
-    return taskDate.getTime() < today.getTime();
-  }).length;
+
+  const currentTasks = activeTab === "urgency" ? urgentTasks : todayTasks;
+
+  const completedCount = currentTasks.filter((task) => task.completed).length;
+  const overdueCount =
+    activeTab === "today"
+      ? todayTasks.filter((task) => {
+          if (!task.dueDate || task.completed) return false;
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const taskDate = new Date(task.dueDate);
+          taskDate.setHours(0, 0, 0, 0);
+          return taskDate.getTime() < today.getTime();
+        }).length
+      : 0;
 
   const [showAll, setShowAll] = useState(false);
-  const visibleTasks = showAll ? todayTasks : todayTasks.slice(0, 5);
+  const visibleTasks = showAll ? currentTasks : currentTasks.slice(0, 5);
 
   return (
     <div className="bg-white rounded-xl shadow-sm">
@@ -63,22 +89,56 @@ export function TodaySection({ tasks, contexts }: TodaySectionProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <Calendar className="w-5 h-5 text-blue-600" />
-            <h2 className="text-xl font-semibold text-gray-900">Today & Overdue</h2>
+            <h2 className="text-xl font-semibold text-gray-900">
+              {activeTab === "urgency" ? "Top by Urgency" : "Today & Overdue"}
+            </h2>
           </div>
-          <div className="text-sm text-gray-500">
-            {completedCount}/{todayTasks.length} completed
-            {overdueCount > 0 && <span className="text-red-500 ml-2">({overdueCount} overdue)</span>}
+          <div className="flex items-center gap-3">
+            <div className="text-sm text-gray-500">
+              {completedCount}/{currentTasks.length} completed
+              {activeTab === "today" && overdueCount > 0 && (
+                <span className="text-red-500 ml-2">({overdueCount} overdue)</span>
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="mt-4">
+          <div className="inline-flex rounded-lg bg-gray-100 p-1">
+            <button
+              type="button"
+              onClick={() => setActiveTab("urgency")}
+              className={
+                "px-3 py-1.5 text-sm rounded-md transition-colors " +
+                (activeTab === "urgency"
+                  ? "bg-white text-gray-900 shadow"
+                  : "text-gray-600 hover:text-gray-900")
+              }
+            >
+              Urgency
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("today")}
+              className={
+                "px-3 py-1.5 text-sm rounded-md transition-colors " +
+                (activeTab === "today"
+                  ? "bg-white text-gray-900 shadow"
+                  : "text-gray-600 hover:text-gray-900")
+              }
+            >
+              Today & Overdue
+            </button>
           </div>
         </div>
       </div>
 
       <div className="p-6">
-        {todayTasks.length > 0 ? (
+        {currentTasks.length > 0 ? (
           <div className="space-y-2">
             {visibleTasks.map((task) => (
               <TaskCard key={task.id} task={task} contexts={contexts} />
             ))}
-            {todayTasks.length > 5 && (
+            {currentTasks.length > 5 && (
               <div className="pt-2 text-center">
                 <Button
                   variant="ghost"
@@ -94,7 +154,7 @@ export function TodaySection({ tasks, contexts }: TodaySectionProps) {
                   ) : (
                     <>
                       <ChevronDown className="w-4 h-4" />
-                      <span>{`Show all (${todayTasks.length})`}</span>
+                      <span>{`Show all (${currentTasks.length})`}</span>
                     </>
                   )}
                 </Button>
@@ -104,7 +164,11 @@ export function TodaySection({ tasks, contexts }: TodaySectionProps) {
         ) : (
           <div className="text-center py-8">
             <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500">No tasks scheduled for today</p>
+            <p className="text-gray-500">
+              {activeTab === "urgency"
+                ? "No tasks to focus on"
+                : "No tasks scheduled for today"}
+            </p>
           </div>
         )}
       </div>
