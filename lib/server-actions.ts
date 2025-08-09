@@ -34,11 +34,42 @@ export async function toggleTaskAction(taskId: string) {
   // Handle different task types
   if (task.type === "HABIT" && !task.completed) {
     // Habit is being completed
-    const habitCompletionData = {
-      lastCompleted: now,
-      streak: (task.streak || 0) + 1,
-      longestStreak: Math.max(task.longestStreak || 0, (task.streak || 0) + 1),
+    const endOfDay = (d: Date) => {
+      const x = new Date(d);
+      x.setHours(23, 59, 59, 999);
+      return x;
     };
+
+    const startOfDay = (d: Date) => {
+      const x = new Date(d);
+      x.setHours(0, 0, 0, 0);
+      return x;
+    };
+
+    const addDays = (d: Date, days: number) => {
+      const x = new Date(d);
+      x.setDate(x.getDate() + days);
+      return x;
+    };
+
+    const isOnTime = (() => {
+      if (task.dueDate) {
+        return now <= endOfDay(new Date(task.dueDate));
+      }
+      if (task.frequency) {
+        if (task.lastCompleted) {
+          const expectedDue = addDays(startOfDay(new Date(task.lastCompleted)), task.frequency);
+          return now <= endOfDay(expectedDue);
+        }
+        // First completion without a prior window counts as on-time
+        return true;
+      }
+      // No due date and no frequency; treat as on-time
+      return true;
+    })();
+
+    const nextStreak = isOnTime ? (task.streak || 0) + 1 : 1;
+    const nextLongest = Math.max(task.longestStreak || 0, nextStreak);
 
     // Create habit completion record
     await prisma.habitCompletion.create({
@@ -53,7 +84,9 @@ export async function toggleTaskAction(taskId: string) {
       data: {
         completed: true,
         completedAt: now,
-        ...habitCompletionData,
+        lastCompleted: now,
+        streak: nextStreak,
+        longestStreak: nextLongest,
       },
     });
   } else if (task.type === "HABIT" && task.completed) {
