@@ -1,8 +1,11 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import { Calendar } from "lucide-react";
 import { TaskCard } from "./task-card";
 import { shouldHideCompletedTask } from "@/lib/utils";
 import type { Task } from "@/lib/data";
+import { Button } from "@/components/ui/button";
 
 interface TodaySectionProps {
   tasks: Task[];
@@ -51,6 +54,9 @@ export function TodaySection({ tasks, contexts }: TodaySectionProps) {
     return taskDate.getTime() < today.getTime();
   }).length;
 
+  const [showAll, setShowAll] = useState(false);
+  const visibleTasks = showAll ? todayTasks : todayTasks.slice(0, 5);
+
   return (
     <div className="bg-white rounded-xl shadow-sm">
       <div className="p-6 border-b border-gray-200">
@@ -69,9 +75,16 @@ export function TodaySection({ tasks, contexts }: TodaySectionProps) {
       <div className="p-6">
         {todayTasks.length > 0 ? (
           <div className="space-y-2">
-            {todayTasks.map((task) => (
+            {visibleTasks.map((task) => (
               <TaskCard key={task.id} task={task} contexts={contexts} />
             ))}
+            {todayTasks.length > 5 && (
+              <div className="pt-2 text-center">
+                <Button variant="ghost" size="sm" onClick={() => setShowAll((v) => !v)}>
+                  {showAll ? "Show less" : `Show all (${todayTasks.length})`}
+                </Button>
+              </div>
+            )}
           </div>
         ) : (
           <div className="text-center py-8">
