@@ -95,6 +95,7 @@ export function SmartTaskInput({
   } | null>(null);
 
   const [error, setError] = useState<string | null>(null);
+  const [isInputFocused, setIsInputFocused] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const highlightRef = useRef<HTMLDivElement>(null);
@@ -269,6 +270,7 @@ export function SmartTaskInput({
 
   // Handle input blur to hide suggestions
   const handleInputBlur = () => {
+    setIsInputFocused(false);
     // Delay hiding suggestions to allow for suggestion clicks
     setTimeout(() => {
       setShowSuggestions(false);
@@ -689,8 +691,9 @@ export function SmartTaskInput({
             onSelect={handleCursorChange}
             onClick={handleCursorChange}
             onBlur={handleInputBlur}
+            onFocus={() => setIsInputFocused(true)}
             placeholder="Type your task naturally... e.g., 'Setup Todone !Homelab #sideprojects #setup p1 tomorrow' or 'Team standup weekly !Work #meetings'"
-            className="relative text-base font-mono bg-transparent caret-gray-900"
+            className="relative text-base font-mono bg-transparent caret-gray-900 pr-8"
             style={{ zIndex: 2 }}
             disabled={isPending}
           />
@@ -891,43 +894,45 @@ export function SmartTaskInput({
       </form>
 
       {/* Help Text */}
-      <div className="text-xs text-gray-500 mt-2">
-        <div className="font-medium mb-1">Quick syntax:</div>
-        <div className="space-y-1">
-          <div>
-            <code className="bg-blue-50 text-blue-600 px-1 rounded">
-              !context
-            </code>{" "}
-            for context{" "}
-            <span className="text-gray-400">(type ! to see suggestions)</span>
-          </div>
-          <div>
-            <code className="bg-green-50 text-green-600 px-1 rounded">
-              #tag
-            </code>{" "}
-            for tags{" "}
-            <span className="text-gray-400">(type # to see suggestions)</span>
-          </div>
-          <div>
-            <code className="bg-purple-50 text-purple-600 px-1 rounded">
-              p1/p2/p3
-            </code>{" "}
-            for priority (high/medium/low)
-          </div>
-          <div>
-            <code className="bg-orange-50 text-orange-600 px-1 rounded">
-              tomorrow, next week, in 3 days
-            </code>{" "}
-            for due dates
-          </div>
-          <div>
-            <code className="bg-cyan-50 text-cyan-600 px-1 rounded">
-              daily, weekly, monthly, every 4 days
-            </code>{" "}
-            for recurring tasks
+      {isInputFocused && (
+        <div className="text-xs text-gray-500 mt-2">
+          <div className="font-medium mb-1">Quick syntax:</div>
+          <div className="space-y-1">
+            <div>
+              <code className="bg-blue-50 text-blue-600 px-1 rounded">
+                !context
+              </code>{" "}
+              for context{" "}
+              <span className="text-gray-400">(type ! to see suggestions)</span>
+            </div>
+            <div>
+              <code className="bg-green-50 text-green-600 px-1 rounded">
+                #tag
+              </code>{" "}
+              for tags{" "}
+              <span className="text-gray-400">(type # to see suggestions)</span>
+            </div>
+            <div>
+              <code className="bg-purple-50 text-purple-600 px-1 rounded">
+                p1/p2/p3
+              </code>{" "}
+              for priority (high/medium/low)
+            </div>
+            <div>
+              <code className="bg-orange-50 text-orange-600 px-1 rounded">
+                tomorrow, next week, in 3 days
+              </code>{" "}
+              for due dates
+            </div>
+            <div>
+              <code className="bg-cyan-50 text-cyan-600 px-1 rounded">
+                daily, weekly, monthly, every 4 days
+              </code>{" "}
+              for recurring tasks
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
