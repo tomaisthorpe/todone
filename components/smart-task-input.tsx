@@ -99,11 +99,20 @@ export function SmartTaskInput({
   const inputRef = useRef<HTMLInputElement>(null);
   const highlightRef = useRef<HTMLDivElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
+  const shouldRefocusAfterSubmitRef = useRef<boolean>(false);
 
   // Load existing tags on mount
   useEffect(() => {
     getExistingTags().then(setExistingTags);
   }, []);
+
+  // Refocus input after successful submission when pending clears
+  useEffect(() => {
+    if (!isPending && shouldRefocusAfterSubmitRef.current) {
+      inputRef.current?.focus();
+      shouldRefocusAfterSubmitRef.current = false;
+    }
+  }, [isPending]);
 
   // Check for suggestion triggers and update suggestions
   const updateSuggestions = useCallback(
@@ -561,6 +570,9 @@ export function SmartTaskInput({
       try {
         // Call server action outside of startTransition to properly catch errors
         await createTaskAction(formData);
+
+        // Mark that we should refocus once pending clears
+        shouldRefocusAfterSubmitRef.current = true;
 
         // Use startTransition only for UI state updates after successful submission
         startTransition(() => {
