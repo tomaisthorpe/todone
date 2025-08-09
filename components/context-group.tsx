@@ -57,10 +57,10 @@ export function ContextGroup({
     .filter((task) => {
       // Only include tasks in this context
       if (task.contextId !== context.id) return false;
-      
+
       // Hide completed tasks from previous days (except if completed within the last hour)
       if (shouldHideCompletedTask(task)) return false;
-      
+
       return true;
     })
     .sort((a, b) => {
@@ -84,7 +84,7 @@ export function ContextGroup({
   return (
     <div className="bg-white rounded-xl shadow-sm overflow-hidden">
       <ContextCollapsible>
-        <div className={cn("p-4 text-white", context.color)}>
+        <div className={cn("py-2 px-4 text-white", context.color)}>
           <ContextCollapsibleTrigger>
             <div className="w-full flex items-center justify-between rounded-lg p-2 transition-colors">
               <div className="flex items-center space-x-3">
@@ -118,7 +118,7 @@ export function ContextGroup({
             </div>
           </ContextCollapsibleTrigger>
 
-          <div className="mt-3 flex items-center justify-between">
+          <div className="mt-1 flex items-center justify-between">
             <div className="w-full bg-white/30 rounded-full h-2">
               <div
                 className="bg-white h-2 rounded-full transition-all duration-300"

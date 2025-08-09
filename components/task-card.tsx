@@ -67,7 +67,7 @@ export function TaskCard({ task, contexts }: TaskCardProps) {
 
   return (
     <TooltipProvider>
-      <div className="flex items-start space-x-3 p-3 hover:bg-gray-50 rounded-lg">
+      <div className="flex items-start space-x-3 py-2 px-3 hover:bg-gray-50 rounded-lg">
         <div className={cn(task.completed && "opacity-60")}>
           <TaskToggleButton taskId={task.id} completed={task.completed} />
         </div>
@@ -135,17 +135,23 @@ export function TaskCard({ task, contexts }: TaskCardProps) {
                 )}
               </div>
 
-              <div className="flex items-center space-x-3 mt-1">
-                <span className="text-xs text-gray-500">{task.project}</span>
-                {task.tags.slice(0, 2).map((tag) => (
-                  <span
-                    key={tag}
-                    className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-gray-100 text-gray-600"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
+              {(task.project || task.tags.length > 0) && (
+                <div className="flex items-center space-x-3 mt-1">
+                  {task.project && (
+                    <span className="text-xs text-gray-500">
+                      {task.project}
+                    </span>
+                  )}
+                  {task.tags.slice(0, 2).map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-gray-100 text-gray-600"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="flex items-center ml-2">
