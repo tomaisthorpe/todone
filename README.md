@@ -63,7 +63,7 @@ Each context shows a "health" percentage based only on habit completion (not reg
 
 ### Urgency System
 
-Tasks are sorted by urgency scores (0-10) that can be customized based on:
+Tasks are sorted by urgency scores that can be customized based on:
 - Project importance
 - Age of task
 - Priority level
