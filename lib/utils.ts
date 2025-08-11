@@ -61,7 +61,9 @@ export function evaluateUrgency(task: UrgencyInput): UrgencyResult {
       );
     } else {
       const overdueDays = Math.abs(daysUntilDue);
-      proximity = clamp(
+      // Overdue should be at least as urgent as due today.
+      // Start at 1 and increase up to 2 as it saturates.
+      proximity = 1 + clamp(
         overdueDays / URGENCY_CONSTANTS.due.overdueSaturationDays,
         0,
         1
