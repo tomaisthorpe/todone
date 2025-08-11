@@ -11,6 +11,7 @@ export type UrgencyInput = {
   dueDate: Date | null;
   createdAt: Date;
   tags: string[];
+  project?: string | null;
 };
 
 export type UrgencyResult = {
@@ -79,7 +80,21 @@ export function evaluateUrgency(task: UrgencyInput): UrgencyResult {
     add(0.0, "No due date");
   }
 
-  // Tags ignored for now per request
+  // Project contribution: fixed 1 * coefficient if project exists
+  if (task.project && task.project.trim().length > 0) {
+    add(1 * URGENCY_CONSTANTS.project.coefficient, "Project set");
+  }
+
+  // Special tags contribution
+  if (task.tags && task.tags.length > 0) {
+    const normalized = task.tags.map((t) => t.toLowerCase());
+    if (normalized.includes("next")) {
+      add(URGENCY_CONSTANTS.tags.special.next, "Tag: next");
+    }
+    if (normalized.includes("blocked")) {
+      add(URGENCY_CONSTANTS.tags.special.blocked, "Tag: blocked");
+    }
+  }
 
   return { score: urgency, explanation };
 }
