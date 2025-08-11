@@ -155,9 +155,11 @@ export function formatTagsForInput(tags: string[]): string {
 }
 
 export function formatDate(date: Date): string {
-  const today = new Date();
-  const diffTime = date.getTime() - today.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const now = new Date();
+  const diffDays = Math.round(
+    (Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) -
+      Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())) / 86400000
+  );
 
   if (diffDays === 0) return "Today";
   if (diffDays === 1) return "Tomorrow";
@@ -177,9 +179,11 @@ export function getUrgencyColor(urgency: number): string {
 export function formatDateForTask(date: Date | null): { text: string; color: string; isOverdue: boolean } | null {
   if (!date) return null;
   
-  const today = new Date();
-  const diffTime = date.getTime() - today.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const now = new Date();
+  const diffDays = Math.round(
+    (Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) -
+      Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())) / 86400000
+  );
 
   if (diffDays === 0) {
     return {
