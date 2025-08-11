@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { URGENCY_CONSTANTS } from "./urgency-config";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -17,45 +18,66 @@ export type UrgencyResult = {
   explanation: string[];
 };
 
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
+}
+
 export function evaluateUrgency(task: UrgencyInput): UrgencyResult {
   let urgency = 0;
   const explanation: string[] = [];
 
   const add = (delta: number, label: string) => {
     urgency += delta;
-    explanation.push(`${label}: ${delta >= 0 ? "+" : ""}${delta.toFixed(1)}`);
+    explanation.push(`${label}: ${delta >= 0 ? "+" : ""}${delta.toFixed(2)}`);
   };
 
-  // Base
-  add(5.0, "Base urgency");
+  // Priority (mirror Taskwarrior values via normalized * coefficient)
+  const prioNorm = URGENCY_CONSTANTS.priority.normalized[
+    task.priority
+  ];
+  const prioContribution = prioNorm * URGENCY_CONSTANTS.priority.coefficient;
+  add(prioContribution, `${task.priority[0]}${task.priority.slice(1).toLowerCase()} priority`);
 
-  // Priority
-  const priorityDelta =
-    task.priority === "HIGH" ? 2.0 : task.priority === "MEDIUM" ? 1.0 : 0.0;
-  const prettyPriority = `${task.priority[0]}${task.priority.slice(1).toLowerCase()}`;
-  add(priorityDelta, `${prettyPriority} priority`);
-
-  // Age
+  // Age factor
   const ageInDays = diffInLocalCalendarDays(new Date(), task.createdAt);
-  const ageDelta = Math.min(ageInDays * 0.1, 2.0);
-  add(ageDelta, `Task age (${ageInDays} days)`);
+  const ageNorm = clamp(
+    ageInDays / URGENCY_CONSTANTS.age.horizonDays,
+    0,
+    1
+  );
+  const ageContribution = ageNorm * URGENCY_CONSTANTS.age.coefficient;
+  add(ageContribution, `Task age (${ageInDays} days)`);
 
-  // Due date
+  // Due date proximity (days only)
   if (task.dueDate) {
     const daysUntilDue = diffInLocalCalendarDays(task.dueDate);
-    if (daysUntilDue < 0) add(3.0, `Overdue (${Math.abs(daysUntilDue)} days)`);
-    else if (daysUntilDue === 0) add(2.5, "Due today");
-    else if (daysUntilDue === 1) add(2.0, "Due tomorrow");
-    else if (daysUntilDue <= 3) add(1.0, `Due in ${daysUntilDue} days`);
-    else add(0.0, `Due in ${daysUntilDue} days`);
+    let proximity = 0;
+    if (daysUntilDue >= 0) {
+      proximity = clamp(
+        (URGENCY_CONSTANTS.due.nearWindowDays - daysUntilDue) /
+          URGENCY_CONSTANTS.due.nearWindowDays,
+        0,
+        1
+      );
+    } else {
+      const overdueDays = Math.abs(daysUntilDue);
+      proximity = clamp(
+        overdueDays / URGENCY_CONSTANTS.due.overdueSaturationDays,
+        0,
+        1
+      );
+    }
+    const dueContribution = proximity * URGENCY_CONSTANTS.due.coefficient;
+    const label =
+      daysUntilDue < 0
+        ? `Overdue (${Math.abs(daysUntilDue)} days)`
+        : `Due in ${daysUntilDue} days`;
+    add(dueContribution, label);
   } else {
     add(0.0, "No due date");
   }
 
-  // Tags
-  const urgentTags = ["urgent", "important", "critical"];
-  const hasUrgentTag = task.tags.some((tag) => urgentTags.includes(tag.toLowerCase()));
-  add(hasUrgentTag ? 1.5 : 0.0, hasUrgentTag ? "Urgent tags" : "No urgent tags");
+  // Tags ignored for now per request
 
   return { score: urgency, explanation };
 }
@@ -99,8 +121,9 @@ export function formatDate(date: Date): string {
 }
 
 export function getUrgencyColor(urgency: number): string {
-  if (urgency >= 7) return "text-red-600 bg-red-100";
-  if (urgency >= 5) return "text-orange-600 bg-orange-100";
+  const { highThreshold, mediumThreshold } = URGENCY_CONSTANTS.colors;
+  if (urgency >= highThreshold) return "text-red-600 bg-red-100";
+  if (urgency >= mediumThreshold) return "text-orange-600 bg-orange-100";
   return "text-green-600 bg-green-100";
 }
 

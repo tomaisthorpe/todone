@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { RotateCcw, Dumbbell, BookOpen, Flame, Wrench } from "lucide-react";
-import { formatDateForTask, evaluateUrgency } from "@/lib/utils";
+import { formatDateForTask, evaluateUrgency, getUrgencyColor } from "@/lib/utils";
 import { getHabitStatus, getHabitDisplay } from "@/lib/habits";
 import { cn } from "@/lib/utils";
 import { TaskToggleButton } from "./task-toggle-button";
@@ -61,7 +61,7 @@ export function TaskCard({ task, contexts }: TaskCardProps) {
   return (
     <TooltipProvider>
       <div className="flex items-start space-x-3 py-2 px-3 hover:bg-gray-50 rounded-lg">
-        <div className={cn(task.completed && "opacity-60")}>
+        <div className={cn(task.completed && "opacity-60") }>
           <TaskToggleButton taskId={task.id} completed={task.completed} />
         </div>
 
@@ -169,11 +169,7 @@ export function TaskCard({ task, contexts }: TaskCardProps) {
                   <div
                     className={cn(
                       "px-1.5 py-0.5 rounded text-xs font-semibold cursor-help",
-                      task.urgency >= 7
-                        ? "text-red-600 bg-red-100"
-                        : task.urgency >= 5
-                        ? "text-orange-600 bg-orange-100"
-                        : "text-green-600 bg-green-100"
+                      getUrgencyColor(task.urgency)
                     )}
                   >
                     {task.urgency.toFixed(1)}
