@@ -23,6 +23,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { diffInLocalCalendarDays } from "@/lib/utils";
 
 interface SmartTaskInputProps {
   contexts: Array<{
@@ -640,9 +641,7 @@ export function SmartTaskInput({
   const formatDate = (date: Date | null) => {
     if (!date) return null;
 
-    const today = new Date();
-    const diffTime = date.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const diffDays = diffInLocalCalendarDays(date);
 
     if (diffDays === 0) return "Today";
     if (diffDays === 1) return "Tomorrow";

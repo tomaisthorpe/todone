@@ -154,10 +154,14 @@ export function formatTagsForInput(tags: string[]): string {
   return tags.join(', ');
 }
 
+export function diffInLocalCalendarDays(target: Date, base: Date = new Date()): number {
+  const targetUTC = Date.UTC(target.getFullYear(), target.getMonth(), target.getDate());
+  const baseUTC = Date.UTC(base.getFullYear(), base.getMonth(), base.getDate());
+  return Math.round((targetUTC - baseUTC) / 86400000);
+}
+
 export function formatDate(date: Date): string {
-  const today = new Date();
-  const diffTime = date.getTime() - today.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const diffDays = diffInLocalCalendarDays(date);
 
   if (diffDays === 0) return "Today";
   if (diffDays === 1) return "Tomorrow";
@@ -177,9 +181,7 @@ export function getUrgencyColor(urgency: number): string {
 export function formatDateForTask(date: Date | null): { text: string; color: string; isOverdue: boolean } | null {
   if (!date) return null;
   
-  const today = new Date();
-  const diffTime = date.getTime() - today.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const diffDays = diffInLocalCalendarDays(date);
 
   if (diffDays === 0) {
     return {
