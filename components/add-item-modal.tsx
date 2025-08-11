@@ -216,7 +216,7 @@ export function TaskModal({
           priority: task.priority,
           contextId: task.contextId,
           dueDate: task.dueDate
-            ? new Date(task.dueDate).toISOString().slice(0, 16)
+            ? new Date(task.dueDate).toISOString().slice(0, 10)
             : "",
           type: task.type,
           habitType: task.habitType || undefined,

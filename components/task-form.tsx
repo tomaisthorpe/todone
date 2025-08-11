@@ -298,7 +298,7 @@ export function TaskForm({
           </Label>
           <Input
             id={getFieldId("dueDate")}
-            type="datetime-local"
+            type="date"
             value={data.dueDate}
             onChange={(e) => onChange("dueDate", e.target.value)}
             className={compact ? "text-sm mt-1" : ""}
