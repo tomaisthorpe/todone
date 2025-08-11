@@ -91,7 +91,7 @@ export async function getTasks(): Promise<Task[]> {
       }),
     ]);
 
-    const contextMap = new Map(contexts.map((c: any) => [c.id, c]));
+    const contextMap = new Map(contexts.map((c) => [c.id, c]));
 
     const tasksWithUrgency = tasks.map((task: PrismaTaskData) => {
       const ctx = contextMap.get(task.contextId);
@@ -178,7 +178,7 @@ export async function getUserTasks(userId: string): Promise<Task[]> {
       }),
     ]);
 
-    const contextMap = new Map(contexts.map((c: any) => [c.id, c]));
+    const contextMap = new Map(contexts.map((c) => [c.id, c]));
 
     const tasksWithUrgency = tasks.map((task: PrismaTaskData) => {
       const ctx = contextMap.get(task.contextId);
@@ -305,7 +305,7 @@ export async function getCompletedTasks(
       }),
     ]);
 
-    const contextMap = new Map(contexts.map((c: any) => [c.id, c]));
+    const contextMap = new Map(contexts.map((c) => [c.id, c]));
 
     const tasksWithUrgency = tasks.map((task: PrismaTaskData) => {
       const ctx = contextMap.get(task.contextId);

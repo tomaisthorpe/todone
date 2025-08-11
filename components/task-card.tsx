@@ -2,7 +2,11 @@
 
 import React, { useState } from "react";
 import { RotateCcw, Dumbbell, BookOpen, Flame, Wrench } from "lucide-react";
-import { formatDateForTask, evaluateUrgency, getUrgencyColor } from "@/lib/utils";
+import {
+  formatDateForTask,
+  evaluateUrgency,
+  getUrgencyColor,
+} from "@/lib/utils";
 import { getHabitStatus, getHabitDisplay } from "@/lib/habits";
 import { cn } from "@/lib/utils";
 import { TaskToggleButton } from "./task-toggle-button";
@@ -22,6 +26,7 @@ interface TaskCardProps {
     name: string;
     icon: string;
     color: string;
+    coefficient?: number;
   }>;
 }
 
@@ -56,12 +61,16 @@ export function TaskCard({ task, contexts }: TaskCardProps) {
     dueDate: task.dueDate,
     createdAt: task.createdAt,
     tags: task.tags,
+    contextCoefficient:
+      contexts.find((c) => c.id === task.contextId)?.coefficient ?? 0,
   });
+
+  console.log(urgencyExplanation);
 
   return (
     <TooltipProvider>
       <div className="flex items-start space-x-3 py-2 px-3 hover:bg-gray-50 rounded-lg">
-        <div className={cn(task.completed && "opacity-60") }>
+        <div className={cn(task.completed && "opacity-60")}>
           <TaskToggleButton taskId={task.id} completed={task.completed} />
         </div>
 
@@ -191,15 +200,14 @@ export function TaskCard({ task, contexts }: TaskCardProps) {
             </div>
           </div>
         </div>
+      </div>
 
-        </div>
-
-        <TaskModal
-          contexts={contexts}
-          task={task}
-          isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
-        />
-      </TooltipProvider>
-    );
-  }
+      <TaskModal
+        contexts={contexts}
+        task={task}
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+      />
+    </TooltipProvider>
+  );
+}
