@@ -47,7 +47,7 @@ const contextSchema = z.object({
     .default(0),
 });
 
-type ContextFormData = z.infer<typeof contextSchema>;
+type ContextFormData = z.input<typeof contextSchema>;
 
 interface TaskModalProps {
   contexts: Array<{
@@ -111,7 +111,7 @@ export function TaskModal({
   const isEditing = !!task;
   const isEditingContext = !!contextToEdit;
 
-  const contextForm = useForm<ContextFormData>({
+  const contextForm = useForm<z.input<typeof contextSchema>>({
     resolver: zodResolver(contextSchema),
     defaultValues: {
       icon: "Home",
@@ -241,7 +241,7 @@ export function TaskModal({
     if (data.description) formData.append("description", data.description);
     formData.append("icon", data.icon);
     formData.append("color", data.color);
-    formData.append("coefficient", data.coefficient.toString());
+    formData.append("coefficient", (Number(data.coefficient ?? 0)).toString());
 
     try {
       if (isEditingContext) {
@@ -470,7 +470,7 @@ export function TaskModal({
                   type="number"
                   step="0.1"
                   placeholder="0"
-                  value={contextForm.watch("coefficient")}
+                  value={Number(contextForm.watch("coefficient") ?? 0)}
                   onChange={(e) =>
                     contextForm.setValue(
                       "coefficient",
@@ -480,7 +480,7 @@ export function TaskModal({
                 />
                 {contextForm.formState.errors.coefficient && (
                   <p className="text-sm text-red-500 mt-1">
-                    {contextForm.formState.errors.coefficient.message as string}
+                    {contextForm.formState.errors.coefficient.message}
                   </p>
                 )}
               </div>
