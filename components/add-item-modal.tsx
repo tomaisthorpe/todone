@@ -30,50 +30,9 @@ import {
   deleteTaskAction,
   getExistingTags,
 } from "@/lib/server-actions";
-import {
-  CheckSquare,
-  Home,
-  Code,
-  Coffee,
-  Building,
-  Plus,
-  Pizza,
-  UtensilsCrossed,
-  ChefHat,
-  Wine,
-  Beer,
-  Grape,
-  Salad,
-  CookingPot,
-  Croissant,
-  IceCreamCone,
-  Cake,
-  Sandwich,
-  Soup,
-  Wallet,
-  Coins,
-  PiggyBank,
-  CreditCard,
-  Banknote,
-  TrendingUp,
-  Calculator,
-  Receipt,
-  Leaf,
-  TreePine,
-  Sprout,
-  Flower,
-  TreeDeciduous,
-  Flower2,
-  LeafyGreen,
-  Trees,
-  FlaskConical,
-  TestTube,
-  Beaker,
-  Trash2,
-  AlertTriangle,
-  AlertCircle,
-} from "lucide-react";
+import { CheckSquare, Home, Plus, Trash2, AlertTriangle, AlertCircle } from "lucide-react";
 import type { Task, Context } from "@/lib/data";
+import { contextIconOptions } from "@/lib/context-icons";
 
 // Context form schema
 const contextSchema = z.object({
@@ -98,49 +57,6 @@ interface TaskModalProps {
   defaultContextId?: string;
   contextToEdit?: Context;
 }
-
-const contextIcons = [
-  { value: "Home", icon: Home, label: "Home" },
-  { value: "Code", icon: Code, label: "Coding" },
-  { value: "Coffee", icon: Coffee, label: "Kitchen" },
-  { value: "Building", icon: Building, label: "Work" },
-  // Food & Beverage Icons
-  { value: "Pizza", icon: Pizza, label: "Food" },
-  { value: "UtensilsCrossed", icon: UtensilsCrossed, label: "Dining" },
-  { value: "ChefHat", icon: ChefHat, label: "Cooking" },
-  { value: "Wine", icon: Wine, label: "Wine" },
-  { value: "Beer", icon: Beer, label: "Beer" },
-  { value: "Grape", icon: Grape, label: "Fermentation" },
-  { value: "Salad", icon: Salad, label: "Healthy Food" },
-  { value: "CookingPot", icon: CookingPot, label: "Meal Prep" },
-  { value: "Croissant", icon: Croissant, label: "Bakery" },
-  { value: "IceCreamCone", icon: IceCreamCone, label: "Desserts" },
-  { value: "Cake", icon: Cake, label: "Baking" },
-  { value: "Sandwich", icon: Sandwich, label: "Quick Meals" },
-  { value: "Soup", icon: Soup, label: "Comfort Food" },
-  // Finance Icons
-  { value: "Wallet", icon: Wallet, label: "Personal Finance" },
-  { value: "Coins", icon: Coins, label: "Savings" },
-  { value: "PiggyBank", icon: PiggyBank, label: "Budget" },
-  { value: "CreditCard", icon: CreditCard, label: "Credit" },
-  { value: "Banknote", icon: Banknote, label: "Cash" },
-  { value: "TrendingUp", icon: TrendingUp, label: "Investments" },
-  { value: "Calculator", icon: Calculator, label: "Accounting" },
-  { value: "Receipt", icon: Receipt, label: "Expenses" },
-  // Plant/Nature Icons
-  { value: "Leaf", icon: Leaf, label: "Plants" },
-  { value: "TreePine", icon: TreePine, label: "Garden" },
-  { value: "Sprout", icon: Sprout, label: "Growing" },
-  { value: "Flower", icon: Flower, label: "Flowers" },
-  { value: "TreeDeciduous", icon: TreeDeciduous, label: "Trees" },
-  { value: "Flower2", icon: Flower2, label: "Gardening" },
-  { value: "LeafyGreen", icon: LeafyGreen, label: "Herbs" },
-  { value: "Trees", icon: Trees, label: "Forest" },
-  // Science/Fermentation Icons
-  { value: "FlaskConical", icon: FlaskConical, label: "Brewing" },
-  { value: "TestTube", icon: TestTube, label: "Experiments" },
-  { value: "Beaker", icon: Beaker, label: "Laboratory" },
-];
 
 const contextColors = [
   { value: "bg-blue-500", label: "Blue", color: "bg-blue-500" },
@@ -500,7 +416,7 @@ export function TaskModal({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="max-h-60">
-                    {contextIcons.map(({ value, icon: Icon, label }) => (
+                    {contextIconOptions.map(({ value, icon: Icon, label }) => (
                       <SelectItem key={value} value={value}>
                         <Icon className="w-4 h-4 inline mr-2" />
                         {label}
@@ -558,42 +474,28 @@ export function TaskModal({
         )}
       </DialogContent>
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <DialogContent className="max-w-md bg-white shadow-xl rounded-2xl border-0">
-          <DialogHeader>
-            <DialogTitle className="flex items-center text-red-600">
-              <AlertTriangle className="w-5 h-5 mr-2" />
-              Delete Task
-            </DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <p className="text-gray-600">
-              Are you sure you want to delete &quot;
-              <span className="font-medium">{task?.title}</span>&quot;? This
-              action cannot be undone.
-            </p>
-          </div>
-          <div className="flex justify-end space-x-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setShowDeleteConfirm(false)}
-              disabled={isLoading}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              onClick={handleDeleteTask}
-              disabled={isLoading}
-              className="bg-red-600 text-white hover:bg-red-700"
-            >
-              {isLoading ? "Deleting..." : "Delete Task"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Delete confirmation dialog */}
+      {isEditing && (
+        <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center">
+                <AlertTriangle className="w-4 h-4 text-red-600 mr-2" />
+                Confirm Delete
+              </DialogTitle>
+            </DialogHeader>
+            <p>Are you sure you want to delete this task? This action cannot be undone.</p>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>
+                Cancel
+              </Button>
+              <Button className="bg-red-600 text-white hover:bg-red-700" onClick={handleDeleteTask}>
+                Delete
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </Dialog>
   );
 }
