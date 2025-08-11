@@ -1,57 +1,18 @@
 "use client";
+
 import React, { useState } from "react";
 import { TaskCard } from "./task-card";
 import { AddItemModal } from "./add-item-modal";
 import { TaskModal } from "./add-item-modal";
 import { cn, shouldHideCompletedTask } from "@/lib/utils";
-import {
-  Home,
-  Code,
-  Coffee,
-  Car,
-  Briefcase,
-  Building,
-  Pizza,
-  UtensilsCrossed,
-  ChefHat,
-  Wine,
-  Beer,
-  Grape,
-  Salad,
-  CookingPot,
-  Croissant,
-  IceCreamCone,
-  Cake,
-  Sandwich,
-  Soup,
-  Wallet,
-  Coins,
-  PiggyBank,
-  CreditCard,
-  Banknote,
-  TrendingUp,
-  Calculator,
-  Receipt,
-  Leaf,
-  TreePine,
-  Sprout,
-  Flower,
-  TreeDeciduous,
-  Flower2,
-  LeafyGreen,
-  Trees,
-  FlaskConical,
-  TestTube,
-  Beaker,
-  ChevronDown,
-  Pencil,
-} from "lucide-react";
+import { ChevronDown, Pencil } from "lucide-react";
 import {
   ContextCollapsible,
   ContextCollapsibleContent,
   ContextCollapsibleTrigger,
 } from "./context-collapsible";
 import type { Task, Context } from "@/lib/data";
+import { getContextIconComponent } from "@/lib/context-icons";
 
 interface ContextGroupProps {
   context: Context;
@@ -59,55 +20,6 @@ interface ContextGroupProps {
   allContexts: Context[];
   collapsed?: boolean;
   onCollapsedChange?: (value: boolean) => void;
-}
-
-function getIconComponent(iconName: string) {
-  const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-    Home,
-    Code,
-    Coffee,
-    Car,
-    Briefcase,
-    Building,
-    // Food & Beverage
-    Pizza,
-    UtensilsCrossed,
-    ChefHat,
-    Wine,
-    Beer,
-    Grape,
-    Salad,
-    CookingPot,
-    Croissant,
-    IceCreamCone,
-    Cake,
-    Sandwich,
-    Soup,
-    // Finance
-    Wallet,
-    Coins,
-    PiggyBank,
-    CreditCard,
-    Banknote,
-    TrendingUp,
-    Calculator,
-    Receipt,
-    // Nature
-    Leaf,
-    TreePine,
-    Sprout,
-    Flower,
-    TreeDeciduous,
-    Flower2,
-    LeafyGreen,
-    Trees,
-    // Science
-    FlaskConical,
-    TestTube,
-    Beaker,
-  };
-
-  return iconMap[iconName] || Home;
 }
 
 function getContextCompletion(tasks: Task[]) {
@@ -148,7 +60,7 @@ export function ContextGroup({
     });
 
   const completion = getContextCompletion(contextTasks);
-  const IconComponent = getIconComponent(context.icon);
+  const IconComponent = getContextIconComponent(context.icon);
   const hasHabits = completion.total > 0;
 
   // Count tasks scheduled for today
