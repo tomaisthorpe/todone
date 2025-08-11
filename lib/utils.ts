@@ -27,16 +27,12 @@ export function calculateUrgency(task: {
   }
 
   // Age weight (older tasks get more urgent)
-  const ageInDays = Math.floor(
-    (Date.now() - task.createdAt.getTime()) / (1000 * 60 * 60 * 24)
-  );
+  const ageInDays = diffInLocalCalendarDays(new Date(), task.createdAt);
   urgency += Math.min(ageInDays * 0.1, 2.0);
 
   // Due date weight
   if (task.dueDate) {
-    const daysUntilDue = Math.floor(
-      (task.dueDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-    );
+    const daysUntilDue = diffInLocalCalendarDays(task.dueDate);
     
     if (daysUntilDue < 0) {
       urgency += 3.0; // Overdue
@@ -89,18 +85,14 @@ export function explainUrgency(task: {
   }
 
   // Age weight (older tasks get more urgent)
-  const ageInDays = Math.floor(
-    (Date.now() - task.createdAt.getTime()) / (1000 * 60 * 60 * 24)
-  );
+  const ageInDays = diffInLocalCalendarDays(new Date(), task.createdAt);
   const ageWeight = Math.min(ageInDays * 0.1, 2.0);
   urgency += ageWeight;
   explanation.push(`Task age (${ageInDays} days): +${ageWeight.toFixed(1)}`);
 
   // Due date weight
   if (task.dueDate) {
-    const daysUntilDue = Math.floor(
-      (task.dueDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-    );
+    const daysUntilDue = diffInLocalCalendarDays(task.dueDate);
     
     if (daysUntilDue < 0) {
       urgency += 3.0;
