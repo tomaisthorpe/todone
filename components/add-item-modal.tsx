@@ -165,7 +165,7 @@ export function TaskModal({
         setActiveTab("task");
       }
     }
-  }, [isOpen, task, defaultContextId, contextToEdit]);
+  }, [isOpen, task?.id, defaultContextId, contextToEdit?.id]);
 
   const handleTaskFormChange = <K extends keyof TaskFormData>(
     field: K,
