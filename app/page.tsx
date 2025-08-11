@@ -4,13 +4,13 @@ import { getServerSession } from "next-auth/next";
 import { Session } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { TodaySection } from "@/components/today-section";
-import { ContextGroup } from "@/components/context-group";
 import { AddItemModal } from "@/components/add-item-modal";
 import { SmartTaskInput } from "@/components/smart-task-input";
 import { getTasks, getContexts } from "@/lib/data";
 import { signOutAction } from "@/lib/server-actions";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { ContextsSection } from "@/components/contexts-section";
 
 export default async function Dashboard() {
   // Check authentication
@@ -111,27 +111,7 @@ export default async function Dashboard() {
         <TodaySection tasks={tasks} contexts={contexts} />
 
         {/* Context Groups */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold text-gray-900">Contexts</h2>
-          {sortedContexts.length > 0 ? (
-            <div className="grid grid-cols-1 gap-4">
-              {sortedContexts.map((context) => (
-                <ContextGroup
-                  key={context.id}
-                  context={context}
-                  tasks={tasks}
-                  allContexts={contexts}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <p className="text-gray-500">
-                No contexts yet. Create one to get started!
-              </p>
-            </div>
-          )}
-        </div>
+        <ContextsSection contexts={sortedContexts} tasks={tasks} />
       </div>
       <div className="flex justify-center mt-2 pb-16">
         <AddItemModal contexts={contexts} />

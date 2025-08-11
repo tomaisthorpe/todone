@@ -21,18 +21,32 @@ function useCollapsible() {
 interface ContextCollapsibleProps {
   children: ReactNode;
   defaultCollapsed?: boolean;
+  // When provided, the component becomes controlled
+  collapsed?: boolean;
+  onCollapsedChange?: (value: boolean) => void;
 }
 
 export function ContextCollapsible({
   children,
   defaultCollapsed = false,
+  collapsed,
+  onCollapsedChange,
 }: ContextCollapsibleProps) {
-  const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
+  const isControlled = typeof collapsed === "boolean";
+  const [internalCollapsed, setInternalCollapsed] = useState(defaultCollapsed);
 
-  const toggle = () => setIsCollapsed(!isCollapsed);
+  const currentCollapsed = isControlled ? (collapsed as boolean) : internalCollapsed;
+
+  const toggle = () => {
+    if (isControlled) {
+      onCollapsedChange?.(!currentCollapsed);
+    } else {
+      setInternalCollapsed(!currentCollapsed);
+    }
+  };
 
   return (
-    <CollapsibleContext.Provider value={{ isCollapsed, toggle }}>
+    <CollapsibleContext.Provider value={{ isCollapsed: currentCollapsed, toggle }}>
       {children}
     </CollapsibleContext.Provider>
   );

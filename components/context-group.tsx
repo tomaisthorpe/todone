@@ -24,6 +24,8 @@ interface ContextGroupProps {
   context: Context;
   tasks: Task[];
   allContexts: Context[];
+  collapsed?: boolean;
+  onCollapsedChange?: (value: boolean) => void;
 }
 
 function getIconComponent(iconName: string) {
@@ -56,6 +58,8 @@ export function ContextGroup({
   context,
   tasks,
   allContexts,
+  collapsed,
+  onCollapsedChange,
 }: ContextGroupProps) {
   const [isEditContextOpen, setIsEditContextOpen] = useState(false);
   const contextTasks = tasks
@@ -89,7 +93,11 @@ export function ContextGroup({
 
   return (
     <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-      <ContextCollapsible defaultCollapsed={contextTasks.length === 0}>
+      <ContextCollapsible
+        defaultCollapsed={contextTasks.length === 0}
+        collapsed={collapsed}
+        onCollapsedChange={onCollapsedChange}
+      >
         <div className={cn("py-2 px-4 text-white", context.color)}>
           <ContextCollapsibleTrigger>
             <div className="w-full flex items-center justify-between rounded-lg p-2 transition-colors">
