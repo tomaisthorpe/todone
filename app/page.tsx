@@ -119,7 +119,7 @@ export default async function Dashboard() {
       </div>
 
       {/* Periodic auto-refresh for multi-device sync */}
-      <AutoRefresher intervalMs={10000} />
+      <AutoRefresher intervalMs={5000} />
     </div>
   );
 }
