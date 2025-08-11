@@ -11,6 +11,7 @@ import { signOutAction } from "@/lib/server-actions";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ContextsSection } from "@/components/contexts-section";
+import { AutoRefresher } from "@/components/auto-refresher";
 
 export default async function Dashboard() {
   // Check authentication
@@ -116,6 +117,9 @@ export default async function Dashboard() {
       <div className="flex justify-center mt-2 pb-16">
         <AddItemModal contexts={contexts} />
       </div>
+
+      {/* Periodic auto-refresh for multi-device sync */}
+      <AutoRefresher intervalMs={5000} />
     </div>
   );
 }
