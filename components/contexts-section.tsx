@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import type { Context, Task } from "@/lib/data";
@@ -12,23 +12,24 @@ interface ContextsSectionProps {
 }
 
 export function ContextsSection({ contexts, tasks }: ContextsSectionProps) {
-  const [collapsedAll, setCollapsedAll] = useState<boolean | null>(null);
+  const [collapsedState, setCollapsedState] = useState<Record<string, boolean>>({});
 
-  // Build a map of id -> collapsed state based on collapsedAll toggle when set
-  const collapsedById = useMemo(() => {
-    if (collapsedAll === null) return new Map<string, boolean>();
-    const m = new Map<string, boolean>();
-    for (const c of contexts) {
-      m.set(c.id, collapsedAll);
-    }
-    return m;
-  }, [collapsedAll, contexts]);
+  const handleExpandAll = () => {
+    const next: Record<string, boolean> = {};
+    for (const c of contexts) next[c.id] = false;
+    setCollapsedState(next);
+  };
 
-  const allCollapsed = collapsedAll === true;
-  const allExpanded = collapsedAll === false;
+  const handleCollapseAll = () => {
+    const next: Record<string, boolean> = {};
+    for (const c of contexts) next[c.id] = true;
+    setCollapsedState(next);
+  };
 
-  const handleExpandAll = () => setCollapsedAll(false);
-  const handleCollapseAll = () => setCollapsedAll(true);
+  const allCollapsed =
+    contexts.length > 0 && contexts.every((c) => collapsedState[c.id] === true);
+  const allExpanded =
+    contexts.length > 0 && contexts.every((c) => collapsedState[c.id] === false);
 
   return (
     <div className="space-y-4">
@@ -58,16 +59,32 @@ export function ContextsSection({ contexts, tasks }: ContextsSectionProps) {
 
       {contexts.length > 0 ? (
         <div className="grid grid-cols-1 gap-4">
-          {contexts.map((context) => (
-            <ContextGroup
-              key={context.id}
-              context={context}
-              tasks={tasks}
-              allContexts={contexts}
-              collapsed={collapsedById.get(context.id) ?? undefined}
-              onCollapsedChange={() => {}}
-            />
-          ))}
+          {contexts.map((context) => {
+            const isControlled = Object.prototype.hasOwnProperty.call(
+              collapsedState,
+              context.id
+            );
+            const collapsedValue = collapsedState[context.id];
+
+            return (
+              <ContextGroup
+                key={context.id}
+                context={context}
+                tasks={tasks}
+                allContexts={contexts}
+                {...(isControlled
+                  ? {
+                      collapsed: collapsedValue,
+                      onCollapsedChange: (value: boolean) =>
+                        setCollapsedState((prev) => ({
+                          ...prev,
+                          [context.id]: value,
+                        })),
+                    }
+                  : {})}
+              />
+            );
+          })}
         </div>
       ) : (
         <div className="text-center py-8">
