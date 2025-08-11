@@ -12,6 +12,7 @@ export type UrgencyInput = {
   createdAt: Date;
   tags: string[];
   project?: string | null;
+  contextCoefficient?: number;
 };
 
 export type UrgencyResult = {
@@ -38,6 +39,11 @@ export function evaluateUrgency(task: UrgencyInput): UrgencyResult {
   ];
   const prioContribution = prioNorm * URGENCY_CONSTANTS.priority.coefficient;
   add(prioContribution, `${task.priority[0]}${task.priority.slice(1).toLowerCase()} priority`);
+
+  // Context coefficient (user-defined per context)
+  if (typeof task.contextCoefficient === "number") {
+    add(task.contextCoefficient, "Context coefficient");
+  }
 
   // Age factor
   const ageInDays = diffInLocalCalendarDays(new Date(), task.createdAt);

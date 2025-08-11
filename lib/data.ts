@@ -68,6 +68,7 @@ export interface Context {
   userId: string;
   createdAt: Date;
   updatedAt: Date;
+  coefficient: number;
 }
 
 export async function getTasks(): Promise<Task[]> {
@@ -78,31 +79,42 @@ export async function getTasks(): Promise<Task[]> {
   }
 
   try {
-    const tasks = await prisma.task.findMany({
-      where: {
-        userId: session.user.id,
-      },
-      orderBy: [{ completed: "asc" }, { createdAt: "desc" }],
-    });
-
-    const tasksWithUrgency = tasks.map((task: PrismaTaskData) => ({
-      ...task,
-      priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
-      type: task.type as "TASK" | "HABIT" | "RECURRING",
-      habitType: task.habitType as
-        | "STREAK"
-        | "LEARNING"
-        | "WELLNESS"
-        | "MAINTENANCE"
-        | null,
-      urgency: calculateUrgency({
-        priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
-        dueDate: task.dueDate,
-        createdAt: task.createdAt,
-        tags: task.tags,
-        project: task.project,
+    const [tasks, contexts] = await Promise.all([
+      prisma.task.findMany({
+        where: {
+          userId: session.user.id,
+        },
+        orderBy: [{ completed: "asc" }, { createdAt: "desc" }],
       }),
-    }));
+      prisma.context.findMany({
+        where: { OR: [{ userId: session.user.id }, { shared: true }] },
+      }),
+    ]);
+
+    const contextMap = new Map(contexts.map((c: any) => [c.id, c]));
+
+    const tasksWithUrgency = tasks.map((task: PrismaTaskData) => {
+      const ctx = contextMap.get(task.contextId);
+      return {
+        ...task,
+        priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
+        type: task.type as "TASK" | "HABIT" | "RECURRING",
+        habitType: task.habitType as
+          | "STREAK"
+          | "LEARNING"
+          | "WELLNESS"
+          | "MAINTENANCE"
+          | null,
+        urgency: calculateUrgency({
+          priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
+          dueDate: task.dueDate,
+          createdAt: task.createdAt,
+          tags: task.tags,
+          project: task.project,
+          contextCoefficient: ctx?.coefficient ?? 0,
+        }),
+      };
+    });
 
     return tasksWithUrgency.sort((a: Task, b: Task) => {
       if (a.completed !== b.completed) return a.completed ? 1 : -1;
@@ -129,7 +141,7 @@ export async function getContexts(): Promise<Context[]> {
       orderBy: { name: "asc" },
     });
 
-    return contexts;
+    return contexts as unknown as Context[];
   } catch (error) {
     console.error("Error fetching contexts:", error);
     return [];
@@ -145,7 +157,7 @@ export async function getUserContexts(userId: string): Promise<Context[]> {
       orderBy: { name: "asc" },
     });
 
-    return contexts;
+    return contexts as unknown as Context[];
   } catch (error) {
     console.error("Error fetching user contexts:", error);
     return [];
@@ -154,31 +166,42 @@ export async function getUserContexts(userId: string): Promise<Context[]> {
 
 export async function getUserTasks(userId: string): Promise<Task[]> {
   try {
-    const tasks = await prisma.task.findMany({
-      where: {
-        userId: userId,
-      },
-      orderBy: [{ completed: "asc" }, { createdAt: "desc" }],
-    });
-
-    const tasksWithUrgency = tasks.map((task: PrismaTaskData) => ({
-      ...task,
-      priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
-      type: task.type as "TASK" | "HABIT" | "RECURRING",
-      habitType: task.habitType as
-        | "STREAK"
-        | "LEARNING"
-        | "WELLNESS"
-        | "MAINTENANCE"
-        | null,
-      urgency: calculateUrgency({
-        priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
-        dueDate: task.dueDate,
-        createdAt: task.createdAt,
-        tags: task.tags,
-        project: task.project,
+    const [tasks, contexts] = await Promise.all([
+      prisma.task.findMany({
+        where: {
+          userId: userId,
+        },
+        orderBy: [{ completed: "asc" }, { createdAt: "desc" }],
       }),
-    }));
+      prisma.context.findMany({
+        where: { OR: [{ userId }, { shared: true }] },
+      }),
+    ]);
+
+    const contextMap = new Map(contexts.map((c: any) => [c.id, c]));
+
+    const tasksWithUrgency = tasks.map((task: PrismaTaskData) => {
+      const ctx = contextMap.get(task.contextId);
+      return {
+        ...task,
+        priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
+        type: task.type as "TASK" | "HABIT" | "RECURRING",
+        habitType: task.habitType as
+          | "STREAK"
+          | "LEARNING"
+          | "WELLNESS"
+          | "MAINTENANCE"
+          | null,
+        urgency: calculateUrgency({
+          priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
+          dueDate: task.dueDate,
+          createdAt: task.createdAt,
+          tags: task.tags,
+          project: task.project,
+          contextCoefficient: ctx?.coefficient ?? 0,
+        }),
+      };
+    });
 
     return tasksWithUrgency.sort((a: Task, b: Task) => {
       if (a.completed !== b.completed) return a.completed ? 1 : -1;
@@ -259,45 +282,53 @@ export async function getCompletedTasks(
   try {
     const skip = (page - 1) * pageSize;
 
-    // Get total count of completed tasks
-    const totalCount = await prisma.task.count({
-      where: {
-        userId: session.user.id,
-        completed: true,
-        completedAt: { not: null },
-      },
-    });
-
-    // Get paginated completed tasks
-    const tasks = await prisma.task.findMany({
-      where: {
-        userId: session.user.id,
-        completed: true,
-        completedAt: { not: null },
-      },
-      orderBy: { completedAt: "desc" }, // Most recently completed first
-      skip,
-      take: pageSize,
-    });
-
-    const tasksWithUrgency = tasks.map((task: PrismaTaskData) => ({
-      ...task,
-      priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
-      type: task.type as "TASK" | "HABIT" | "RECURRING",
-      habitType: task.habitType as
-        | "STREAK"
-        | "LEARNING"
-        | "WELLNESS"
-        | "MAINTENANCE"
-        | null,
-      urgency: calculateUrgency({
-        priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
-        dueDate: task.dueDate,
-        createdAt: task.createdAt,
-        tags: task.tags,
-        project: task.project,
+    const [totalCount, tasks, contexts] = await Promise.all([
+      prisma.task.count({
+        where: {
+          userId: session.user.id,
+          completed: true,
+          completedAt: { not: null },
+        },
       }),
-    }));
+      prisma.task.findMany({
+        where: {
+          userId: session.user.id,
+          completed: true,
+          completedAt: { not: null },
+        },
+        orderBy: { completedAt: "desc" },
+        skip,
+        take: pageSize,
+      }),
+      prisma.context.findMany({
+        where: { OR: [{ userId: session.user.id }, { shared: true }] },
+      }),
+    ]);
+
+    const contextMap = new Map(contexts.map((c: any) => [c.id, c]));
+
+    const tasksWithUrgency = tasks.map((task: PrismaTaskData) => {
+      const ctx = contextMap.get(task.contextId);
+      return {
+        ...task,
+        priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
+        type: task.type as "TASK" | "HABIT" | "RECURRING",
+        habitType: task.habitType as
+          | "STREAK"
+          | "LEARNING"
+          | "WELLNESS"
+          | "MAINTENANCE"
+          | null,
+        urgency: calculateUrgency({
+          priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
+          dueDate: task.dueDate,
+          createdAt: task.createdAt,
+          tags: task.tags,
+          project: task.project,
+          contextCoefficient: ctx?.coefficient ?? 0,
+        }),
+      };
+    });
 
     const totalPages = Math.ceil(totalCount / pageSize);
 

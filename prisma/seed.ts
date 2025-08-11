@@ -31,6 +31,7 @@ async function main() {
         icon: "Code",
         color: "bg-blue-500",
         userId: user.id,
+        coefficient: 2,
       },
     }),
     prisma.context.upsert({
@@ -55,6 +56,7 @@ async function main() {
         icon: "Coffee",
         color: "bg-green-500",
         userId: user.id,
+        coefficient: -1,
       },
     }),
     prisma.context.upsert({

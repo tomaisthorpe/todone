@@ -40,6 +40,11 @@ const contextSchema = z.object({
   description: z.string().optional(),
   icon: z.string(),
   color: z.string(),
+  coefficient: z
+    .number({ invalid_type_error: "Coefficient must be a number" })
+    .min(-1000, "Too small")
+    .max(1000, "Too large")
+    .default(0),
 });
 
 type ContextFormData = z.infer<typeof contextSchema>;
@@ -50,6 +55,7 @@ interface TaskModalProps {
     name: string;
     icon: string;
     color: string;
+    coefficient?: number;
   }>;
   task?: Task;
   isOpen: boolean;
@@ -110,6 +116,7 @@ export function TaskModal({
     defaultValues: {
       icon: "Home",
       color: "bg-blue-500",
+      coefficient: 0,
     },
   });
 
@@ -147,6 +154,7 @@ export function TaskModal({
           description: contextToEdit.description || "",
           icon: contextToEdit.icon,
           color: contextToEdit.color,
+          coefficient: contextToEdit.coefficient ?? 0,
         });
         setActiveTab("context");
       } else {
@@ -233,6 +241,7 @@ export function TaskModal({
     if (data.description) formData.append("description", data.description);
     formData.append("icon", data.icon);
     formData.append("color", data.color);
+    formData.append("coefficient", data.coefficient.toString());
 
     try {
       if (isEditingContext) {
@@ -450,6 +459,30 @@ export function TaskModal({
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div>
+                <Label htmlFor={getFieldId("coefficient")}>
+                  Context coefficient
+                </Label>
+                <Input
+                  id={getFieldId("coefficient")}
+                  type="number"
+                  step="0.1"
+                  placeholder="0"
+                  value={contextForm.watch("coefficient")}
+                  onChange={(e) =>
+                    contextForm.setValue(
+                      "coefficient",
+                      e.target.value === "" ? 0 : Number(e.target.value)
+                    )
+                  }
+                />
+                {contextForm.formState.errors.coefficient && (
+                  <p className="text-sm text-red-500 mt-1">
+                    {contextForm.formState.errors.coefficient.message as string}
+                  </p>
+                )}
               </div>
 
               <div className="col-span-2">

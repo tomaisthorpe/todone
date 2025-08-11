@@ -91,6 +91,9 @@ export function ContextGroup({
                 <div className="text-left">
                   <h3 className="font-semibold">{context.name}</h3>
                   <p className="text-sm opacity-90">{context.description}</p>
+                  {typeof context.coefficient === "number" && context.coefficient !== 0 && (
+                    <p className="text-xs opacity-90">Coeff: {context.coefficient}</p>
+                  )}
                 </div>
               </div>
               <div className="text-right">
