@@ -5,127 +5,67 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function calculateUrgency(task: {
+export type UrgencyInput = {
   priority: "LOW" | "MEDIUM" | "HIGH";
   dueDate: Date | null;
   createdAt: Date;
   tags: string[];
-}): number {
-  let urgency = 5.0; // Base urgency
+};
 
-  // Priority weight
-  switch (task.priority) {
-    case "HIGH":
-      urgency += 2.0;
-      break;
-    case "MEDIUM":
-      urgency += 1.0;
-      break;
-    case "LOW":
-      urgency += 0.0;
-      break;
-  }
+export type UrgencyResult = {
+  score: number;
+  explanation: string[];
+};
 
-  // Age weight (older tasks get more urgent)
-  const ageInDays = diffInLocalCalendarDays(new Date(), task.createdAt);
-  urgency += Math.min(ageInDays * 0.1, 2.0);
-
-  // Due date weight
-  if (task.dueDate) {
-    const daysUntilDue = diffInLocalCalendarDays(task.dueDate);
-    
-    if (daysUntilDue < 0) {
-      urgency += 3.0; // Overdue
-    } else if (daysUntilDue === 0) {
-      urgency += 2.5; // Due today
-    } else if (daysUntilDue === 1) {
-      urgency += 2.0; // Due tomorrow
-    } else if (daysUntilDue <= 3) {
-      urgency += 1.0; // Due soon
-    }
-  }
-
-  // Tag weight
-  const urgentTags = ["urgent", "important", "critical"];
-  const hasUrgentTag = task.tags.some(tag => 
-    urgentTags.includes(tag.toLowerCase())
-  );
-  if (hasUrgentTag) {
-    urgency += 1.5;
-  }
-
-  return urgency;
-}
-
-export function explainUrgency(task: {
-  priority: "LOW" | "MEDIUM" | "HIGH";
-  dueDate: Date | null;
-  createdAt: Date;
-  tags: string[];
-}): { score: number; explanation: string[] } {
-  let urgency = 5.0;
+export function evaluateUrgency(task: UrgencyInput): UrgencyResult {
+  let urgency = 0;
   const explanation: string[] = [];
-  
-  explanation.push("Base urgency: 5.0");
 
-  // Priority weight
-  switch (task.priority) {
-    case "HIGH":
-      urgency += 2.0;
-      explanation.push("High priority: +2.0");
-      break;
-    case "MEDIUM":
-      urgency += 1.0;
-      explanation.push("Medium priority: +1.0");
-      break;
-    case "LOW":
-      urgency += 0.0;
-      explanation.push("Low priority: +0.0");
-      break;
-  }
+  const add = (delta: number, label: string) => {
+    urgency += delta;
+    explanation.push(`${label}: ${delta >= 0 ? "+" : ""}${delta.toFixed(1)}`);
+  };
 
-  // Age weight (older tasks get more urgent)
+  // Base
+  add(5.0, "Base urgency");
+
+  // Priority
+  const priorityDelta =
+    task.priority === "HIGH" ? 2.0 : task.priority === "MEDIUM" ? 1.0 : 0.0;
+  const prettyPriority = `${task.priority[0]}${task.priority.slice(1).toLowerCase()}`;
+  add(priorityDelta, `${prettyPriority} priority`);
+
+  // Age
   const ageInDays = diffInLocalCalendarDays(new Date(), task.createdAt);
-  const ageWeight = Math.min(ageInDays * 0.1, 2.0);
-  urgency += ageWeight;
-  explanation.push(`Task age (${ageInDays} days): +${ageWeight.toFixed(1)}`);
+  const ageDelta = Math.min(ageInDays * 0.1, 2.0);
+  add(ageDelta, `Task age (${ageInDays} days)`);
 
-  // Due date weight
+  // Due date
   if (task.dueDate) {
     const daysUntilDue = diffInLocalCalendarDays(task.dueDate);
-    
-    if (daysUntilDue < 0) {
-      urgency += 3.0;
-      explanation.push(`Overdue (${Math.abs(daysUntilDue)} days): +3.0`);
-    } else if (daysUntilDue === 0) {
-      urgency += 2.5;
-      explanation.push(`Due today: +2.5`);
-    } else if (daysUntilDue === 1) {
-      urgency += 2.0;
-      explanation.push(`Due tomorrow: +2.0`);
-    } else if (daysUntilDue <= 3) {
-      urgency += 1.0;
-      explanation.push(`Due in ${daysUntilDue} days: +1.0`);
-    } else {
-      explanation.push(`Due in ${daysUntilDue} days: +0.0`);
-    }
+    if (daysUntilDue < 0) add(3.0, `Overdue (${Math.abs(daysUntilDue)} days)`);
+    else if (daysUntilDue === 0) add(2.5, "Due today");
+    else if (daysUntilDue === 1) add(2.0, "Due tomorrow");
+    else if (daysUntilDue <= 3) add(1.0, `Due in ${daysUntilDue} days`);
+    else add(0.0, `Due in ${daysUntilDue} days`);
   } else {
-    explanation.push("No due date: +0.0");
+    add(0.0, "No due date");
   }
 
-  // Tag weight
+  // Tags
   const urgentTags = ["urgent", "important", "critical"];
-  const hasUrgentTag = task.tags.some(tag => 
-    urgentTags.includes(tag.toLowerCase())
-  );
-  if (hasUrgentTag) {
-    urgency += 1.5;
-    explanation.push("Urgent tags: +1.5");
-  } else {
-    explanation.push("No urgent tags: +0.0");
-  }
+  const hasUrgentTag = task.tags.some((tag) => urgentTags.includes(tag.toLowerCase()));
+  add(hasUrgentTag ? 1.5 : 0.0, hasUrgentTag ? "Urgent tags" : "No urgent tags");
 
   return { score: urgency, explanation };
+}
+
+export function calculateUrgency(task: UrgencyInput): number {
+  return evaluateUrgency(task).score;
+}
+
+export function explainUrgency(task: UrgencyInput): UrgencyResult {
+  return evaluateUrgency(task);
 }
 
 export function parseTags(tagsString: string): string[] {

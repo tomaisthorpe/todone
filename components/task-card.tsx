@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { RotateCcw, Dumbbell, BookOpen, Flame, Wrench } from "lucide-react";
-import { formatDateForTask, explainUrgency } from "@/lib/utils";
+import { formatDateForTask, evaluateUrgency } from "@/lib/utils";
 import { getHabitStatus, getHabitDisplay } from "@/lib/habits";
 import { cn } from "@/lib/utils";
 import { TaskToggleButton } from "./task-toggle-button";
@@ -51,7 +51,7 @@ export function TaskCard({ task, contexts }: TaskCardProps) {
         })
       : null;
   const habitDisplay = getHabitDisplay(task);
-  const urgencyExplanation = explainUrgency({
+  const urgencyExplanation = evaluateUrgency({
     priority: task.priority,
     dueDate: task.dueDate,
     createdAt: task.createdAt,
@@ -195,14 +195,15 @@ export function TaskCard({ task, contexts }: TaskCardProps) {
             </div>
           </div>
         </div>
-      </div>
 
-      <TaskModal
-        contexts={contexts}
-        task={task}
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-      />
-    </TooltipProvider>
-  );
-}
+        </div>
+
+        <TaskModal
+          contexts={contexts}
+          task={task}
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+        />
+      </TooltipProvider>
+    );
+  }
