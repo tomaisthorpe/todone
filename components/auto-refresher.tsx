@@ -8,7 +8,10 @@ export function AutoRefresher({ intervalMs = 5000 }: { intervalMs?: number }) {
 
   useEffect(() => {
     const intervalId = setInterval(() => {
-      router.refresh();
+      const openDialog = document.querySelector('[data-slot="dialog-content"][data-state="open"]');
+      if (!openDialog) {
+        router.refresh();
+      }
     }, intervalMs);
 
     return () => clearInterval(intervalId);
@@ -16,7 +19,9 @@ export function AutoRefresher({ intervalMs = 5000 }: { intervalMs?: number }) {
 
   useEffect(() => {
     const refreshIfVisible = () => {
-      if (document.visibilityState === "visible") {
+      // Skip if any dialog is open to avoid wiping unsaved changes
+      const openDialog = document.querySelector('[data-slot="dialog-content"][data-state="open"]');
+      if (document.visibilityState === "visible" && !openDialog) {
         router.refresh();
       }
     };
