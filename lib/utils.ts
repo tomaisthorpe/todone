@@ -58,7 +58,7 @@ export function calculateUrgency(task: {
     urgency += 1.5;
   }
 
-  return Math.min(Math.max(urgency, 0), 10); // Clamp between 0 and 10
+  return urgency;
 }
 
 export function explainUrgency(task: {
@@ -133,13 +133,7 @@ export function explainUrgency(task: {
     explanation.push("No urgent tags: +0.0");
   }
 
-  const finalScore = Math.min(Math.max(urgency, 0), 10);
-  
-  if (finalScore !== urgency) {
-    explanation.push(`Clamped to range [0-10]: ${finalScore.toFixed(1)}`);
-  }
-
-  return { score: finalScore, explanation };
+  return { score: urgency, explanation };
 }
 
 export function parseTags(tagsString: string): string[] {

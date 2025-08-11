@@ -377,7 +377,7 @@ const Todone = () => {
       urgency += 1.5;
     }
 
-    return Math.min(Math.max(urgency, 0), 10); // Clamp between 0 and 10
+    return urgency;
   };
 
   const getTodayTasks = () => {
