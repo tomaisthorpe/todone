@@ -100,6 +100,7 @@ export async function getTasks(): Promise<Task[]> {
         dueDate: task.dueDate,
         createdAt: task.createdAt,
         tags: task.tags,
+        project: task.project,
       }),
     }));
 
@@ -175,6 +176,7 @@ export async function getUserTasks(userId: string): Promise<Task[]> {
         dueDate: task.dueDate,
         createdAt: task.createdAt,
         tags: task.tags,
+        project: task.project,
       }),
     }));
 
@@ -293,6 +295,7 @@ export async function getCompletedTasks(
         dueDate: task.dueDate,
         createdAt: task.createdAt,
         tags: task.tags,
+        project: task.project,
       }),
     }));
 

@@ -123,33 +123,35 @@ export async function toggleTaskAction(taskId: string) {
           tags: task.tags,
           contextId: task.contextId,
           dueDate: nextDueDate,
-          type: "RECURRING",
+          type: task.type,
+          userId: task.userId,
           frequency: task.frequency,
           nextDue: nextDueDate,
-          userId: task.userId,
-          completed: false,
         },
       });
-    }
 
-    // Mark current task as completed
-    await prisma.task.update({
-      where: { id: taskId },
-      data: {
-        completed: true,
-        completedAt: now,
-      },
-    });
-  } else {
-    // Regular task or uncompleting a recurring task
-    await prisma.task.update({
-      where: { id: taskId },
-      data: {
-        completed: !task.completed,
-        completedAt: !task.completed ? now : null,
-      },
-    });
+      // Mark current recurring task as completed
+      await prisma.task.update({
+        where: { id: taskId },
+        data: {
+          completed: true,
+          completedAt: now,
+        },
+      });
+
+      revalidatePath("/");
+      return;
+    }
   }
+
+  // Toggle task completion state (non-habit or non-recurring)
+  await prisma.task.update({
+    where: { id: taskId },
+    data: {
+      completed: !task.completed,
+      completedAt: !task.completed ? now : null,
+    },
+  });
 
   revalidatePath("/");
 }
@@ -275,6 +277,7 @@ export async function updateTaskAction(formData: FormData) {
     dueDate: dueDate ? new Date(dueDate) : null,
     createdAt: existingTask.createdAt,
     tags,
+    project: project || null,
   });
 
   // Prepare update data based on type
@@ -326,6 +329,7 @@ export async function createContextAction(formData: FormData) {
     throw new Error("Name is required");
   }
 
+  // Create context
   await prisma.context.create({
     data: {
       name,

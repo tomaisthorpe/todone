@@ -27,6 +27,19 @@ export const URGENCY_CONSTANTS = {
     horizonDays: 30,
   },
 
+  // Project: adding a project adds a fixed 1 * coefficient
+  project: {
+    coefficient: 1.0,
+  },
+
+  // Tags: special tag impacts
+  tags: {
+    special: {
+      next: 15,
+      blocked: -5,
+    } as const,
+  },
+
   // Urgency color thresholds tuned for the new scale (max roughly ~20)
   colors: {
     highThreshold: 14, // red
