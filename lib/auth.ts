@@ -57,8 +57,24 @@ export const authOptions = {
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async session({ session, token }: { session: any; token: any }) {
-      if (token) {
-        session.user.id = token.id as string;
+      if (token?.id) {
+        // Validate that the user still exists in the database
+        try {
+          const user = await prisma.user.findUnique({
+            where: { id: token.id as string }
+          });
+          
+          if (!user) {
+            // User no longer exists, return null to invalidate session
+            return null;
+          }
+          
+          session.user.id = token.id as string;
+        } catch (error) {
+          console.error("Error validating user existence:", error);
+          // Return null to invalidate session on database errors
+          return null;
+        }
       }
       return session;
     }
