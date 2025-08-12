@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth/next";
 import { Session } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { getTasks, getContexts } from "@/lib/data";
+import { getTasks, getContexts, getArchivedContexts } from "@/lib/data";
 import { signOutAction } from "@/lib/server-actions";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -19,7 +19,11 @@ export default async function Dashboard() {
   }
 
   // Server-side data fetching
-  const [tasks, contexts] = await Promise.all([getTasks(), getContexts()]);
+  const [tasks, contexts, archivedContexts] = await Promise.all([
+    getTasks(),
+    getContexts(),
+    getArchivedContexts(),
+  ]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -53,7 +57,7 @@ export default async function Dashboard() {
         </div>
       </div>
 
-      <DashboardClient tasks={tasks} contexts={contexts} />
+      <DashboardClient tasks={tasks} contexts={contexts} archivedContexts={archivedContexts} />
 
       {/* Periodic auto-refresh for multi-device sync */}
       <AutoRefresher intervalMs={5000} />

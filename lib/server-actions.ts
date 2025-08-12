@@ -433,3 +433,62 @@ export async function getExistingTags(): Promise<string[]> {
     return [];
   }
 }
+
+// Archive context action
+export async function archiveContextAction(contextId: string) {
+  const userId = await getAuthenticatedUser();
+
+  // Verify context belongs to user
+  const existingContext = await prisma.context.findFirst({
+    where: { id: contextId, userId },
+  });
+
+  if (!existingContext) {
+    throw new Error("Context not found");
+  }
+
+  // Handle tasks in the context before archiving
+  const tasks = await prisma.task.findMany({
+    where: { contextId },
+  });
+
+  // Delete incomplete tasks, keep completed tasks
+  const incompleteTasks = tasks.filter(task => !task.completed);
+  if (incompleteTasks.length > 0) {
+    await prisma.task.deleteMany({
+      where: {
+        id: { in: incompleteTasks.map(task => task.id) },
+      },
+    });
+  }
+
+  // Archive the context
+  await prisma.context.update({
+    where: { id: contextId },
+    data: { archived: true },
+  });
+
+  revalidatePath("/");
+}
+
+// Unarchive context action
+export async function unarchiveContextAction(contextId: string) {
+  const userId = await getAuthenticatedUser();
+
+  // Verify context belongs to user
+  const existingContext = await prisma.context.findFirst({
+    where: { id: contextId, userId, archived: true },
+  });
+
+  if (!existingContext) {
+    throw new Error("Archived context not found");
+  }
+
+  // Unarchive the context
+  await prisma.context.update({
+    where: { id: contextId },
+    data: { archived: false },
+  });
+
+  revalidatePath("/");
+}
