@@ -17,6 +17,42 @@ async function getAuthenticatedUser() {
   return session.user.id;
 }
 
+// Helper function to create an inbox context for a user
+export async function createInboxContext(userId: string) {
+  try {
+    const inboxContext = await prisma.context.create({
+      data: {
+        name: "Inbox",
+        description: "Default context for new tasks",
+        icon: "Inbox",
+        color: "bg-blue-500",
+        coefficient: 0.0,
+        isInbox: true,
+        userId,
+      },
+    });
+    return inboxContext;
+  } catch (error) {
+    console.error("Error creating inbox context:", error);
+    throw error;
+  }
+}
+
+// Helper function to get or create user's inbox context
+export async function getOrCreateInboxContext(userId: string) {
+  // First try to find existing inbox
+  let inboxContext = await prisma.context.findFirst({
+    where: { userId, isInbox: true },
+  });
+
+  // If no inbox exists, create one
+  if (!inboxContext) {
+    inboxContext = await createInboxContext(userId);
+  }
+
+  return inboxContext;
+}
+
 // Server action to toggle task completion
 export async function toggleTaskAction(taskId: string) {
   const userId = await getAuthenticatedUser();
@@ -178,13 +214,20 @@ export async function createTaskAction(formData: FormData) {
     : null;
   const tagsString = formData.get("tags") as string;
 
-  if (!title || !contextId) {
-    throw new Error("Title and context are required");
+  if (!title) {
+    throw new Error("Title is required");
+  }
+
+  // Use provided context or fallback to inbox
+  let finalContextId = contextId;
+  if (!contextId) {
+    const inboxContext = await getOrCreateInboxContext(userId);
+    finalContextId = inboxContext.id;
   }
 
   // Verify context belongs to user
   const context = await prisma.context.findFirst({
-    where: { id: contextId, userId },
+    where: { id: finalContextId, userId },
   });
 
   if (!context) {
@@ -200,7 +243,7 @@ export async function createTaskAction(formData: FormData) {
     project: project || null,
     priority,
     tags,
-    contextId,
+    contextId: finalContextId,
     dueDate: dueDate ? new Date(dueDate) : null,
     type,
     userId,
@@ -370,6 +413,11 @@ export async function updateContextAction(formData: FormData) {
     throw new Error("Context not found");
   }
 
+  // Prevent modifying inbox contexts
+  if (existingContext.isInbox) {
+    throw new Error("Inbox context cannot be modified");
+  }
+
   await prisma.context.update({
     where: { id: contextId },
     data: {
@@ -445,6 +493,11 @@ export async function archiveContextAction(contextId: string) {
 
   if (!existingContext) {
     throw new Error("Context not found");
+  }
+
+  // Prevent archiving inbox contexts
+  if (existingContext.isInbox) {
+    throw new Error("Inbox context cannot be archived");
   }
 
   // Handle tasks in the context before archiving

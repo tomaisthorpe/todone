@@ -47,6 +47,7 @@ export interface Context {
   coefficient: number;
   shared: boolean;
   archived: boolean;
+  isInbox: boolean;
   userId: string;
   createdAt: Date;
   updatedAt: Date;
@@ -143,6 +144,28 @@ export async function getArchivedContexts(): Promise<Context[]> {
   } catch (error) {
     console.error("Error fetching archived contexts:", error);
     return [];
+  }
+}
+
+export async function getInboxContext(): Promise<Context | null> {
+  const session = await getAuthenticatedSession();
+
+  if (!session?.user?.id) {
+    return null;
+  }
+
+  try {
+    const inboxContext = await prisma.context.findFirst({
+      where: {
+        userId: session.user.id,
+        isInbox: true,
+      },
+    });
+
+    return inboxContext;
+  } catch (error) {
+    console.error("Error fetching inbox context:", error);
+    return null;
   }
 }
 

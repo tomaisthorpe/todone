@@ -45,6 +45,7 @@ interface TaskFormProps {
     name: string;
     icon: string;
     color: string;
+    isInbox: boolean;
   }>;
   existingTags?: string[];
   errors?: Partial<Record<keyof TaskFormData, string>>;
@@ -170,30 +171,40 @@ export function TaskForm({
             htmlFor={getFieldId("context")}
             className={compact ? "text-xs" : ""}
           >
-            Context {!compact && "*"}
+            Context
           </Label>
           <Select
             value={data.contextId}
             onValueChange={(value) => onChange("contextId", value)}
           >
             <SelectTrigger className={compact ? "text-sm mt-1" : ""}>
-              <SelectValue placeholder="Select context" />
+              <SelectValue placeholder="Inbox (default)" />
             </SelectTrigger>
             <SelectContent>
-              {contexts.map((context) => {
-                const IconComponent = getContextIconComponent(context.icon);
-                return (
-                  <SelectItem key={context.id} value={context.id}>
-                    <div className="flex items-center">
-                      <div
-                        className={`w-3 h-3 rounded-full ${context.color} mr-2`}
-                      />
-                      <IconComponent className="w-4 h-4 mr-2" />
-                      {context.name}
-                    </div>
-                  </SelectItem>
-                );
-              })}
+              {contexts
+                .sort((a, b) => {
+                  // Sort inbox context first, then alphabetically
+                  if (a.isInbox) return -1;
+                  if (b.isInbox) return 1;
+                  return a.name.localeCompare(b.name);
+                })
+                .map((context) => {
+                  const IconComponent = getContextIconComponent(context.icon);
+                  return (
+                    <SelectItem key={context.id} value={context.id}>
+                      <div className="flex items-center">
+                        <div
+                          className={`w-3 h-3 rounded-full ${context.color} mr-2`}
+                        />
+                        <IconComponent className="w-4 h-4 mr-2" />
+                        {context.name}
+                        {context.isInbox && (
+                          <span className="text-xs text-gray-500 ml-2">(default)</span>
+                        )}
+                      </div>
+                    </SelectItem>
+                  );
+                })}
             </SelectContent>
           </Select>
           {errors.contextId && (

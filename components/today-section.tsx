@@ -15,6 +15,7 @@ interface TodaySectionProps {
     icon: string;
     color: string;
     coefficient: number;
+    isInbox: boolean;
   }>;
   onContextClick?: (contextId: string) => void;
 }

@@ -61,10 +61,10 @@ function ContextGroupHeader({
         <div className="w-full flex items-center justify-between rounded-lg p-2 transition-colors">
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-2">
-              <ChevronDown 
+              <ChevronDown
                 className={`w-4 h-4 transition-transform ${
                   isCollapsed ? "-rotate-90" : "rotate-0"
-                }`} 
+                }`}
               />
               <IconComponent className="w-5 h-5" />
             </div>
@@ -76,14 +76,16 @@ function ContextGroupHeader({
           <div className="text-right">
             <div className="flex flex-col items-end gap-1">
               <div className="ml-3 flex flex-wrap justify-end items-center gap-2 flex-shrink-0">
-                <button
-                  onClick={() => setIsEditContextOpen(true)}
-                  className="flex items-center space-x-2 px-2 py-1 text-xs bg-white/20 hover:bg-white/30 rounded-md transition-colors"
-                  title="Edit context"
-                >
-                  <Pencil className="w-3 h-3" />
-                  <span>Edit</span>
-                </button>
+                {!context.isInbox && (
+                  <button
+                    onClick={() => setIsEditContextOpen(true)}
+                    className="flex items-center space-x-2 px-2 py-1 text-xs bg-white/20 hover:bg-white/30 rounded-md transition-colors"
+                    title="Edit context"
+                  >
+                    <Pencil className="w-3 h-3" />
+                    <span>Edit</span>
+                  </button>
+                )}
                 <AddItemModal
                   contexts={allContexts}
                   defaultContextId={context.id}
@@ -169,14 +171,13 @@ export function ContextGroup({
         collapsed={collapsed}
         onCollapsedChange={onCollapsedChange}
       >
-        <ContextGroupHeader 
+        <ContextGroupHeader
           context={context}
           allContexts={allContexts}
           completion={completion}
           todayTasksInContext={todayTasksInContext}
           hasHabits={hasHabits}
         />
-
         <ContextCollapsibleContent>
           <div className="p-2 md:p-4">
             {contextTasks.length > 0 ? (

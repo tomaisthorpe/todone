@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { createInboxContext } from "@/lib/server-actions";
 import { z } from "zod";
 
 const signupSchema = z.object({
@@ -37,6 +38,9 @@ export async function POST(request: NextRequest) {
         password: hashedPassword,
       },
     });
+
+    // Create inbox context for the new user
+    await createInboxContext(user.id);
 
     // Return user without password
     const userWithoutPassword: Omit<typeof user, 'password'> = {

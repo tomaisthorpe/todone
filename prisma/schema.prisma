@@ -75,6 +75,7 @@ model Context {
   coefficient Float    @default(0.0)
   shared      Boolean  @default(false)
   archived    Boolean  @default(false)
+  isInbox     Boolean  @default(false)
   userId      String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
