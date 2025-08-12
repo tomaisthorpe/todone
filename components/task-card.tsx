@@ -25,6 +25,7 @@ interface TaskCardProps {
     color: string;
     coefficient: number;
   }>;
+  showContext?: boolean;
 }
 
 const renderHabitIcon = (iconType: string, className: string) => {
@@ -42,7 +43,7 @@ const renderHabitIcon = (iconType: string, className: string) => {
   }
 };
 
-export function TaskCard({ task, contexts }: TaskCardProps) {
+export function TaskCard({ task, contexts, showContext = false }: TaskCardProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const dateInfo = formatDateForTask(task.dueDate);
   const habitStatus =
@@ -134,9 +135,9 @@ export function TaskCard({ task, contexts }: TaskCardProps) {
                 )}
               </div>
 
-              {(taskContext || task.project || task.tags.length > 0) && (
+              {((showContext && taskContext) || task.project || task.tags.length > 0) && (
                 <div className="flex items-center space-x-3 mt-1">
-                  {taskContext && ContextIconComponent && (
+                  {showContext && taskContext && ContextIconComponent && (
                     <div className={cn(
                       "inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium text-white",
                       taskContext.color
