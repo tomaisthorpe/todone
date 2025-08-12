@@ -19,8 +19,21 @@ async function main() {
 
   console.log("Created user:", user.email);
 
-  // Create contexts
+  // Create contexts including inbox
   const contexts = await Promise.all([
+    prisma.context.upsert({
+      where: { id: "inbox-context" },
+      update: {},
+      create: {
+        id: "inbox-context",
+        name: "Inbox",
+        description: "Default context for new tasks",
+        icon: "Inbox",
+        color: "bg-blue-500",
+        isInbox: true,
+        userId: user.id,
+      },
+    }),
     prisma.context.upsert({
       where: { id: "coding-context" },
       update: {},
@@ -29,7 +42,7 @@ async function main() {
         name: "Coding",
         description: "Development work",
         icon: "Code",
-        color: "bg-blue-500",
+        color: "bg-green-500",
         userId: user.id,
       },
     }),

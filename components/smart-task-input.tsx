@@ -32,6 +32,7 @@ interface SmartTaskInputProps {
     icon: string;
     color: string;
     coefficient: number;
+    isInbox: boolean;
   }>;
   className?: string;
   onTaskCreated?: () => void;
@@ -782,9 +783,7 @@ export function SmartTaskInput({
                 errors={
                   error
                     ? {
-                        contextId: parsedTask.contextId
-                          ? undefined
-                          : "Context is required",
+                        // Context is no longer required since we have inbox fallback
                       }
                     : undefined
                 }

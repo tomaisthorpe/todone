@@ -24,6 +24,7 @@ interface TaskCardProps {
     icon: string;
     color: string;
     coefficient: number;
+    isInbox: boolean;
   }>;
   showContext?: boolean;
   onContextClick?: (contextId: string) => void;

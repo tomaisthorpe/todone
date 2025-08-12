@@ -38,6 +38,7 @@ import {
   Beaker,
   Car,
   Briefcase,
+  Inbox,
 } from "lucide-react";
 
 export type IconComponent = React.ComponentType<{ className?: string }>;
@@ -82,6 +83,7 @@ export const contextIconMap: Record<string, IconComponent> = {
   // Legacy/extra icons that might exist in stored contexts
   Car,
   Briefcase,
+  Inbox,
 };
 
 export function getContextIconComponent(name: string): IconComponent {
@@ -94,6 +96,7 @@ export const contextIconOptions: ReadonlyArray<{
   label: string;
 }> = [
   { value: "Home", icon: Home, label: "Home" },
+  { value: "Inbox", icon: Inbox, label: "Inbox" },
   { value: "Code", icon: Code, label: "Coding" },
   { value: "Coffee", icon: Coffee, label: "Kitchen" },
   { value: "Building", icon: Building, label: "Work" },

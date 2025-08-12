@@ -53,6 +53,7 @@ interface TaskModalProps {
     icon: string;
     color: string;
     coefficient: number;
+    isInbox: boolean;
   }>;
   task?: Task;
   isOpen: boolean;
@@ -197,7 +198,7 @@ export function TaskModal({
 
     // Basic validation
     if (!taskFormData.title.trim()) return;
-    if (!taskFormData.contextId) return;
+    // Context is no longer required since we have inbox fallback
     if (taskFormData.type === "RECURRING" && !taskFormData.frequency) return;
 
     // Clear any previous errors and set loading state
@@ -309,9 +310,7 @@ export function TaskModal({
     if (!taskFormData.title.trim()) {
       errors.title = "Title is required";
     }
-    if (!taskFormData.contextId) {
-      errors.contextId = "Context is required";
-    }
+    // Context is no longer required since we have inbox fallback
     if (taskFormData.type === "RECURRING" && !taskFormData.frequency) {
       errors.frequency = "Frequency is required for recurring tasks";
     }
@@ -427,10 +426,16 @@ export function TaskModal({
           >
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
-                <Label htmlFor={getFieldId("name")}>Context Name *</Label>
+                <Label htmlFor={getFieldId("name")}>
+                  Context Name * 
+                  {contextToEdit?.isInbox && (
+                    <span className="text-xs text-gray-500 ml-2">(cannot be changed)</span>
+                  )}
+                </Label>
                 <Input
                   id={getFieldId("name")}
                   placeholder="e.g., Work, Home, Kitchen"
+                  disabled={contextToEdit?.isInbox}
                   {...contextForm.register("name")}
                 />
                 {contextForm.formState.errors.name && (
@@ -520,7 +525,7 @@ export function TaskModal({
             </div>
 
             <div className="flex justify-between pt-4">
-              {isEditingContext && (
+              {isEditingContext && !contextToEdit?.isInbox && (
                 <Button
                   type="button"
                   variant="outline"
@@ -536,7 +541,10 @@ export function TaskModal({
                 <Button type="button" variant="outline" onClick={onClose}>
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isLoading}>
+                <Button 
+                  type="submit" 
+                  disabled={isLoading || (isEditingContext && contextToEdit?.isInbox)}
+                >
                   {isLoading ? (isEditingContext ? "Updating..." : "Creating...") : isEditingContext ? "Update Context" : "Create Context"}
                 </Button>
               </div>
@@ -619,6 +627,7 @@ export function AddItemModal({
     icon: string;
     color: string;
     coefficient: number;
+    isInbox: boolean;
   }>;
   defaultContextId?: string;
   addButtonSize?: "sm" | "lg";

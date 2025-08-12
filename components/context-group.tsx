@@ -96,14 +96,16 @@ export function ContextGroup({
               <div className="text-right">
                 <div className="flex flex-col items-end gap-1">
                   <div className="ml-3 flex items-center gap-2 flex-shrink-0">
-                    <button
-                      onClick={() => setIsEditContextOpen(true)}
-                      className="flex items-center space-x-2 px-2 py-1 text-xs bg-white/20 hover:bg-white/30 rounded-md transition-colors"
-                      title="Edit context"
-                    >
-                      <Pencil className="w-3 h-3" />
-                      <span>Edit</span>
-                    </button>
+                    {!context.isInbox && (
+                      <button
+                        onClick={() => setIsEditContextOpen(true)}
+                        className="flex items-center space-x-2 px-2 py-1 text-xs bg-white/20 hover:bg-white/30 rounded-md transition-colors"
+                        title="Edit context"
+                      >
+                        <Pencil className="w-3 h-3" />
+                        <span>Edit</span>
+                      </button>
+                    )}
                     <AddItemModal
                       contexts={allContexts}
                       defaultContextId={context.id}
