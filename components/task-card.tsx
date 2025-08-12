@@ -139,17 +139,30 @@ export function TaskCard({ task, contexts, showContext = false, onContextClick }
               {((showContext && taskContext) || task.project || task.tags.length > 0) && (
                 <div className="flex items-center space-x-3 mt-1">
                   {showContext && taskContext && ContextIconComponent && (
-                    <button
-                      onClick={() => onContextClick?.(taskContext.id)}
-                      className={cn(
-                        "inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium text-white transition-all hover:scale-105 hover:shadow-md",
-                        taskContext.color
-                      )}
-                      title={`Click to scroll to ${taskContext.name} context`}
-                    >
-                      <ContextIconComponent className="w-3 h-3 mr-1" />
-                      {taskContext.name}
-                    </button>
+                    onContextClick ? (
+                      <button
+                        onClick={() => onContextClick(taskContext.id)}
+                        className={cn(
+                          "inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium text-white transition-all hover:scale-105 hover:shadow-md",
+                          taskContext.color
+                        )}
+                        title={`Click to scroll to ${taskContext.name} context`}
+                      >
+                        <ContextIconComponent className="w-3 h-3 mr-1" />
+                        {taskContext.name}
+                      </button>
+                    ) : (
+                      <span
+                        className={cn(
+                          "inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium text-white",
+                          taskContext.color
+                        )}
+                        title={taskContext.name}
+                      >
+                        <ContextIconComponent className="w-3 h-3 mr-1" />
+                        {taskContext.name}
+                      </span>
+                    )
                   )}
                   {task.project && (
                     <span className="text-xs text-gray-500">
