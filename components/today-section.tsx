@@ -16,6 +16,7 @@ interface TodaySectionProps {
     color: string;
     coefficient: number;
   }>;
+  onContextClick?: (contextId: string) => void;
 }
 
 function getTodayTasks(tasks: Task[]): Task[] {
@@ -60,7 +61,7 @@ function getUrgentTasks(tasks: Task[]): Task[] {
     });
 }
 
-export function TodaySection({ tasks, contexts }: TodaySectionProps) {
+export function TodaySection({ tasks, contexts, onContextClick }: TodaySectionProps) {
   const [activeTab, setActiveTab] = useState<"urgency" | "today">("urgency");
 
   const urgentTasks = getUrgentTasks(tasks);
@@ -137,7 +138,7 @@ export function TodaySection({ tasks, contexts }: TodaySectionProps) {
         {currentTasks.length > 0 ? (
           <div className="space-y-2">
             {visibleTasks.map((task) => (
-              <TaskCard key={task.id} task={task} contexts={contexts} showContext={true} />
+              <TaskCard key={task.id} task={task} contexts={contexts} showContext={true} onContextClick={onContextClick} />
             ))}
             {currentTasks.length > 5 && (
               <div className="pt-2 text-center">

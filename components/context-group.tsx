@@ -74,7 +74,7 @@ export function ContextGroup({
   }).length;
 
   return (
-    <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+    <div id={`context-${context.id}`} className="bg-white rounded-xl shadow-sm overflow-hidden">
       <ContextCollapsible
         defaultCollapsed={contextTasks.length === 0}
         collapsed={collapsed}

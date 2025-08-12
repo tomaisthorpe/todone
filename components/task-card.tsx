@@ -26,6 +26,7 @@ interface TaskCardProps {
     coefficient: number;
   }>;
   showContext?: boolean;
+  onContextClick?: (contextId: string) => void;
 }
 
 const renderHabitIcon = (iconType: string, className: string) => {
@@ -43,7 +44,7 @@ const renderHabitIcon = (iconType: string, className: string) => {
   }
 };
 
-export function TaskCard({ task, contexts, showContext = false }: TaskCardProps) {
+export function TaskCard({ task, contexts, showContext = false, onContextClick }: TaskCardProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const dateInfo = formatDateForTask(task.dueDate);
   const habitStatus =
@@ -138,13 +139,17 @@ export function TaskCard({ task, contexts, showContext = false }: TaskCardProps)
               {((showContext && taskContext) || task.project || task.tags.length > 0) && (
                 <div className="flex items-center space-x-3 mt-1">
                   {showContext && taskContext && ContextIconComponent && (
-                    <div className={cn(
-                      "inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium text-white",
-                      taskContext.color
-                    )}>
+                    <button
+                      onClick={() => onContextClick?.(taskContext.id)}
+                      className={cn(
+                        "inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium text-white transition-all hover:scale-105 hover:shadow-md",
+                        taskContext.color
+                      )}
+                      title={`Click to scroll to ${taskContext.name} context`}
+                    >
                       <ContextIconComponent className="w-3 h-3 mr-1" />
                       {taskContext.name}
-                    </div>
+                    </button>
                   )}
                   {task.project && (
                     <span className="text-xs text-gray-500">

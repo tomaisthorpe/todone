@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import type { Context, Task } from "@/lib/data";
@@ -9,21 +8,21 @@ import { ContextGroup } from "@/components/context-group";
 interface ContextsSectionProps {
   contexts: Context[];
   tasks: Task[];
+  collapsedState?: Record<string, boolean>;
+  onCollapsedStateChange?: (collapsedState: Record<string, boolean>) => void;
 }
 
-export function ContextsSection({ contexts, tasks }: ContextsSectionProps) {
-  const [collapsedState, setCollapsedState] = useState<Record<string, boolean>>({});
-
+export function ContextsSection({ contexts, tasks, collapsedState = {}, onCollapsedStateChange }: ContextsSectionProps) {
   const handleExpandAll = () => {
     const next: Record<string, boolean> = {};
     for (const c of contexts) next[c.id] = false;
-    setCollapsedState(next);
+    onCollapsedStateChange?.(next);
   };
 
   const handleCollapseAll = () => {
     const next: Record<string, boolean> = {};
     for (const c of contexts) next[c.id] = true;
-    setCollapsedState(next);
+    onCollapsedStateChange?.(next);
   };
 
   const allCollapsed =
@@ -76,10 +75,10 @@ export function ContextsSection({ contexts, tasks }: ContextsSectionProps) {
                   ? {
                       collapsed: collapsedValue,
                       onCollapsedChange: (value: boolean) =>
-                        setCollapsedState((prev) => ({
-                          ...prev,
+                        onCollapsedStateChange?.({
+                          ...collapsedState,
                           [context.id]: value,
-                        })),
+                        }),
                     }
                   : {})}
               />
