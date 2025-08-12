@@ -166,6 +166,14 @@ export function TaskModal({
           frequency: undefined,
           tags: [],
         });
+        // Also reset context form to defaults
+        contextForm.reset({
+          name: "",
+          description: "",
+          icon: "Home",
+          color: "bg-blue-500",
+          coefficient: 0,
+        });
         setActiveTab("task");
       }
     }
@@ -237,6 +245,7 @@ export function TaskModal({
     if (data.description) formData.append("description", data.description);
     formData.append("icon", data.icon);
     formData.append("color", data.color);
+    formData.append("coefficient", data.coefficient.toString());
 
     try {
       if (isEditingContext) {
