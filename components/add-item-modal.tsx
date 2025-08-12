@@ -40,6 +40,7 @@ const contextSchema = z.object({
   description: z.string().optional(),
   icon: z.string(),
   color: z.string(),
+  coefficient: z.number().min(-100, "Coefficient must be at least -100").max(100, "Coefficient must be at most 100"),
 });
 
 type ContextFormData = z.infer<typeof contextSchema>;
@@ -50,6 +51,7 @@ interface TaskModalProps {
     name: string;
     icon: string;
     color: string;
+    coefficient: number;
   }>;
   task?: Task;
   isOpen: boolean;
@@ -110,6 +112,7 @@ export function TaskModal({
     defaultValues: {
       icon: "Home",
       color: "bg-blue-500",
+      coefficient: 0,
     },
   });
 
@@ -147,6 +150,7 @@ export function TaskModal({
           description: contextToEdit.description || "",
           icon: contextToEdit.icon,
           color: contextToEdit.color,
+          coefficient: contextToEdit.coefficient || 0,
         });
         setActiveTab("context");
       } else {
@@ -453,6 +457,29 @@ export function TaskModal({
               </div>
 
               <div className="col-span-2">
+                <Label htmlFor={getFieldId("coefficient")}>Context Coefficient</Label>
+                <Input
+                  id={getFieldId("coefficient")}
+                  type="number"
+                  min="-100"
+                  max="100"
+                  step="0.1"
+                  placeholder="0 (default)"
+                  {...contextForm.register("coefficient", {
+                    valueAsNumber: true,
+                  })}
+                />
+                {contextForm.formState.errors.coefficient && (
+                  <p className="text-sm text-red-500 mt-1">
+                    {contextForm.formState.errors.coefficient.message}
+                  </p>
+                )}
+                <p className="text-sm text-gray-500 mt-1">
+                  Adds a fixed value to task urgency calculations. Use positive values for higher priority contexts.
+                </p>
+              </div>
+
+              <div className="col-span-2">
                 <Label htmlFor={getFieldId("description")}>Description</Label>
                 <Textarea
                   id={getFieldId("description")}
@@ -511,6 +538,7 @@ export function AddItemModal({
     name: string;
     icon: string;
     color: string;
+    coefficient: number;
   }>;
   defaultContextId?: string;
   addButtonSize?: "sm" | "lg";

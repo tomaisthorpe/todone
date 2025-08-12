@@ -22,6 +22,7 @@ interface TaskCardProps {
     name: string;
     icon: string;
     color: string;
+    coefficient: number;
   }>;
 }
 
@@ -51,11 +52,16 @@ export function TaskCard({ task, contexts }: TaskCardProps) {
         })
       : null;
   const habitDisplay = getHabitDisplay(task);
+  
+  // Find the context for this task to get its coefficient
+  const taskContext = contexts.find(ctx => ctx.id === task.contextId);
+  
   const urgencyExplanation = evaluateUrgency({
     priority: task.priority,
     dueDate: task.dueDate,
     createdAt: task.createdAt,
     tags: task.tags,
+    contextCoefficient: taskContext?.coefficient || 0,
   });
 
   return (

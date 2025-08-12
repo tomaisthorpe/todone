@@ -72,6 +72,7 @@ model Context {
   description String?
   icon        String   @default("Home")
   color       String   @default("bg-gray-500")
+  coefficient Float    @default(0.0)
   shared      Boolean  @default(false)
   userId      String
   createdAt   DateTime @default(now())

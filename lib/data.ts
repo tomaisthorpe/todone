@@ -64,6 +64,7 @@ export interface Context {
   description: string | null;
   icon: string;
   color: string;
+  coefficient: number;
   shared: boolean;
   userId: string;
   createdAt: Date;
@@ -82,10 +83,13 @@ export async function getTasks(): Promise<Task[]> {
       where: {
         userId: session.user.id,
       },
+      include: {
+        context: true, // Include context to access coefficient
+      },
       orderBy: [{ completed: "asc" }, { createdAt: "desc" }],
     });
 
-    const tasksWithUrgency = tasks.map((task: PrismaTaskData) => ({
+    const tasksWithUrgency = tasks.map((task: PrismaTaskData & { context: { coefficient: number } }) => ({
       ...task,
       priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
       type: task.type as "TASK" | "HABIT" | "RECURRING",
@@ -101,6 +105,7 @@ export async function getTasks(): Promise<Task[]> {
         createdAt: task.createdAt,
         tags: task.tags,
         project: task.project,
+        contextCoefficient: task.context?.coefficient || 0,
       }),
     }));
 
@@ -158,10 +163,13 @@ export async function getUserTasks(userId: string): Promise<Task[]> {
       where: {
         userId: userId,
       },
+      include: {
+        context: true, // Include context to access coefficient
+      },
       orderBy: [{ completed: "asc" }, { createdAt: "desc" }],
     });
 
-    const tasksWithUrgency = tasks.map((task: PrismaTaskData) => ({
+    const tasksWithUrgency = tasks.map((task: PrismaTaskData & { context: { coefficient: number } }) => ({
       ...task,
       priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
       type: task.type as "TASK" | "HABIT" | "RECURRING",
@@ -177,6 +185,7 @@ export async function getUserTasks(userId: string): Promise<Task[]> {
         createdAt: task.createdAt,
         tags: task.tags,
         project: task.project,
+        contextCoefficient: task.context?.coefficient || 0,
       }),
     }));
 
@@ -275,12 +284,15 @@ export async function getCompletedTasks(
         completed: true,
         completedAt: { not: null },
       },
+      include: {
+        context: true, // Include context to access coefficient
+      },
       orderBy: { completedAt: "desc" }, // Most recently completed first
       skip,
       take: pageSize,
     });
 
-    const tasksWithUrgency = tasks.map((task: PrismaTaskData) => ({
+    const tasksWithUrgency = tasks.map((task: PrismaTaskData & { context: { coefficient: number } }) => ({
       ...task,
       priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
       type: task.type as "TASK" | "HABIT" | "RECURRING",
@@ -296,6 +308,7 @@ export async function getCompletedTasks(
         createdAt: task.createdAt,
         tags: task.tags,
         project: task.project,
+        contextCoefficient: task.context?.coefficient || 0,
       }),
     }));
 

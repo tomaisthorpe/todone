@@ -31,6 +31,7 @@ interface SmartTaskInputProps {
     name: string;
     icon: string;
     color: string;
+    coefficient: number;
   }>;
   className?: string;
   onTaskCreated?: () => void;
