@@ -31,7 +31,15 @@ import {
   archiveContextAction,
   getExistingTags,
 } from "@/lib/server-actions";
-import { CheckSquare, Home, Plus, Trash2, AlertTriangle, AlertCircle, Archive } from "lucide-react";
+import {
+  CheckSquare,
+  Home,
+  Plus,
+  Trash2,
+  AlertTriangle,
+  AlertCircle,
+  Archive,
+} from "lucide-react";
 import type { Task, Context } from "@/lib/data";
 import { contextIconOptions } from "@/lib/context-icons";
 
@@ -41,7 +49,10 @@ const contextSchema = z.object({
   description: z.string().optional(),
   icon: z.string(),
   color: z.string(),
-  coefficient: z.number().min(-100, "Coefficient must be at least -100").max(100, "Coefficient must be at most 100"),
+  coefficient: z
+    .number()
+    .min(-100, "Coefficient must be at least -100")
+    .max(100, "Coefficient must be at most 100"),
 });
 
 type ContextFormData = z.infer<typeof contextSchema>;
@@ -259,7 +270,9 @@ export function TaskModal({
       onClose();
     } catch (error) {
       console.error("Failed to save context:", error);
-      setError(error instanceof Error ? error.message : "Failed to save context");
+      setError(
+        error instanceof Error ? error.message : "Failed to save context"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -323,7 +336,11 @@ export function TaskModal({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white shadow-xl rounded-2xl border-0">
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? "Edit Task" : isEditingContext ? "Edit Context" : "Add New Item"}
+            {isEditing
+              ? "Edit Task"
+              : isEditingContext
+              ? "Edit Context"
+              : "Add New Item"}
           </DialogTitle>
         </DialogHeader>
 
@@ -391,10 +408,9 @@ export function TaskModal({
                 {isEditing && (
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="outline-destructive"
                     onClick={() => setShowDeleteConfirm(true)}
                     disabled={isLoading}
-                    className="text-red-600 border-red-300 hover:bg-red-50 hover:border-red-400"
                   >
                     <Trash2 className="w-4 h-4 mr-2" />
                     Delete Task
@@ -487,7 +503,9 @@ export function TaskModal({
               </div>
 
               <div className="col-span-2">
-                <Label htmlFor={getFieldId("coefficient")}>Context Coefficient</Label>
+                <Label htmlFor={getFieldId("coefficient")}>
+                  Context Coefficient
+                </Label>
                 <Input
                   id={getFieldId("coefficient")}
                   type="number"
@@ -505,7 +523,8 @@ export function TaskModal({
                   </p>
                 )}
                 <p className="text-sm text-gray-500 mt-1">
-                  Adds a fixed value to task urgency calculations. Use positive values for higher priority contexts.
+                  Adds a fixed value to task urgency calculations. Use positive
+                  values for higher priority contexts.
                 </p>
               </div>
 
@@ -523,9 +542,8 @@ export function TaskModal({
               {isEditingContext && (
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="outline-destructive"
                   onClick={() => setShowArchiveConfirm(true)}
-                  className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
                   disabled={isLoading}
                 >
                   <Archive className="w-4 h-4 mr-2" />
@@ -537,7 +555,13 @@ export function TaskModal({
                   Cancel
                 </Button>
                 <Button type="submit" disabled={isLoading}>
-                  {isLoading ? (isEditingContext ? "Updating..." : "Creating...") : isEditingContext ? "Update Context" : "Create Context"}
+                  {isLoading
+                    ? isEditingContext
+                      ? "Updating..."
+                      : "Creating..."
+                    : isEditingContext
+                    ? "Update Context"
+                    : "Create Context"}
                 </Button>
               </div>
             </div>
@@ -548,19 +572,25 @@ export function TaskModal({
       {/* Delete confirmation dialog */}
       {isEditing && (
         <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-          <DialogContent>
+          <DialogContent className="bg-white">
             <DialogHeader>
               <DialogTitle className="flex items-center">
                 <AlertTriangle className="w-4 h-4 text-red-600 mr-2" />
                 Confirm Delete
               </DialogTitle>
             </DialogHeader>
-            <p>Are you sure you want to delete this task? This action cannot be undone.</p>
+            <p>
+              Are you sure you want to delete this task? This action cannot be
+              undone.
+            </p>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setShowDeleteConfirm(false)}
+              >
                 Cancel
               </Button>
-              <Button className="bg-red-600 text-white hover:bg-red-700" onClick={handleDeleteTask}>
+              <Button variant="destructive" onClick={handleDeleteTask}>
                 Delete
               </Button>
             </div>
@@ -582,18 +612,21 @@ export function TaskModal({
               <p>Are you sure you want to archive this context?</p>
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
                 <p className="text-sm text-yellow-800">
-                  <strong>Note:</strong> Archiving will permanently delete all incomplete tasks in this context. 
-                  Completed tasks will be preserved and visible in the completed tasks page.
+                  <strong>Note:</strong> Archiving will permanently delete all
+                  incomplete tasks in this context. Completed tasks will be
+                  preserved and visible in the completed tasks page.
                 </p>
               </div>
             </div>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setShowArchiveConfirm(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setShowArchiveConfirm(false)}
+              >
                 Cancel
               </Button>
-              <Button 
+              <Button
                 variant="destructive"
-                className="bg-orange-600 hover:bg-orange-700" 
                 onClick={handleArchiveContext}
                 disabled={isLoading}
               >
@@ -636,13 +669,10 @@ export function AddItemModal({
           <span>Add</span>
         </button>
       ) : (
-        <button
-          onClick={() => setIsOpen(true)}
-          className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-        >
+        <Button onClick={() => setIsOpen(true)} variant="default" size="lg">
           <Plus className="w-4 h-4" />
           <span>Add Task</span>
-        </button>
+        </Button>
       )}
 
       <TaskModal

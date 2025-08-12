@@ -701,6 +701,7 @@ export function SmartTaskInput({
           <Button
             type="submit"
             size="sm"
+            variant="ghost"
             disabled={!parsedTask.title.trim() || isPending}
             className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0"
             style={{ zIndex: 3 }}
