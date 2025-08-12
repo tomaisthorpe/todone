@@ -1,11 +1,11 @@
 {
-  "name": "Todone - Context-Based Task Management",
-  "short_name": "Todone",
+  "name": "todone - Context-Based Task Management",
+  "short_name": "todone",
   "description": "A context-based task management app with customizable urgency scoring and flexible habit tracking.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "theme_color": "#ffffff",
   "orientation": "portrait",
   "scope": "/",
   "icons": [

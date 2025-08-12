@@ -7,7 +7,13 @@ import { CheckCircle2, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export default function SignUp() {
   const [name, setName] = useState("");
@@ -84,7 +90,8 @@ export default function SignUp() {
               Account Created!
             </h2>
             <p className="mt-2 text-sm text-gray-600">
-              Your account has been created successfully. Redirecting to sign in...
+              Your account has been created successfully. Redirecting to sign
+              in...
             </p>
           </div>
         </div>
@@ -102,7 +109,7 @@ export default function SignUp() {
             </div>
           </div>
           <h2 className="mt-6 text-3xl font-bold tracking-tight text-gray-900">
-            Join Todone
+            Join todone
           </h2>
           <p className="mt-2 text-sm text-gray-600">
             Create your account to start managing your tasks
@@ -206,11 +213,7 @@ export default function SignUp() {
                 </div>
               )}
 
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isLoading}
-              >
+              <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "Creating account..." : "Create account"}
               </Button>
             </form>
@@ -218,8 +221,8 @@ export default function SignUp() {
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">
                 Already have an account?{" "}
-                <Link 
-                  href="/auth/signin" 
+                <Link
+                  href="/auth/signin"
                   className="font-medium text-blue-600 hover:text-blue-500"
                 >
                   Sign in

@@ -54,7 +54,7 @@ export default async function CompletedPage({
                   <CheckCircle2 className="w-5 h-5 text-white" />
                 </div>
                 <h1 className="hidden md:block text-2xl font-bold text-gray-900 ml-3">
-                  Todone
+                  todone
                 </h1>
               </Link>
               <span className="text-gray-400">/</span>

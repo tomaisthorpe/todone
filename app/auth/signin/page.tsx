@@ -158,7 +158,7 @@ export default function SignIn() {
             </div>
           </div>
           <h2 className="mt-6 text-3xl font-bold tracking-tight text-gray-900">
-            Welcome to Todone
+            Welcome to todone
           </h2>
           <p className="mt-2 text-sm text-gray-600">
             Sign in to your account to manage your tasks
