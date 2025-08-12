@@ -137,7 +137,7 @@ export function TodaySection({ tasks, contexts }: TodaySectionProps) {
         {currentTasks.length > 0 ? (
           <div className="space-y-2">
             {visibleTasks.map((task) => (
-              <TaskCard key={task.id} task={task} contexts={contexts} />
+              <TaskCard key={task.id} task={task} contexts={contexts} showContext={true} />
             ))}
             {currentTasks.length > 5 && (
               <div className="pt-2 text-center">

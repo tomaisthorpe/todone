@@ -109,7 +109,7 @@ export default async function CompletedPage({
                 return (
                   <div key={task.id} className="p-4">
                     <div className="flex items-start justify-between mb-2">
-                      <TaskCard task={task} contexts={contexts} />
+                      <TaskCard task={task} contexts={contexts} showContext={true} />
                       {completedDate && (
                         <div className="ml-4 text-right">
                           <div className="text-xs text-gray-500">Completed</div>

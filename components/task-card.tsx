@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { RotateCcw, Dumbbell, BookOpen, Flame, Wrench } from "lucide-react";
 import { formatDateForTask, evaluateUrgency, getUrgencyColor } from "@/lib/utils";
 import { getHabitStatus, getHabitDisplay } from "@/lib/habits";
+import { getContextIconComponent } from "@/lib/context-icons";
 import { cn } from "@/lib/utils";
 import { TaskToggleButton } from "./task-toggle-button";
 import { TaskModal } from "./add-item-modal";
@@ -24,6 +25,7 @@ interface TaskCardProps {
     color: string;
     coefficient: number;
   }>;
+  showContext?: boolean;
 }
 
 const renderHabitIcon = (iconType: string, className: string) => {
@@ -41,7 +43,7 @@ const renderHabitIcon = (iconType: string, className: string) => {
   }
 };
 
-export function TaskCard({ task, contexts }: TaskCardProps) {
+export function TaskCard({ task, contexts, showContext = false }: TaskCardProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const dateInfo = formatDateForTask(task.dueDate);
   const habitStatus =
@@ -63,6 +65,9 @@ export function TaskCard({ task, contexts }: TaskCardProps) {
     tags: task.tags,
     contextCoefficient: taskContext?.coefficient || 0,
   });
+
+  // Get context icon component for display
+  const ContextIconComponent = taskContext ? getContextIconComponent(taskContext.icon) : null;
 
   return (
     <TooltipProvider>
@@ -130,8 +135,17 @@ export function TaskCard({ task, contexts }: TaskCardProps) {
                 )}
               </div>
 
-              {(task.project || task.tags.length > 0) && (
+              {((showContext && taskContext) || task.project || task.tags.length > 0) && (
                 <div className="flex items-center space-x-3 mt-1">
+                  {showContext && taskContext && ContextIconComponent && (
+                    <div className={cn(
+                      "inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium text-white",
+                      taskContext.color
+                    )}>
+                      <ContextIconComponent className="w-3 h-3 mr-1" />
+                      {taskContext.name}
+                    </div>
+                  )}
                   {task.project && (
                     <span className="text-xs text-gray-500">
                       {task.project}
