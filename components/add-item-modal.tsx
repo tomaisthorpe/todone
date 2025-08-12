@@ -592,7 +592,8 @@ export function TaskModal({
                 Cancel
               </Button>
               <Button 
-                className="bg-orange-600 text-white hover:bg-orange-700" 
+                variant="destructive"
+                className="bg-orange-600 hover:bg-orange-700" 
                 onClick={handleArchiveContext}
                 disabled={isLoading}
               >
