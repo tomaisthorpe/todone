@@ -1,5 +1,16 @@
 @import "tailwindcss";
 
+@theme {
+    --color-primary: var(--color-blue-500);
+    --color-primary-foreground: var(--color-white);
+    --color-secondary: var(--color-gray-500);
+    --color-secondary-foreground: var(--color-white);
+    --color-accent: var(--color-gray-500);
+    --color-accent-foreground: var(--color-white);
+    --color-destructive: var(--color-red-500);
+    --color-destructive-foreground: var(--color-white);
+}
+
 .border-input {
     border-color: #e5e7eb;
 }

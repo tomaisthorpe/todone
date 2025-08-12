@@ -2,7 +2,11 @@
 
 import React, { useState } from "react";
 import { RotateCcw, Dumbbell, BookOpen, Flame, Wrench } from "lucide-react";
-import { formatDateForTask, evaluateUrgency, getUrgencyColor } from "@/lib/utils";
+import {
+  formatDateForTask,
+  evaluateUrgency,
+  getUrgencyColor,
+} from "@/lib/utils";
 import { getHabitStatus, getHabitDisplay } from "@/lib/habits";
 import { getContextIconComponent } from "@/lib/context-icons";
 import { cn } from "@/lib/utils";
@@ -45,7 +49,12 @@ const renderHabitIcon = (iconType: string, className: string) => {
   }
 };
 
-export function TaskCard({ task, contexts, showContext = false, onContextClick }: TaskCardProps) {
+export function TaskCard({
+  task,
+  contexts,
+  showContext = false,
+  onContextClick,
+}: TaskCardProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const dateInfo = formatDateForTask(task.dueDate);
   const habitStatus =
@@ -56,10 +65,10 @@ export function TaskCard({ task, contexts, showContext = false, onContextClick }
         })
       : null;
   const habitDisplay = getHabitDisplay(task);
-  
+
   // Find the context for this task to get its coefficient
-  const taskContext = contexts.find(ctx => ctx.id === task.contextId);
-  
+  const taskContext = contexts.find((ctx) => ctx.id === task.contextId);
+
   const urgencyExplanation = evaluateUrgency({
     priority: task.priority,
     dueDate: task.dueDate,
@@ -69,12 +78,14 @@ export function TaskCard({ task, contexts, showContext = false, onContextClick }
   });
 
   // Get context icon component for display
-  const ContextIconComponent = taskContext ? getContextIconComponent(taskContext.icon) : null;
+  const ContextIconComponent = taskContext
+    ? getContextIconComponent(taskContext.icon)
+    : null;
 
   return (
     <TooltipProvider>
-      <div className="flex items-start space-x-3 py-2 px-3 hover:bg-gray-50 rounded-lg">
-        <div className={cn(task.completed && "opacity-60") }>
+      <div className="flex items-start space-x-3 py-2 sm:px-3 hover:bg-gray-50 rounded-lg">
+        <div className={cn(task.completed && "opacity-60")}>
           <TaskToggleButton taskId={task.id} completed={task.completed} />
         </div>
 
@@ -137,14 +148,18 @@ export function TaskCard({ task, contexts, showContext = false, onContextClick }
                 )}
               </div>
 
-              {((showContext && taskContext) || task.project || task.tags.length > 0) && (
-                <div className="flex items-center space-x-3 mt-1">
-                  {showContext && taskContext && ContextIconComponent && (
-                    onContextClick ? (
+              {((showContext && taskContext) ||
+                task.project ||
+                task.tags.length > 0) && (
+                <div className="flex flex-wrap items-center space-x-2 md:space-x-3 mt-1">
+                  {showContext &&
+                    taskContext &&
+                    ContextIconComponent &&
+                    (onContextClick ? (
                       <button
                         onClick={() => onContextClick(taskContext.id)}
                         className={cn(
-                          "inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium text-white transition-all hover:scale-105 hover:shadow-md",
+                          "inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium text-white transition-all hover:scale-105 hover:shadow-md mb-1",
                           taskContext.color
                         )}
                         title={`Click to scroll to ${taskContext.name} context`}
@@ -155,7 +170,7 @@ export function TaskCard({ task, contexts, showContext = false, onContextClick }
                     ) : (
                       <span
                         className={cn(
-                          "inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium text-white",
+                          "inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium text-white mb-1",
                           taskContext.color
                         )}
                         title={taskContext.name}
@@ -163,17 +178,16 @@ export function TaskCard({ task, contexts, showContext = false, onContextClick }
                         <ContextIconComponent className="w-3 h-3 mr-1" />
                         {taskContext.name}
                       </span>
-                    )
-                  )}
+                    ))}
                   {task.project && (
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-500 mb-1">
                       {task.project}
                     </span>
                   )}
                   {task.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-gray-100 text-gray-600"
+                      className="block items-center px-1.5 py-0.5 rounded text-xs bg-gray-100 text-gray-600 mb-1"
                     >
                       {tag}
                     </span>
@@ -230,15 +244,14 @@ export function TaskCard({ task, contexts, showContext = false, onContextClick }
             </div>
           </div>
         </div>
+      </div>
 
-        </div>
-
-        <TaskModal
-          contexts={contexts}
-          task={task}
-          isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
-        />
-      </TooltipProvider>
-    );
-  }
+      <TaskModal
+        contexts={contexts}
+        task={task}
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+      />
+    </TooltipProvider>
+  );
+}

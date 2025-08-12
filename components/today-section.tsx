@@ -62,7 +62,11 @@ function getUrgentTasks(tasks: Task[]): Task[] {
     });
 }
 
-export function TodaySection({ tasks, contexts, onContextClick }: TodaySectionProps) {
+export function TodaySection({
+  tasks,
+  contexts,
+  onContextClick,
+}: TodaySectionProps) {
   const [activeTab, setActiveTab] = useState<"urgency" | "today">("urgency");
 
   const urgentTasks = getUrgentTasks(tasks);
@@ -100,7 +104,9 @@ export function TodaySection({ tasks, contexts, onContextClick }: TodaySectionPr
             <div className="text-sm text-gray-500">
               {completedCount}/{currentTasks.length} completed
               {activeTab === "today" && overdueCount > 0 && (
-                <span className="text-red-500 ml-2">({overdueCount} overdue)</span>
+                <span className="text-red-500 ml-2">
+                  ({overdueCount} overdue)
+                </span>
               )}
             </div>
           </div>
@@ -135,11 +141,17 @@ export function TodaySection({ tasks, contexts, onContextClick }: TodaySectionPr
         </div>
       </div>
 
-      <div className="p-6">
+      <div className="py-4 px-2 md:p-6">
         {currentTasks.length > 0 ? (
-          <div className="space-y-2">
+          <div className="space-y-1">
             {visibleTasks.map((task) => (
-              <TaskCard key={task.id} task={task} contexts={contexts} showContext={true} onContextClick={onContextClick} />
+              <TaskCard
+                key={task.id}
+                task={task}
+                contexts={contexts}
+                showContext={true}
+                onContextClick={onContextClick}
+              />
             ))}
             {currentTasks.length > 5 && (
               <div className="pt-2 text-center">
