@@ -74,7 +74,10 @@ export function ContextGroup({
   }).length;
 
   return (
-    <div id={`context-${context.id}`} className="bg-white rounded-xl shadow-sm overflow-hidden">
+    <div
+      id={`context-${context.id}`}
+      className="bg-white rounded-xl shadow-sm overflow-hidden"
+    >
       <ContextCollapsible
         defaultCollapsed={contextTasks.length === 0}
         collapsed={collapsed}
@@ -95,7 +98,7 @@ export function ContextGroup({
               </div>
               <div className="text-right">
                 <div className="flex flex-col items-end gap-1">
-                  <div className="ml-3 flex items-center gap-2 flex-shrink-0">
+                  <div className="ml-3 flex flex-wrap justify-end items-center gap-2 flex-shrink-0">
                     <button
                       onClick={() => setIsEditContextOpen(true)}
                       className="flex items-center space-x-2 px-2 py-1 text-xs bg-white/20 hover:bg-white/30 rounded-md transition-colors"
@@ -136,7 +139,7 @@ export function ContextGroup({
         </div>
 
         <ContextCollapsibleContent>
-          <div className="p-4">
+          <div className="p-2 md:p-4">
             {contextTasks.length > 0 ? (
               <div className="space-y-1">
                 {contextTasks.map((task) => (
