@@ -1,18 +1,22 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Archive } from "lucide-react";
 import type { Context, Task } from "@/lib/data";
 import { ContextGroup } from "@/components/context-group";
+import { ArchivedContexts } from "@/components/archived-contexts";
 
 interface ContextsSectionProps {
   contexts: Context[];
   tasks: Task[];
   collapsedState?: Record<string, boolean>;
   onCollapsedStateChange?: (collapsedState: Record<string, boolean>) => void;
+  archivedContexts: Context[];
 }
 
-export function ContextsSection({ contexts, tasks, collapsedState = {}, onCollapsedStateChange }: ContextsSectionProps) {
+export function ContextsSection({ contexts, tasks, collapsedState = {}, onCollapsedStateChange, archivedContexts }: ContextsSectionProps) {
+  const [showArchivedContexts, setShowArchivedContexts] = useState(false);
   const handleExpandAll = () => {
     const next: Record<string, boolean> = {};
     for (const c of contexts) next[c.id] = false;
@@ -90,6 +94,26 @@ export function ContextsSection({ contexts, tasks, collapsedState = {}, onCollap
           <p className="text-gray-500">No contexts yet. Create one to get started!</p>
         </div>
       )}
+
+      {/* View Archived Contexts Button */}
+      <div className="flex justify-center mt-6">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setShowArchivedContexts(true)}
+          className="text-gray-600 hover:text-gray-900"
+        >
+          <Archive className="w-4 h-4 mr-2" />
+          View Archived Contexts
+        </Button>
+      </div>
+
+      {/* Archived Contexts Modal */}
+      <ArchivedContexts
+        archivedContexts={archivedContexts}
+        isOpen={showArchivedContexts}
+        onClose={() => setShowArchivedContexts(false)}
+      />
     </div>
   );
 }

@@ -46,6 +46,7 @@ export interface Context {
   color: string;
   coefficient: number;
   shared: boolean;
+  archived: boolean;
   userId: string;
   createdAt: Date;
   updatedAt: Date;
@@ -110,6 +111,7 @@ export async function getContexts(): Promise<Context[]> {
     const contexts = await prisma.context.findMany({
       where: {
         OR: [{ userId: session.user.id }, { shared: true }],
+        archived: false,
       },
       orderBy: { name: "asc" },
     });
@@ -121,11 +123,35 @@ export async function getContexts(): Promise<Context[]> {
   }
 }
 
+export async function getArchivedContexts(): Promise<Context[]> {
+  const session = await getAuthenticatedSession();
+
+  if (!session?.user?.id) {
+    return [];
+  }
+
+  try {
+    const contexts = await prisma.context.findMany({
+      where: {
+        userId: session.user.id,
+        archived: true,
+      },
+      orderBy: { name: "asc" },
+    });
+
+    return contexts;
+  } catch (error) {
+    console.error("Error fetching archived contexts:", error);
+    return [];
+  }
+}
+
 export async function getUserContexts(userId: string): Promise<Context[]> {
   try {
     const contexts = await prisma.context.findMany({
       where: {
         OR: [{ userId: userId }, { shared: true }],
+        archived: false,
       },
       orderBy: { name: "asc" },
     });

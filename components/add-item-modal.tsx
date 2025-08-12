@@ -28,9 +28,10 @@ import {
   createContextAction,
   updateContextAction,
   deleteTaskAction,
+  archiveContextAction,
   getExistingTags,
 } from "@/lib/server-actions";
-import { CheckSquare, Home, Plus, Trash2, AlertTriangle, AlertCircle } from "lucide-react";
+import { CheckSquare, Home, Plus, Trash2, AlertTriangle, AlertCircle, Archive } from "lucide-react";
 import type { Task, Context } from "@/lib/data";
 import { contextIconOptions } from "@/lib/context-icons";
 
@@ -87,6 +88,7 @@ export function TaskModal({
   const [isLoading, setIsLoading] = useState(false);
   const [existingTags, setExistingTags] = useState<string[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [taskFormData, setTaskFormData] = useState<TaskFormData>({
     title: "",
@@ -177,7 +179,7 @@ export function TaskModal({
         setActiveTab("task");
       }
     }
-  }, [isOpen, task?.id, defaultContextId, contextToEdit?.id]);
+  }, [isOpen, task?.id, defaultContextId, contextToEdit?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleTaskFormChange = <K extends keyof TaskFormData>(
     field: K,
@@ -277,6 +279,25 @@ export function TaskModal({
         error instanceof Error ? error.message : "Failed to delete task"
       );
       setShowDeleteConfirm(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleArchiveContext = async () => {
+    if (!contextToEdit) return;
+    setIsLoading(true);
+
+    try {
+      await archiveContextAction(contextToEdit.id);
+      setShowArchiveConfirm(false);
+      onClose();
+    } catch (error) {
+      console.error("Failed to archive context:", error);
+      setError(
+        error instanceof Error ? error.message : "Failed to archive context"
+      );
+      setShowArchiveConfirm(false);
     } finally {
       setIsLoading(false);
     }
@@ -498,13 +519,27 @@ export function TaskModal({
               </div>
             </div>
 
-            <div className="flex justify-end space-x-2 pt-4">
-              <Button type="button" variant="outline" onClick={onClose}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? (isEditingContext ? "Updating..." : "Creating...") : isEditingContext ? "Update Context" : "Create Context"}
-              </Button>
+            <div className="flex justify-between pt-4">
+              {isEditingContext && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowArchiveConfirm(true)}
+                  className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                  disabled={isLoading}
+                >
+                  <Archive className="w-4 h-4 mr-2" />
+                  Archive Context
+                </Button>
+              )}
+              <div className="flex space-x-2 ml-auto">
+                <Button type="button" variant="outline" onClick={onClose}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? (isEditingContext ? "Updating..." : "Creating...") : isEditingContext ? "Update Context" : "Create Context"}
+                </Button>
+              </div>
             </div>
           </form>
         )}
@@ -527,6 +562,42 @@ export function TaskModal({
               </Button>
               <Button className="bg-red-600 text-white hover:bg-red-700" onClick={handleDeleteTask}>
                 Delete
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Archive confirmation dialog */}
+      {isEditingContext && (
+        <Dialog open={showArchiveConfirm} onOpenChange={setShowArchiveConfirm}>
+          <DialogContent className="bg-white">
+            <DialogHeader>
+              <DialogTitle className="flex items-center">
+                <Archive className="w-4 h-4 text-orange-600 mr-2" />
+                Archive Context
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3">
+              <p>Are you sure you want to archive this context?</p>
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                <p className="text-sm text-yellow-800">
+                  <strong>Note:</strong> Archiving will permanently delete all incomplete tasks in this context. 
+                  Completed tasks will be preserved and visible in the completed tasks page.
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowArchiveConfirm(false)}>
+                Cancel
+              </Button>
+              <Button 
+                variant="destructive"
+                className="bg-orange-600 hover:bg-orange-700" 
+                onClick={handleArchiveContext}
+                disabled={isLoading}
+              >
+                {isLoading ? "Archiving..." : "Archive Context"}
               </Button>
             </div>
           </DialogContent>

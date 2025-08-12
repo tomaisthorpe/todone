@@ -10,9 +10,10 @@ import type { Task, Context } from "@/lib/data";
 interface DashboardClientProps {
   tasks: Task[];
   contexts: Context[];
+  archivedContexts: Context[];
 }
 
-export function DashboardClient({ tasks, contexts }: DashboardClientProps) {
+export function DashboardClient({ tasks, contexts, archivedContexts }: DashboardClientProps) {
   const [collapsedState, setCollapsedState] = useState<Record<string, boolean>>({});
 
   const scrollToContext = (contextId: string) => {
@@ -103,6 +104,7 @@ export function DashboardClient({ tasks, contexts }: DashboardClientProps) {
           tasks={tasks} 
           collapsedState={collapsedState}
           onCollapsedStateChange={setCollapsedState}
+          archivedContexts={archivedContexts}
         />
       </div>
       <div className="flex justify-center mt-2 pb-16">
