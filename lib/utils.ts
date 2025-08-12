@@ -12,6 +12,7 @@ export type UrgencyInput = {
   createdAt: Date;
   tags: string[];
   project?: string | null;
+  contextCoefficient?: number;
 };
 
 export type UrgencyResult = {
@@ -94,6 +95,11 @@ export function evaluateUrgency(task: UrgencyInput): UrgencyResult {
     if (normalized.includes("blocked")) {
       add(URGENCY_CONSTANTS.tags.special.blocked, "Tag: blocked");
     }
+  }
+
+  // Context coefficient contribution
+  if (task.contextCoefficient !== undefined && task.contextCoefficient !== 0) {
+    add(task.contextCoefficient, `Context coefficient`);
   }
 
   return { score: urgency, explanation };

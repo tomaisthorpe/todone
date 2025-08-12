@@ -14,6 +14,7 @@ interface TodaySectionProps {
     name: string;
     icon: string;
     color: string;
+    coefficient: number;
   }>;
 }
 

@@ -278,6 +278,7 @@ export async function updateTaskAction(formData: FormData) {
     createdAt: existingTask.createdAt,
     tags,
     project: project || null,
+    contextCoefficient: context.coefficient || 0,
   });
 
   // Prepare update data based on type
@@ -324,6 +325,7 @@ export async function createContextAction(formData: FormData) {
   const description = formData.get("description") as string;
   const icon = (formData.get("icon") as string) || "Home";
   const color = (formData.get("color") as string) || "bg-gray-500";
+  const coefficient = parseFloat(formData.get("coefficient") as string) || 0.0;
 
   if (!name) {
     throw new Error("Name is required");
@@ -336,6 +338,7 @@ export async function createContextAction(formData: FormData) {
       description: description || null,
       icon,
       color,
+      coefficient,
       userId,
     },
   });
@@ -352,6 +355,7 @@ export async function updateContextAction(formData: FormData) {
   const description = formData.get("description") as string;
   const icon = (formData.get("icon") as string) || "Home";
   const color = (formData.get("color") as string) || "bg-gray-500";
+  const coefficient = parseFloat(formData.get("coefficient") as string) || 0.0;
 
   if (!contextId || !name) {
     throw new Error("Context ID and name are required");
@@ -373,6 +377,7 @@ export async function updateContextAction(formData: FormData) {
       description: description || null,
       icon,
       color,
+      coefficient,
     },
   });
 
