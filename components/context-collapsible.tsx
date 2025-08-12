@@ -10,7 +10,7 @@ interface CollapsibleContextType {
 
 const CollapsibleContext = createContext<CollapsibleContextType | null>(null);
 
-function useCollapsible() {
+export function useCollapsible() {
   const context = useContext(CollapsibleContext);
   if (!context) {
     throw new Error("useCollapsible must be used within ContextCollapsible");
