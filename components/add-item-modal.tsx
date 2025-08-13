@@ -30,6 +30,7 @@ import {
   deleteTaskAction,
   archiveContextAction,
   getExistingTags,
+  completeTaskYesterdayAction,
 } from "@/lib/server-actions";
 import {
   CheckSquare,
@@ -39,6 +40,7 @@ import {
   AlertTriangle,
   AlertCircle,
   Archive,
+  Calendar,
 } from "lucide-react";
 import type { Task, Context } from "@/lib/data";
 import { contextIconOptions } from "@/lib/context-icons";
@@ -304,6 +306,23 @@ export function TaskModal({
     }
   };
 
+  const handleCompleteYesterday = async () => {
+    if (!task) return;
+    setIsLoading(true);
+
+    try {
+      await completeTaskYesterdayAction(task.id);
+      onClose();
+    } catch (error) {
+      console.error("Failed to complete task yesterday:", error);
+      setError(
+        error instanceof Error ? error.message : "Failed to complete task yesterday"
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleArchiveContext = async () => {
     if (!contextToEdit) return;
     setIsLoading(true);
@@ -409,7 +428,18 @@ export function TaskModal({
             />
 
             <div className="flex justify-between pt-4">
-              <div>
+              <div className="flex space-x-2">
+                {isEditing && !task?.completed && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleCompleteYesterday}
+                    disabled={isLoading}
+                  >
+                    <Calendar className="w-4 h-4 mr-2" />
+                    Complete Yesterday
+                  </Button>
+                )}
                 {isEditing && (
                   <Button
                     type="button"

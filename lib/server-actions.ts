@@ -192,6 +192,141 @@ export async function toggleTaskAction(taskId: string) {
   revalidatePath("/");
 }
 
+// Server action to mark task as completed yesterday
+export async function completeTaskYesterdayAction(taskId: string) {
+  const userId = await getAuthenticatedUser();
+
+  const task = await prisma.task.findFirst({
+    where: { id: taskId, userId },
+  });
+
+  if (!task) {
+    throw new Error("Task not found");
+  }
+
+  // Calculate yesterday's date
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  // Set to end of yesterday for completion time
+  yesterday.setHours(23, 59, 59, 999);
+
+  // Handle different task types similar to toggleTaskAction
+  if (task.type === "HABIT" && !task.completed) {
+    // Habit is being completed for yesterday
+    const endOfDay = (d: Date) => {
+      const x = new Date(d);
+      x.setHours(23, 59, 59, 999);
+      return x;
+    };
+
+    const startOfDay = (d: Date) => {
+      const x = new Date(d);
+      x.setHours(0, 0, 0, 0);
+      return x;
+    };
+
+    const addDays = (d: Date, days: number) => {
+      const x = new Date(d);
+      x.setDate(x.getDate() + days);
+      return x;
+    };
+
+    const isOnTime = (() => {
+      if (task.dueDate) {
+        return yesterday <= endOfDay(new Date(task.dueDate));
+      }
+      if (task.frequency) {
+        if (task.lastCompleted) {
+          const expectedDue = addDays(startOfDay(new Date(task.lastCompleted)), task.frequency);
+          return yesterday <= endOfDay(expectedDue);
+        }
+        // First completion without a prior window counts as on-time
+        return true;
+      }
+      // No due date and no frequency; treat as on-time
+      return true;
+    })();
+
+    const nextStreak = isOnTime ? (task.streak || 0) + 1 : 1;
+    const nextLongest = Math.max(task.longestStreak || 0, nextStreak);
+
+    // Create habit completion record with yesterday's date
+    await prisma.habitCompletion.create({
+      data: {
+        taskId: taskId,
+        completedAt: yesterday,
+      },
+    });
+
+    await prisma.task.update({
+      where: { id: taskId },
+      data: {
+        completed: true,
+        completedAt: yesterday,
+        lastCompleted: yesterday,
+        streak: nextStreak,
+        longestStreak: nextLongest,
+      },
+    });
+  } else if (task.type === "RECURRING" && !task.completed) {
+    // Recurring task is being completed yesterday - create next instance
+    if (task.frequency) {
+      let nextDueDate: Date;
+      
+      if (task.dueDate) {
+        // If task has a due date, calculate next due date from the original due date
+        nextDueDate = new Date(task.dueDate);
+        nextDueDate.setDate(nextDueDate.getDate() + task.frequency);
+      } else {
+        // If task has no due date, calculate next due date from yesterday's completion date
+        nextDueDate = new Date(yesterday);
+        nextDueDate.setDate(nextDueDate.getDate() + task.frequency);
+      }
+
+      // Create the next recurring task instance
+      await prisma.task.create({
+        data: {
+          title: task.title,
+          project: task.project,
+          priority: task.priority,
+          tags: task.tags,
+          contextId: task.contextId,
+          dueDate: nextDueDate,
+          type: task.type,
+          userId: task.userId,
+          frequency: task.frequency,
+          nextDue: nextDueDate,
+        },
+      });
+
+      // Mark current recurring task as completed yesterday
+      await prisma.task.update({
+        where: { id: taskId },
+        data: {
+          completed: true,
+          completedAt: yesterday,
+        },
+      });
+
+      revalidatePath("/");
+      return;
+    }
+  }
+
+  // Mark regular task as completed yesterday
+  if (!task.completed) {
+    await prisma.task.update({
+      where: { id: taskId },
+      data: {
+        completed: true,
+        completedAt: yesterday,
+      },
+    });
+  }
+
+  revalidatePath("/");
+}
+
 // Server action to create a new task
 export async function createTaskAction(formData: FormData) {
   const userId = await getAuthenticatedUser();
