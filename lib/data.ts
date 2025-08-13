@@ -297,21 +297,23 @@ export async function getCompletedTasks(
   try {
     const skip = (page - 1) * pageSize;
 
-    // Get total count of completed tasks
+    // Get total count of completed tasks (exclude habits since they're ongoing behaviors)
     const totalCount = await prisma.task.count({
       where: {
         userId: session.user.id,
         completed: true,
         completedAt: { not: null },
+        type: { not: "HABIT" },
       },
     });
 
-    // Get paginated completed tasks
+    // Get paginated completed tasks (exclude habits since they're ongoing behaviors)
     const tasks = await prisma.task.findMany({
       where: {
         userId: session.user.id,
         completed: true,
         completedAt: { not: null },
+        type: { not: "HABIT" },
       },
       include: {
         context: true,

@@ -198,7 +198,12 @@ export function formatDateForTask(date: Date | null): { text: string; color: str
   };
 }
 
-export function shouldHideCompletedTask(task: { completed: boolean; completedAt: Date | null }): boolean {
+export function shouldHideCompletedTask(task: { completed: boolean; completedAt: Date | null; type?: string }): boolean {
+  // Never hide habits - they are ongoing behaviors that should always be visible
+  if (task.type === "HABIT") {
+    return false;
+  }
+
   if (!task.completed || !task.completedAt) {
     return false; // Don't hide uncompleted tasks or tasks without completedAt
   }
@@ -227,4 +232,35 @@ export function shouldHideCompletedTask(task: { completed: boolean; completedAt:
 
   // Don't hide tasks completed today
   return false;
+}
+
+export function shouldHabitShowAsAvailable(habit: {
+  completed: boolean;
+  lastCompleted: Date | null;
+  frequency: number | null;
+  type: string;
+}): boolean {
+  // Only apply to habits
+  if (habit.type !== "HABIT") {
+    return habit.completed;
+  }
+
+  // If not completed, it's available
+  if (!habit.completed) {
+    return true;
+  }
+
+  // If no frequency or lastCompleted, show current completion state
+  if (!habit.frequency || !habit.lastCompleted) {
+    return !habit.completed;
+  }
+
+  // Calculate if enough time has passed since last completion
+  const now = new Date();
+  const lastCompleted = new Date(habit.lastCompleted);
+  const nextDueDate = new Date(lastCompleted);
+  nextDueDate.setDate(nextDueDate.getDate() + habit.frequency);
+
+  // If enough time has passed, show as available (even if technically completed)
+  return now >= nextDueDate;
 }
