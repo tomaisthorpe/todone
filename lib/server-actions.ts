@@ -17,8 +17,6 @@ async function getAuthenticatedUser() {
   return session.user.id;
 }
 
-
-
 // Helper function to create an inbox context for a user
 export async function createInboxContext(userId: string) {
   try {
@@ -96,7 +94,10 @@ export async function toggleTaskAction(taskId: string) {
       }
       if (task.frequency) {
         if (task.completedAt) {
-          const expectedDue = addDays(startOfDay(new Date(task.completedAt)), task.frequency);
+          const expectedDue = addDays(
+            startOfDay(new Date(task.completedAt)),
+            task.frequency
+          );
           return now <= endOfDay(expectedDue);
         }
         // First completion without a prior window counts as on-time
@@ -148,7 +149,7 @@ export async function toggleTaskAction(taskId: string) {
     // Recurring task is being completed - create next instance
     if (task.frequency) {
       let nextDueDate: Date;
-      
+
       if (task.dueDate) {
         // If task has a due date, calculate next due date from the original due date
         nextDueDate = new Date(task.dueDate);
@@ -245,8 +246,11 @@ export async function completeTaskYesterdayAction(taskId: string) {
         return yesterday <= endOfDay(new Date(task.dueDate));
       }
       if (task.frequency) {
-        if (task.lastCompleted) {
-          const expectedDue = addDays(startOfDay(new Date(task.lastCompleted)), task.frequency);
+        if (task.completedAt) {
+          const expectedDue = addDays(
+            startOfDay(new Date(task.completedAt)),
+            task.frequency
+          );
           return yesterday <= endOfDay(expectedDue);
         }
         // First completion without a prior window counts as on-time
@@ -272,7 +276,6 @@ export async function completeTaskYesterdayAction(taskId: string) {
       data: {
         completed: true,
         completedAt: yesterday,
-        lastCompleted: yesterday,
         streak: nextStreak,
         longestStreak: nextLongest,
       },
@@ -281,7 +284,7 @@ export async function completeTaskYesterdayAction(taskId: string) {
     // Recurring task is being completed yesterday - create next instance
     if (task.frequency) {
       let nextDueDate: Date;
-      
+
       if (task.dueDate) {
         // If task has a due date, calculate next due date from the original due date
         nextDueDate = new Date(task.dueDate);
@@ -616,7 +619,7 @@ export async function getExistingTags(): Promise<string[]> {
 
     const allTags = new Set<string>();
     tasks.forEach((task: { tags: string[] }) => {
-      task.tags.forEach(tag => allTags.add(tag));
+      task.tags.forEach((tag) => allTags.add(tag));
     });
 
     return Array.from(allTags).sort();
@@ -650,11 +653,11 @@ export async function archiveContextAction(contextId: string) {
   });
 
   // Delete incomplete tasks, keep completed tasks
-  const incompleteTasks = tasks.filter(task => !task.completed);
+  const incompleteTasks = tasks.filter((task) => !task.completed);
   if (incompleteTasks.length > 0) {
     await prisma.task.deleteMany({
       where: {
-        id: { in: incompleteTasks.map(task => task.id) },
+        id: { in: incompleteTasks.map((task) => task.id) },
       },
     });
   }
