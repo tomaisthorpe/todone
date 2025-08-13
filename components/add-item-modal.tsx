@@ -381,7 +381,7 @@ export function TaskModal({
                     className="text-xs"
                   >
                     <Calendar className="w-3 h-3 mr-1" />
-                    Yesterday
+                    Complete Yesterday
                   </Button>
                 )}
                 <Button
