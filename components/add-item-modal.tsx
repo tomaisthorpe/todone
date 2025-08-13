@@ -367,6 +367,38 @@ export function TaskModal({
                 ? "Edit Context"
                 : "Add New Item"}
             </DialogTitle>
+            
+            {/* Quick Actions in Header - Only for editing tasks */}
+            {isEditing && activeTab === "task" && (
+              <div className="flex items-center space-x-2">
+                {!task?.completed && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleCompleteYesterday}
+                    disabled={isLoading}
+                    className="text-xs"
+                    tabIndex={-1}
+                  >
+                    <Calendar className="w-3 h-3 mr-1" />
+                    Complete Yesterday
+                  </Button>
+                )}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  disabled={isLoading}
+                  className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                  tabIndex={-1}
+                >
+                  <Trash2 className="w-3 h-3 mr-1" />
+                  Delete
+                </Button>
+              </div>
+            )}
           </div>
         </DialogHeader>
 
@@ -428,41 +460,6 @@ export function TaskModal({
               task={task}
               fieldIdPrefix={modalId}
             />
-
-            {/* Quick Actions for editing tasks - moved from header */}
-            {isEditing && (
-              <div className="flex items-center justify-between pt-2 pb-2 border-t border-gray-100">
-                <div className="text-sm text-gray-600">
-                  Quick Actions:
-                </div>
-                <div className="flex items-center space-x-2">
-                  {!task?.completed && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleCompleteYesterday}
-                      disabled={isLoading}
-                      className="text-xs"
-                    >
-                      <Calendar className="w-3 h-3 mr-1" />
-                      Complete Yesterday
-                    </Button>
-                  )}
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowDeleteConfirm(true)}
-                    disabled={isLoading}
-                    className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
-                  >
-                    <Trash2 className="w-3 h-3 mr-1" />
-                    Delete
-                  </Button>
-                </div>
-              </div>
-            )}
 
             <div className="flex justify-end space-x-2 pt-4">
               <Button type="button" variant="outline" onClick={onClose}>
