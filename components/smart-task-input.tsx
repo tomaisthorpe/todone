@@ -829,9 +829,19 @@ export function SmartTaskInput({
                       >
                         {parsedTask.contextName} (not found)
                       </Badge>
-                    ) : (
-                      <span className="text-red-400">No context selected</span>
-                    )}
+                    ) : (() => {
+                      const inboxContext = contexts.find(c => c.isInbox);
+                      return inboxContext ? (
+                        <Badge
+                          variant="outline"
+                          className="text-blue-600 bg-blue-50 border-blue-200"
+                        >
+                          {inboxContext.name} (default)
+                        </Badge>
+                      ) : (
+                        <span className="text-red-400">No context available</span>
+                      );
+                    })()}
                   </div>
                 </div>
 
