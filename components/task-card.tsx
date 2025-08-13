@@ -61,7 +61,7 @@ export function TaskCard({
   const habitStatus =
     task.type === "HABIT"
       ? getHabitStatus({
-          lastCompleted: task.lastCompleted,
+          completedAt: task.completedAt,
           frequency: task.frequency,
         })
       : null;

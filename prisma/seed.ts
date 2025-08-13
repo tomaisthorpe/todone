@@ -122,7 +122,6 @@ async function main() {
       streak: 12,
       longestStreak: 28,
       frequency: 1,
-      lastCompleted: today,
       userId: user.id,
     },
 
@@ -166,7 +165,6 @@ async function main() {
       streak: 7,
       longestStreak: 15,
       frequency: 1,
-      lastCompleted: yesterday,
       userId: user.id,
     },
     {
@@ -199,7 +197,6 @@ async function main() {
       habitType: "MAINTENANCE" as const,
       streak: 5,
       frequency: 1,
-      lastCompleted: today,
       userId: user.id,
     },
     {
@@ -231,7 +228,6 @@ async function main() {
       streak: 8,
       longestStreak: 22,
       frequency: 1,
-      lastCompleted: today,
       userId: user.id,
     },
     {
@@ -248,7 +244,6 @@ async function main() {
       streak: 9,
       longestStreak: 18,
       frequency: 1,
-      lastCompleted: yesterday,
       userId: user.id,
     },
 
@@ -267,7 +262,6 @@ async function main() {
       streak: 18,
       longestStreak: 32,
       frequency: 1,
-      lastCompleted: yesterday,
       userId: user.id,
     },
 

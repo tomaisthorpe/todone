@@ -6,15 +6,15 @@ export type HabitStatus = {
 };
 
 export function getHabitStatus(habit: {
-  lastCompleted: Date | null;
+  completedAt: Date | null;
   frequency: number | null;
 }): HabitStatus | null {
-  if (!habit.lastCompleted || !habit.frequency) return null;
+  if (!habit.completedAt || !habit.frequency) return null;
 
   const today = new Date();
-  const lastCompleted = new Date(habit.lastCompleted);
+  const completedAt = new Date(habit.completedAt);
   
-  const nextDueDate = new Date(lastCompleted);
+  const nextDueDate = new Date(completedAt);
   nextDueDate.setDate(nextDueDate.getDate() + habit.frequency);
   const daysUntilDue = Math.ceil(
     (nextDueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)

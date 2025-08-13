@@ -34,7 +34,7 @@ export interface Task {
   streak: number | null;
   longestStreak: number | null;
   frequency: number | null;
-  lastCompleted: Date | null;
+
   nextDue: Date | null;
 }
 

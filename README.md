@@ -254,7 +254,7 @@ This helps maintain context for future development and AI assistance.
   streak?: number,
   longestStreak?: number,
   frequency?: number, // days
-  lastCompleted?: string,
+
   
   // Recurring-specific fields
   nextDue?: string

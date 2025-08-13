@@ -95,8 +95,8 @@ export async function toggleTaskAction(taskId: string) {
         return now <= endOfDay(new Date(task.dueDate));
       }
       if (task.frequency) {
-        if (task.lastCompleted) {
-          const expectedDue = addDays(startOfDay(new Date(task.lastCompleted)), task.frequency);
+        if (task.completedAt) {
+          const expectedDue = addDays(startOfDay(new Date(task.completedAt)), task.frequency);
           return now <= endOfDay(expectedDue);
         }
         // First completion without a prior window counts as on-time
@@ -129,7 +129,6 @@ export async function toggleTaskAction(taskId: string) {
       data: {
         completed: true,
         completedAt: now,
-        lastCompleted: now,
         streak: nextStreak,
         longestStreak: nextLongest,
         dueDate: nextDueDate,
