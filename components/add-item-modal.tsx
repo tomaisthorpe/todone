@@ -359,13 +359,45 @@ export function TaskModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white shadow-xl rounded-2xl border-0">
         <DialogHeader>
-          <DialogTitle>
-            {isEditing
-              ? "Edit Task"
-              : isEditingContext
-              ? "Edit Context"
-              : "Add New Item"}
-          </DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle>
+              {isEditing
+                ? "Edit Task"
+                : isEditingContext
+                ? "Edit Context"
+                : "Add New Item"}
+            </DialogTitle>
+            
+            {/* Quick Actions in Header - Only for editing tasks */}
+            {isEditing && activeTab === "task" && (
+              <div className="flex items-center space-x-2">
+                {!task?.completed && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleCompleteYesterday}
+                    disabled={isLoading}
+                    className="text-xs"
+                  >
+                    <Calendar className="w-3 h-3 mr-1" />
+                    Yesterday
+                  </Button>
+                )}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  disabled={isLoading}
+                  className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <Trash2 className="w-3 h-3 mr-1" />
+                  Delete
+                </Button>
+              </div>
+            )}
+          </div>
         </DialogHeader>
 
         {/* Error Display */}
@@ -427,50 +459,19 @@ export function TaskModal({
               fieldIdPrefix={modalId}
             />
 
-            <div className="space-y-3 pt-4">
-              {/* Quick Actions Row - Only for editing existing tasks */}
-              {isEditing && (
-                <div className="flex justify-center space-x-3">
-                  {!task?.completed && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={handleCompleteYesterday}
-                      disabled={isLoading}
-                      size="sm"
-                    >
-                      <Calendar className="w-4 h-4 mr-2" />
-                      Complete Yesterday
-                    </Button>
-                  )}
-                  <Button
-                    type="button"
-                    variant="outline-destructive"
-                    onClick={() => setShowDeleteConfirm(true)}
-                    disabled={isLoading}
-                    size="sm"
-                  >
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Delete Task
-                  </Button>
-                </div>
-              )}
-              
-              {/* Main Actions Row */}
-              <div className="flex justify-end space-x-3">
-                <Button type="button" variant="outline" onClick={onClose}>
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isLoading}>
-                  {isLoading
-                    ? isEditing
-                      ? "Updating..."
-                      : "Creating..."
-                    : isEditing
-                    ? "Update Task"
-                    : "Create Task"}
-                </Button>
-              </div>
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button type="button" variant="outline" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading
+                  ? isEditing
+                    ? "Updating..."
+                    : "Creating..."
+                  : isEditing
+                  ? "Update Task"
+                  : "Create Task"}
+              </Button>
             </div>
           </form>
         )}
