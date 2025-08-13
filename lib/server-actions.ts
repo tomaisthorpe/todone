@@ -7,8 +7,6 @@ import { Session } from "next-auth";
 import { authOptions } from "./auth";
 import { prisma } from "./prisma";
 import { calculateUrgency, parseTags } from "./utils";
-import { processHabitCompletion, processHabitUncompletion } from "./habit-utils";
-import { addDays } from "./date-utils";
 import { completeTask, uncompleteHabit, toggleRegularTask, TaskForCompletion } from "./task-completion-utils";
 
 // Get authenticated user or redirect
