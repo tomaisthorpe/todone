@@ -379,6 +379,7 @@ export function TaskModal({
                     onClick={handleCompleteYesterday}
                     disabled={isLoading}
                     className="text-xs"
+                    tabIndex={-1}
                   >
                     <Calendar className="w-3 h-3 mr-1" />
                     Complete Yesterday
@@ -391,6 +392,7 @@ export function TaskModal({
                   onClick={() => setShowDeleteConfirm(true)}
                   disabled={isLoading}
                   className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                  tabIndex={-1}
                 >
                   <Trash2 className="w-3 h-3 mr-1" />
                   Delete
