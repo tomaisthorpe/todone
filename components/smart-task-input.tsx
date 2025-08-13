@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { diffInLocalCalendarDays } from "@/lib/utils";
+import { getContextIconComponent } from "@/lib/context-icons";
 
 interface SmartTaskInputProps {
   contexts: Array<{
@@ -815,14 +816,32 @@ export function SmartTaskInput({
                 <div>
                   <div className="text-xs text-gray-500 mb-1">Context</div>
                   <div className="text-sm">
-                    {parsedTask.contextName && parsedTask.contextId ? (
-                      <Badge
-                        variant="outline"
-                        className="text-blue-600 bg-blue-50 border-blue-200"
-                      >
-                        {parsedTask.contextName}
-                      </Badge>
-                    ) : parsedTask.contextName ? (
+                    {parsedTask.contextName && parsedTask.contextId ? (() => {
+                      const matchedContext = contexts.find(c => c.id === parsedTask.contextId);
+                      if (matchedContext) {
+                        const ContextIconComponent = getContextIconComponent(matchedContext.icon);
+                        return (
+                          <span
+                            className={cn(
+                              "inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium text-white mb-1",
+                              matchedContext.color
+                            )}
+                            title={matchedContext.name}
+                          >
+                            <ContextIconComponent className="w-3 h-3 mr-1" />
+                            {matchedContext.name}
+                          </span>
+                        );
+                      }
+                      return (
+                        <Badge
+                          variant="outline"
+                          className="text-red-600 bg-red-50 border-red-200"
+                        >
+                          {parsedTask.contextName} (not found)
+                        </Badge>
+                      );
+                    })() : parsedTask.contextName ? (
                       <Badge
                         variant="outline"
                         className="text-red-600 bg-red-50 border-red-200"
@@ -831,14 +850,22 @@ export function SmartTaskInput({
                       </Badge>
                     ) : (() => {
                       const inboxContext = contexts.find(c => c.isInbox);
-                      return inboxContext ? (
-                        <Badge
-                          variant="outline"
-                          className="text-blue-600 bg-blue-50 border-blue-200"
-                        >
-                          {inboxContext.name} (default)
-                        </Badge>
-                      ) : (
+                      if (inboxContext) {
+                        const ContextIconComponent = getContextIconComponent(inboxContext.icon);
+                        return (
+                          <span
+                            className={cn(
+                              "inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium text-white mb-1",
+                              inboxContext.color
+                            )}
+                            title={`${inboxContext.name} (default)`}
+                          >
+                            <ContextIconComponent className="w-3 h-3 mr-1" />
+                            {inboxContext.name} (default)
+                          </span>
+                        );
+                      }
+                      return (
                         <span className="text-red-400">No context available</span>
                       );
                     })()}
