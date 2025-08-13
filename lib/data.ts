@@ -112,7 +112,7 @@ export async function getContexts(): Promise<Context[]> {
     const contexts = await prisma.context.findMany({
       where: {
         OR: [{ userId: session.user.id }, { shared: true }],
-        archived: false,
+        archived: { equals: false },
       },
       orderBy: { name: "asc" },
     });
