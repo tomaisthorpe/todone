@@ -75,6 +75,13 @@ export function TaskForm({
   const gap = compact ? "gap-2" : "gap-4";
   const spacing = compact ? "space-y-2" : "space-y-4";
 
+  // Find inbox context for default selection
+  const inboxContext = contexts.find(c => c.isInbox);
+  
+  // Get the selected context or default to inbox
+  const selectedContextId = data.contextId || inboxContext?.id || "";
+  const selectedContext = contexts.find(c => c.id === selectedContextId);
+
   return (
     <div className={spacing}>
       <div className={`grid ${gridCols} ${gap}`}>
@@ -174,11 +181,27 @@ export function TaskForm({
             Context
           </Label>
           <Select
-            value={data.contextId}
+            value={selectedContextId}
             onValueChange={(value) => onChange("contextId", value)}
           >
             <SelectTrigger className={compact ? "text-sm mt-1" : ""}>
-              <SelectValue placeholder="Inbox (default)" />
+              <SelectValue placeholder="Inbox (default)">
+                {selectedContext && (
+                  <div className="flex items-center">
+                    <div
+                      className={`w-3 h-3 rounded-full ${selectedContext.color} mr-2`}
+                    />
+                    {(() => {
+                      const IconComponent = getContextIconComponent(selectedContext.icon);
+                      return <IconComponent className="w-4 h-4 mr-2" />;
+                    })()}
+                    {selectedContext.name}
+                    {selectedContext.isInbox && (
+                      <span className="text-xs text-gray-500 ml-2">(default)</span>
+                    )}
+                  </div>
+                )}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               {contexts
