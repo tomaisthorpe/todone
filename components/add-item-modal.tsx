@@ -102,11 +102,16 @@ export function TaskModal({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Find inbox context for default selection
+  const inboxContext = contexts.find(c => c.isInbox);
+  const fallbackContextId = defaultContextId || inboxContext?.id || "";
+  
   const [taskFormData, setTaskFormData] = useState<TaskFormData>({
     title: "",
     project: "",
     priority: "MEDIUM",
-    contextId: defaultContextId || "",
+    contextId: fallbackContextId,
     dueDate: "",
     type: "TASK",
     habitType: undefined,
@@ -169,11 +174,12 @@ export function TaskModal({
         setActiveTab("context");
       } else {
         // Adding mode - reset to defaults
+        const currentFallbackContextId = defaultContextId || inboxContext?.id || "";
         setTaskFormData({
           title: "",
           project: "",
           priority: "MEDIUM",
-          contextId: defaultContextId || "",
+          contextId: currentFallbackContextId,
           dueDate: "",
           type: "TASK",
           habitType: undefined,
@@ -191,7 +197,7 @@ export function TaskModal({
         setActiveTab("task");
       }
     }
-  }, [isOpen, task?.id, defaultContextId, contextToEdit?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isOpen, task?.id, defaultContextId, contextToEdit?.id, inboxContext?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleTaskFormChange = <K extends keyof TaskFormData>(
     field: K,
