@@ -9,6 +9,7 @@ import { prisma } from "./prisma";
 import { calculateUrgency, parseTags } from "./utils";
 import { processHabitCompletion, processHabitUncompletion } from "./habit-utils";
 import { addDays } from "./date-utils";
+import { completeTask, uncompleteHabit, toggleRegularTask, TaskForCompletion } from "./task-completion-utils";
 
 // Get authenticated user or redirect
 async function getAuthenticatedUser() {
@@ -70,77 +71,19 @@ export async function toggleTaskAction(taskId: string) {
   const now = new Date();
 
   // Handle different task types
-  if (task.type === "HABIT" && !task.completed) {
-    // Habit is being completed
-    await processHabitCompletion(taskId, {
-      id: task.id,
-      dueDate: task.dueDate,
-      frequency: task.frequency,
-      completedAt: task.completedAt,
-      streak: task.streak,
-      longestStreak: task.longestStreak,
-    }, now);
-  } else if (task.type === "HABIT" && task.completed) {
+  if (task.type === "HABIT" && task.completed) {
     // Habit is being uncompleted
-    await processHabitUncompletion(taskId, {
-      id: task.id,
-      dueDate: task.dueDate,
-      frequency: task.frequency,
-      completedAt: task.completedAt,
-      streak: task.streak,
-      longestStreak: task.longestStreak,
-    });
+    await uncompleteHabit(task as TaskForCompletion);
+  } else if (task.type === "HABIT" && !task.completed) {
+    // Habit is being completed
+    await completeTask(task as TaskForCompletion, now);
   } else if (task.type === "RECURRING" && !task.completed) {
-    // Recurring task is being completed - create next instance
-    if (task.frequency) {
-      let nextDueDate: Date;
-
-      if (task.dueDate) {
-        // If task has a due date, calculate next due date from the original due date
-        nextDueDate = addDays(new Date(task.dueDate), task.frequency);
-      } else {
-        // If task has no due date, calculate next due date from completion date
-        nextDueDate = addDays(new Date(now), task.frequency);
-      }
-
-      // Create the next recurring task instance
-      await prisma.task.create({
-        data: {
-          title: task.title,
-          project: task.project,
-          priority: task.priority,
-          tags: task.tags,
-          contextId: task.contextId,
-          dueDate: nextDueDate,
-          type: task.type,
-          userId: task.userId,
-          frequency: task.frequency,
-          nextDue: nextDueDate,
-        },
-      });
-
-      // Mark current recurring task as completed
-      await prisma.task.update({
-        where: { id: taskId },
-        data: {
-          completed: true,
-          completedAt: now,
-        },
-      });
-
-      revalidatePath("/");
-      return;
-    }
+    // Recurring task is being completed
+    await completeTask(task as TaskForCompletion, now);
+  } else {
+    // Regular task toggle or other cases
+    await toggleRegularTask(taskId, task.completed, now);
   }
-
-  // Toggle task completion state (non-habit or non-recurring)
-  await prisma.task.update({
-    where: { id: taskId },
-    data: {
-      completed: !task.completed,
-      completedAt: !task.completed ? now : null,
-    },
-  });
 
   revalidatePath("/");
 }
@@ -163,69 +106,9 @@ export async function completeTaskYesterdayAction(taskId: string) {
   // Set to end of yesterday for completion time
   yesterday.setHours(23, 59, 59, 999);
 
-  // Handle different task types similar to toggleTaskAction
-  if (task.type === "HABIT" && !task.completed) {
-    // Habit is being completed for yesterday
-    await processHabitCompletion(taskId, {
-      id: task.id,
-      dueDate: task.dueDate,
-      frequency: task.frequency,
-      completedAt: task.completedAt,
-      streak: task.streak,
-      longestStreak: task.longestStreak,
-    }, yesterday);
-  } else if (task.type === "RECURRING" && !task.completed) {
-    // Recurring task is being completed yesterday - create next instance
-    if (task.frequency) {
-      let nextDueDate: Date;
-
-      if (task.dueDate) {
-        // If task has a due date, calculate next due date from the original due date
-        nextDueDate = addDays(new Date(task.dueDate), task.frequency);
-      } else {
-        // If task has no due date, calculate next due date from yesterday's completion date
-        nextDueDate = addDays(new Date(yesterday), task.frequency);
-      }
-
-      // Create the next recurring task instance
-      await prisma.task.create({
-        data: {
-          title: task.title,
-          project: task.project,
-          priority: task.priority,
-          tags: task.tags,
-          contextId: task.contextId,
-          dueDate: nextDueDate,
-          type: task.type,
-          userId: task.userId,
-          frequency: task.frequency,
-          nextDue: nextDueDate,
-        },
-      });
-
-      // Mark current recurring task as completed yesterday
-      await prisma.task.update({
-        where: { id: taskId },
-        data: {
-          completed: true,
-          completedAt: yesterday,
-        },
-      });
-
-      revalidatePath("/");
-      return;
-    }
-  }
-
-  // Mark regular task as completed yesterday
+  // Complete the task for yesterday (only if not already completed)
   if (!task.completed) {
-    await prisma.task.update({
-      where: { id: taskId },
-      data: {
-        completed: true,
-        completedAt: yesterday,
-      },
-    });
+    await completeTask(task as TaskForCompletion, yesterday);
   }
 
   revalidatePath("/");
