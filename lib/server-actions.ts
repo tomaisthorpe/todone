@@ -7,6 +7,8 @@ import { Session } from "next-auth";
 import { authOptions } from "./auth";
 import { prisma } from "./prisma";
 import { calculateUrgency, parseTags } from "./utils";
+import { processHabitCompletion, processHabitUncompletion } from "./habit-utils";
+import { addDays } from "./date-utils";
 
 // Get authenticated user or redirect
 async function getAuthenticatedUser() {
@@ -70,80 +72,23 @@ export async function toggleTaskAction(taskId: string) {
   // Handle different task types
   if (task.type === "HABIT" && !task.completed) {
     // Habit is being completed
-    const endOfDay = (d: Date) => {
-      const x = new Date(d);
-      x.setHours(23, 59, 59, 999);
-      return x;
-    };
-
-    const startOfDay = (d: Date) => {
-      const x = new Date(d);
-      x.setHours(0, 0, 0, 0);
-      return x;
-    };
-
-    const addDays = (d: Date, days: number) => {
-      const x = new Date(d);
-      x.setDate(x.getDate() + days);
-      return x;
-    };
-
-    const isOnTime = (() => {
-      if (task.dueDate) {
-        return now <= endOfDay(new Date(task.dueDate));
-      }
-      if (task.frequency) {
-        if (task.completedAt) {
-          const expectedDue = addDays(
-            startOfDay(new Date(task.completedAt)),
-            task.frequency
-          );
-          return now <= endOfDay(expectedDue);
-        }
-        // First completion without a prior window counts as on-time
-        return true;
-      }
-      // No due date and no frequency; treat as on-time
-      return true;
-    })();
-
-    const nextStreak = isOnTime ? (task.streak || 0) + 1 : 1;
-    const nextLongest = Math.max(task.longestStreak || 0, nextStreak);
-
-    // Create habit completion record
-    await prisma.habitCompletion.create({
-      data: {
-        taskId: taskId,
-        completedAt: now,
-      },
-    });
-
-    // Calculate next due date based on frequency
-    let nextDueDate: Date | null = null;
-    if (task.frequency) {
-      nextDueDate = new Date(now);
-      nextDueDate.setDate(nextDueDate.getDate() + task.frequency);
-    }
-
-    await prisma.task.update({
-      where: { id: taskId },
-      data: {
-        completed: true,
-        completedAt: now,
-        streak: nextStreak,
-        longestStreak: nextLongest,
-        dueDate: nextDueDate,
-      },
-    });
+    await processHabitCompletion(taskId, {
+      id: task.id,
+      dueDate: task.dueDate,
+      frequency: task.frequency,
+      completedAt: task.completedAt,
+      streak: task.streak,
+      longestStreak: task.longestStreak,
+    }, now);
   } else if (task.type === "HABIT" && task.completed) {
     // Habit is being uncompleted
-    await prisma.task.update({
-      where: { id: taskId },
-      data: {
-        completed: false,
-        completedAt: null,
-        streak: Math.max((task.streak || 1) - 1, 0),
-      },
+    await processHabitUncompletion(taskId, {
+      id: task.id,
+      dueDate: task.dueDate,
+      frequency: task.frequency,
+      completedAt: task.completedAt,
+      streak: task.streak,
+      longestStreak: task.longestStreak,
     });
   } else if (task.type === "RECURRING" && !task.completed) {
     // Recurring task is being completed - create next instance
@@ -152,12 +97,10 @@ export async function toggleTaskAction(taskId: string) {
 
       if (task.dueDate) {
         // If task has a due date, calculate next due date from the original due date
-        nextDueDate = new Date(task.dueDate);
-        nextDueDate.setDate(nextDueDate.getDate() + task.frequency);
+        nextDueDate = addDays(new Date(task.dueDate), task.frequency);
       } else {
         // If task has no due date, calculate next due date from completion date
-        nextDueDate = new Date(now);
-        nextDueDate.setDate(nextDueDate.getDate() + task.frequency);
+        nextDueDate = addDays(new Date(now), task.frequency);
       }
 
       // Create the next recurring task instance
@@ -223,63 +166,14 @@ export async function completeTaskYesterdayAction(taskId: string) {
   // Handle different task types similar to toggleTaskAction
   if (task.type === "HABIT" && !task.completed) {
     // Habit is being completed for yesterday
-    const endOfDay = (d: Date) => {
-      const x = new Date(d);
-      x.setHours(23, 59, 59, 999);
-      return x;
-    };
-
-    const startOfDay = (d: Date) => {
-      const x = new Date(d);
-      x.setHours(0, 0, 0, 0);
-      return x;
-    };
-
-    const addDays = (d: Date, days: number) => {
-      const x = new Date(d);
-      x.setDate(x.getDate() + days);
-      return x;
-    };
-
-    const isOnTime = (() => {
-      if (task.dueDate) {
-        return yesterday <= endOfDay(new Date(task.dueDate));
-      }
-      if (task.frequency) {
-        if (task.completedAt) {
-          const expectedDue = addDays(
-            startOfDay(new Date(task.completedAt)),
-            task.frequency
-          );
-          return yesterday <= endOfDay(expectedDue);
-        }
-        // First completion without a prior window counts as on-time
-        return true;
-      }
-      // No due date and no frequency; treat as on-time
-      return true;
-    })();
-
-    const nextStreak = isOnTime ? (task.streak || 0) + 1 : 1;
-    const nextLongest = Math.max(task.longestStreak || 0, nextStreak);
-
-    // Create habit completion record with yesterday's date
-    await prisma.habitCompletion.create({
-      data: {
-        taskId: taskId,
-        completedAt: yesterday,
-      },
-    });
-
-    await prisma.task.update({
-      where: { id: taskId },
-      data: {
-        completed: true,
-        completedAt: yesterday,
-        streak: nextStreak,
-        longestStreak: nextLongest,
-      },
-    });
+    await processHabitCompletion(taskId, {
+      id: task.id,
+      dueDate: task.dueDate,
+      frequency: task.frequency,
+      completedAt: task.completedAt,
+      streak: task.streak,
+      longestStreak: task.longestStreak,
+    }, yesterday);
   } else if (task.type === "RECURRING" && !task.completed) {
     // Recurring task is being completed yesterday - create next instance
     if (task.frequency) {
@@ -287,12 +181,10 @@ export async function completeTaskYesterdayAction(taskId: string) {
 
       if (task.dueDate) {
         // If task has a due date, calculate next due date from the original due date
-        nextDueDate = new Date(task.dueDate);
-        nextDueDate.setDate(nextDueDate.getDate() + task.frequency);
+        nextDueDate = addDays(new Date(task.dueDate), task.frequency);
       } else {
         // If task has no due date, calculate next due date from yesterday's completion date
-        nextDueDate = new Date(yesterday);
-        nextDueDate.setDate(nextDueDate.getDate() + task.frequency);
+        nextDueDate = addDays(new Date(yesterday), task.frequency);
       }
 
       // Create the next recurring task instance
