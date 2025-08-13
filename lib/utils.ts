@@ -198,7 +198,12 @@ export function formatDateForTask(date: Date | null): { text: string; color: str
   };
 }
 
-export function shouldHideCompletedTask(task: { completed: boolean; completedAt: Date | null }): boolean {
+export function shouldHideCompletedTask(task: { completed: boolean; completedAt: Date | null; type?: string }): boolean {
+  // Never hide habits - they are ongoing behaviors that should always be visible
+  if (task.type === "HABIT") {
+    return false;
+  }
+
   if (!task.completed || !task.completedAt) {
     return false; // Don't hide uncompleted tasks or tasks without completedAt
   }
@@ -227,4 +232,41 @@ export function shouldHideCompletedTask(task: { completed: boolean; completedAt:
 
   // Don't hide tasks completed today
   return false;
+}
+
+export function shouldHabitShowAsAvailable(habit: {
+  completed: boolean;
+  completedAt: Date | null;
+  type: string;
+}): boolean {
+  // Only apply to habits
+  if (habit.type !== "HABIT") {
+    return !habit.completed;
+  }
+
+  // If not completed, it's available
+  if (!habit.completed) {
+    return true;
+  }
+
+  // If no completedAt, show current completion state
+  if (!habit.completedAt) {
+    return !habit.completed;
+  }
+
+  // Calculate if we're in the next period after completion
+  const now = new Date();
+  const today = new Date(now);
+  today.setHours(0, 0, 0, 0);
+  
+  const completedAt = new Date(habit.completedAt);
+  const completedDate = new Date(completedAt);
+  completedDate.setHours(0, 0, 0, 0);
+
+  // Show as available the day after completion (allows early completion)
+  const dayAfterCompletion = new Date(completedDate);
+  dayAfterCompletion.setDate(dayAfterCompletion.getDate() + 1);
+
+  // If it's the day after completion or later, show as available
+  return today >= dayAfterCompletion;
 }

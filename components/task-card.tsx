@@ -6,6 +6,7 @@ import {
   formatDateForTask,
   evaluateUrgency,
   getUrgencyColor,
+  shouldHabitShowAsAvailable,
 } from "@/lib/utils";
 import { getHabitStatus, getHabitDisplay } from "@/lib/habits";
 import { getContextIconComponent } from "@/lib/context-icons";
@@ -60,11 +61,20 @@ export function TaskCard({
   const habitStatus =
     task.type === "HABIT"
       ? getHabitStatus({
-          lastCompleted: task.lastCompleted,
+          completedAt: task.completedAt,
           frequency: task.frequency,
         })
       : null;
   const habitDisplay = getHabitDisplay(task);
+
+  // For habits, calculate whether they should show as available (uncompleted) or completed
+  const effectiveCompleted = task.type === "HABIT" 
+    ? !shouldHabitShowAsAvailable({
+        completed: task.completed,
+        completedAt: task.completedAt,
+        type: task.type,
+      })
+    : task.completed;
 
   // Find the context for this task to get its coefficient
   const taskContext = contexts.find((ctx) => ctx.id === task.contextId);
@@ -85,18 +95,18 @@ export function TaskCard({
   return (
     <TooltipProvider>
       <div className="flex items-start space-x-3 py-2 sm:px-3 hover:bg-gray-50 rounded-lg">
-        <div className={cn(task.completed && "opacity-60")}>
-          <TaskToggleButton taskId={task.id} completed={task.completed} />
+        <div className={cn(effectiveCompleted && "opacity-60")}>
+          <TaskToggleButton taskId={task.id} completed={effectiveCompleted} />
         </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between">
-            <div className={cn("flex-1", task.completed && "opacity-60")}>
+            <div className={cn("flex-1", effectiveCompleted && "opacity-60")}>
               <div className="flex items-center flex-wrap space-x-2">
                 <h3
                   className={cn(
                     "font-medium text-sm cursor-pointer hover:text-blue-600 transition-colors",
-                    task.completed
+                    effectiveCompleted
                       ? "line-through text-gray-500"
                       : "text-gray-900"
                   )}

@@ -52,7 +52,7 @@ const Todone = () => {
       streak: 12,
       longestStreak: 28,
       frequency: 1,
-      lastCompleted: "2025-06-15",
+      completedAt: "2025-06-15",
     },
 
     // Coding context
@@ -103,7 +103,7 @@ const Todone = () => {
       streak: 7,
       longestStreak: 15,
       frequency: 1,
-      lastCompleted: "2025-06-14",
+      completedAt: "2025-06-14",
     },
     {
       id: 7,
@@ -166,7 +166,7 @@ const Todone = () => {
       habitType: "MAINTENANCE",
       streak: 3,
       frequency: 1,
-      lastCompleted: "2025-06-13",
+      completedAt: "2025-06-13",
     },
     {
       id: 12,
@@ -181,7 +181,7 @@ const Todone = () => {
       habitType: "MAINTENANCE",
       streak: 5,
       frequency: 1,
-      lastCompleted: "2025-06-15",
+      completedAt: "2025-06-15",
     },
     {
       id: 13,
@@ -221,7 +221,7 @@ const Todone = () => {
       streak: 8,
       longestStreak: 22,
       frequency: 1,
-      lastCompleted: "2025-06-15",
+      completedAt: "2025-06-15",
     },
     {
       id: 16,
@@ -250,7 +250,7 @@ const Todone = () => {
       streak: 9,
       longestStreak: 18,
       frequency: 1,
-      lastCompleted: "2025-06-14",
+      completedAt: "2025-06-14",
     },
   ]);
 
@@ -505,14 +505,14 @@ const Todone = () => {
   };
 
   const getHabitStatus = (habit) => {
-    if (!habit.lastCompleted || !habit.frequency) return null;
+    if (!habit.completedAt || !habit.frequency) return null;
 
     const today = new Date("2025-06-15");
-    const lastCompleted = new Date(habit.lastCompleted);
+    const completedAt = new Date(habit.completedAt);
     const daysSinceCompleted = Math.floor(
-      (today - lastCompleted) / (1000 * 60 * 60 * 24)
+      (today - completedAt) / (1000 * 60 * 60 * 24)
     );
-    const nextDueDate = new Date(lastCompleted);
+    const nextDueDate = new Date(completedAt);
     nextDueDate.setDate(nextDueDate.getDate() + habit.frequency);
     const daysUntilDue = Math.ceil(
       (nextDueDate - today) / (1000 * 60 * 60 * 24)

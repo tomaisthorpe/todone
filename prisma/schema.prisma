@@ -126,7 +126,6 @@ model Task {
   streak        Int?       @default(0)
   longestStreak Int?       @default(0)
   frequency     Int?       // frequency in days (1 = daily, 7 = weekly)
-  lastCompleted DateTime?
 
   // Recurring-specific fields  
   nextDue DateTime?
