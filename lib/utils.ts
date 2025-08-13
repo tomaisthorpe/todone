@@ -242,7 +242,7 @@ export function shouldHabitShowAsAvailable(habit: {
 }): boolean {
   // Only apply to habits
   if (habit.type !== "HABIT") {
-    return habit.completed;
+    return !habit.completed;
   }
 
   // If not completed, it's available
@@ -250,17 +250,24 @@ export function shouldHabitShowAsAvailable(habit: {
     return true;
   }
 
-  // If no frequency or lastCompleted, show current completion state
-  if (!habit.frequency || !habit.lastCompleted) {
+  // If no lastCompleted, show current completion state
+  if (!habit.lastCompleted) {
     return !habit.completed;
   }
 
-  // Calculate if enough time has passed since last completion
+  // Calculate if we're in the next period after completion
   const now = new Date();
+  const today = new Date(now);
+  today.setHours(0, 0, 0, 0);
+  
   const lastCompleted = new Date(habit.lastCompleted);
-  const nextDueDate = new Date(lastCompleted);
-  nextDueDate.setDate(nextDueDate.getDate() + habit.frequency);
+  const completedDate = new Date(lastCompleted);
+  completedDate.setHours(0, 0, 0, 0);
 
-  // If enough time has passed, show as available (even if technically completed)
-  return now >= nextDueDate;
+  // Show as available the day after completion (allows early completion)
+  const dayAfterCompletion = new Date(completedDate);
+  dayAfterCompletion.setDate(dayAfterCompletion.getDate() + 1);
+
+  // If it's the day after completion or later, show as available
+  return today >= dayAfterCompletion;
 }

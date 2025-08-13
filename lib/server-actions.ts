@@ -17,32 +17,7 @@ async function getAuthenticatedUser() {
   return session.user.id;
 }
 
-// Helper function to check if a habit should be available again
-async function autoResetHabitIfDue(taskId: string) {
-  const task = await prisma.task.findUnique({
-    where: { id: taskId },
-  });
 
-  if (!task || task.type !== "HABIT" || !task.completed || !task.frequency || !task.lastCompleted) {
-    return;
-  }
-
-  const now = new Date();
-  const lastCompleted = new Date(task.lastCompleted);
-  const nextDueDate = new Date(lastCompleted);
-  nextDueDate.setDate(nextDueDate.getDate() + task.frequency);
-
-  // If enough time has passed, reset the habit to be available again
-  if (now >= nextDueDate) {
-    await prisma.task.update({
-      where: { id: taskId },
-      data: {
-        completed: false,
-        completedAt: null,
-      },
-    });
-  }
-}
 
 // Helper function to create an inbox context for a user
 export async function createInboxContext(userId: string) {
@@ -83,9 +58,6 @@ export async function getOrCreateInboxContext(userId: string) {
 // Server action to toggle task completion
 export async function toggleTaskAction(taskId: string) {
   const userId = await getAuthenticatedUser();
-
-  // Check if this habit should be automatically reset to available
-  await autoResetHabitIfDue(taskId);
 
   const task = await prisma.task.findFirst({
     where: { id: taskId, userId },
@@ -145,6 +117,13 @@ export async function toggleTaskAction(taskId: string) {
       },
     });
 
+    // Calculate next due date based on frequency
+    let nextDueDate: Date | null = null;
+    if (task.frequency) {
+      nextDueDate = new Date(now);
+      nextDueDate.setDate(nextDueDate.getDate() + task.frequency);
+    }
+
     await prisma.task.update({
       where: { id: taskId },
       data: {
@@ -153,6 +132,7 @@ export async function toggleTaskAction(taskId: string) {
         lastCompleted: now,
         streak: nextStreak,
         longestStreak: nextLongest,
+        dueDate: nextDueDate,
       },
     });
   } else if (task.type === "HABIT" && task.completed) {
