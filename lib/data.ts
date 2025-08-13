@@ -2,7 +2,8 @@ import { getServerSession } from "next-auth/next";
 import { Session } from "next-auth";
 import { authOptions } from "./auth";
 import { prisma } from "./prisma";
-import { calculateUrgency } from "./utils";
+import { calculateUrgency, parseTags } from "./utils";
+import { isHabitCompletedToday, shouldHabitShowAsAvailableFromCompletions, getLatestHabitCompletion } from "./habit-utils";
 
 // Type helper for tasks with context from Prisma  
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -20,7 +21,7 @@ export interface Task {
   title: string;
   project: string | null;
   priority: "LOW" | "MEDIUM" | "HIGH";
-  tags: string[];
+  tags: string;
   contextId: string;
   dueDate: Date | null;
   urgency: number;
@@ -34,8 +35,12 @@ export interface Task {
   streak: number | null;
   longestStreak: number | null;
   frequency: number | null;
-
   nextDue: Date | null;
+  
+  // Computed fields for habits based on habitCompletions
+  isCompletedToday?: boolean;
+  isAvailableToday?: boolean;
+  latestCompletionDate?: Date | null;
 }
 
 export interface Context {
@@ -71,25 +76,44 @@ export async function getTasks(): Promise<Task[]> {
       orderBy: [{ completed: "asc" }, { createdAt: "desc" }],
     });
 
-    const tasksWithUrgency = tasks.map((task: TaskWithContext) => ({
-      ...task,
-      priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
-      type: task.type as "TASK" | "HABIT" | "RECURRING",
-      habitType: task.habitType as
-        | "STREAK"
-        | "LEARNING"
-        | "WELLNESS"
-        | "MAINTENANCE"
-        | null,
-      urgency: calculateUrgency({
-        priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
-        dueDate: task.dueDate,
-        createdAt: task.createdAt,
-        tags: task.tags,
-        project: task.project,
-        contextCoefficient: task.context?.coefficient || 0,
-      }),
-    }));
+    const tasksWithUrgency = await Promise.all(
+      tasks.map(async (task: TaskWithContext) => {
+        // For habits, calculate completion status from habitCompletions table
+        let isCompletedToday = false;
+        let isAvailableToday = true;
+        let latestCompletionDate = null;
+        
+        if (task.type === "HABIT") {
+          isCompletedToday = await isHabitCompletedToday(task.id);
+          isAvailableToday = await shouldHabitShowAsAvailableFromCompletions(task.id, task.frequency);
+          latestCompletionDate = await getLatestHabitCompletion(task.id);
+        }
+        
+        return {
+          ...task,
+          priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
+          type: task.type as "TASK" | "HABIT" | "RECURRING",
+          habitType: task.habitType as
+            | "STREAK"
+            | "LEARNING"
+            | "WELLNESS"
+            | "MAINTENANCE"
+            | null,
+          urgency: calculateUrgency({
+            priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
+            dueDate: task.dueDate,
+            createdAt: task.createdAt,
+            tags: parseTags(task.tags),
+            project: task.project,
+            contextCoefficient: task.context?.coefficient || 0,
+          }),
+          // Add computed habit completion fields
+          isCompletedToday,
+          isAvailableToday,
+          latestCompletionDate,
+        };
+      })
+    );
 
     return tasksWithUrgency.sort((a: Task, b: Task) => {
       if (a.completed !== b.completed) return a.completed ? 1 : -1;
@@ -112,7 +136,7 @@ export async function getContexts(): Promise<Context[]> {
     const contexts = await prisma.context.findMany({
       where: {
         OR: [{ userId: session.user.id }, { shared: true }],
-        archived: { equals: false },
+        archived: false,
       },
       orderBy: { name: "asc" },
     });
@@ -259,7 +283,8 @@ export function getContextCompletion(tasks: Task[], contextId: string) {
     return { percentage: 100, completed: 0, total: 0 };
   }
 
-  const completed = contextHabits.filter((task) => task.completed).length;
+  // For habits, use the computed isCompletedToday field instead of completed
+  const completed = contextHabits.filter((task) => task.isCompletedToday).length;
   const total = contextHabits.length;
   const percentage = Math.round((completed / total) * 100);
 

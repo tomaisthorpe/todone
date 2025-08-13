@@ -8,6 +8,7 @@ import { authOptions } from "./auth";
 import { prisma } from "./prisma";
 import { calculateUrgency, parseTags } from "./utils";
 import { completeTask, uncompleteHabit, toggleRegularTask, TaskForCompletion } from "./task-completion-utils";
+import { isHabitCompletedToday } from "./habit-utils";
 
 // Get authenticated user or redirect
 async function getAuthenticatedUser() {
@@ -69,12 +70,17 @@ export async function toggleTaskAction(taskId: string) {
   const now = new Date();
 
   // Handle different task types
-  if (task.type === "HABIT" && task.completed) {
-    // Habit is being uncompleted
-    await uncompleteHabit(task as TaskForCompletion);
-  } else if (task.type === "HABIT" && !task.completed) {
-    // Habit is being completed
-    await completeTask(task as TaskForCompletion, now);
+  if (task.type === "HABIT") {
+    // For habits, check completion status from habitCompletions table
+    const isCompletedToday = await isHabitCompletedToday(taskId);
+    
+    if (isCompletedToday) {
+      // Habit is being uncompleted
+      await uncompleteHabit(task as TaskForCompletion);
+    } else {
+      // Habit is being completed
+      await completeTask(task as TaskForCompletion, now);
+    }
   } else if (task.type === "RECURRING" && !task.completed) {
     // Recurring task is being completed
     await completeTask(task as TaskForCompletion, now);
@@ -105,7 +111,10 @@ export async function completeTaskYesterdayAction(taskId: string) {
   yesterday.setHours(23, 59, 59, 999);
 
   // Complete the task for yesterday (only if not already completed)
-  if (!task.completed) {
+  if (task.type === "HABIT") {
+    // For habits, always allow completion for yesterday regardless of completed field
+    await completeTask(task as TaskForCompletion, yesterday);
+  } else if (!task.completed) {
     await completeTask(task as TaskForCompletion, yesterday);
   }
 
@@ -162,7 +171,7 @@ export async function createTaskAction(formData: FormData) {
     title,
     project: project || null,
     priority,
-    tags,
+    tags: tags.join(", "),
     contextId: finalContextId,
     dueDate: dueDate ? new Date(dueDate) : null,
     type,
@@ -250,7 +259,7 @@ export async function updateTaskAction(formData: FormData) {
     title,
     project: project || null,
     priority,
-    tags,
+    tags: tags.join(", "),
     contextId,
     dueDate: dueDate ? new Date(dueDate) : null,
     urgency,
@@ -391,8 +400,9 @@ export async function getExistingTags(): Promise<string[]> {
     });
 
     const allTags = new Set<string>();
-    tasks.forEach((task: { tags: string[] }) => {
-      task.tags.forEach((tag) => allTags.add(tag));
+    tasks.forEach((task: { tags: string }) => {
+      const taskTags = parseTags(task.tags);
+      taskTags.forEach((tag) => allTags.add(tag));
     });
 
     return Array.from(allTags).sort();

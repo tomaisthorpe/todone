@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { URGENCY_CONSTANTS } from "./urgency-config";
+import { isHabitCompletedToday, shouldHabitShowAsAvailableFromCompletions } from "./habit-utils";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -234,6 +235,34 @@ export function shouldHideCompletedTask(task: { completed: boolean; completedAt:
   return false;
 }
 
+/**
+ * Helper function to check if a habit is completed today using habit completions
+ * This is an async version that should be used server-side
+ */
+export async function isHabitCompletedTodayAsync(taskId: string): Promise<boolean> {
+  return await isHabitCompletedToday(taskId);
+}
+
+/**
+ * Helper function to check if a habit should show as available using habit completions
+ * This is an async version that should be used server-side
+ */
+export async function shouldHabitShowAsAvailableAsync(
+  taskId: string,
+  frequency: number | null,
+  type: string
+): Promise<boolean> {
+  if (type !== "HABIT") {
+    return true; // Non-habits always show as available if not completed
+  }
+  
+  return await shouldHabitShowAsAvailableFromCompletions(taskId, frequency);
+}
+
+/**
+ * Legacy function for client-side compatibility
+ * This is deprecated and should be replaced with server-side checks
+ */
 export function shouldHabitShowAsAvailable(habit: {
   completed: boolean;
   completedAt: Date | null;

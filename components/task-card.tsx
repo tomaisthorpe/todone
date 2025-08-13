@@ -6,7 +6,7 @@ import {
   formatDateForTask,
   evaluateUrgency,
   getUrgencyColor,
-  shouldHabitShowAsAvailable,
+  parseTags,
 } from "@/lib/utils";
 import { getHabitStatus, getHabitDisplay } from "@/lib/habits";
 import { getContextIconComponent } from "@/lib/context-icons";
@@ -61,19 +61,15 @@ export function TaskCard({
   const habitStatus =
     task.type === "HABIT"
       ? getHabitStatus({
-          completedAt: task.completedAt,
+          completedAt: task.latestCompletionDate || null,
           frequency: task.frequency,
         })
       : null;
   const habitDisplay = getHabitDisplay(task);
 
-  // For habits, calculate whether they should show as available (uncompleted) or completed
+  // For habits, use the computed completion status; for other tasks use the completed field
   const effectiveCompleted = task.type === "HABIT" 
-    ? !shouldHabitShowAsAvailable({
-        completed: task.completed,
-        completedAt: task.completedAt,
-        type: task.type,
-      })
+    ? task.isCompletedToday || false
     : task.completed;
 
   // Find the context for this task to get its coefficient
@@ -83,7 +79,7 @@ export function TaskCard({
     priority: task.priority,
     dueDate: task.dueDate,
     createdAt: task.createdAt,
-    tags: task.tags,
+    tags: parseTags(task.tags),
     contextCoefficient: taskContext?.coefficient || 0,
   });
 
@@ -160,7 +156,7 @@ export function TaskCard({
 
               {((showContext && taskContext) ||
                 task.project ||
-                task.tags.length > 0) && (
+                parseTags(task.tags).length > 0) && (
                 <div className="flex flex-wrap items-center space-x-2 md:space-x-3 mt-1">
                   {showContext &&
                     taskContext &&
@@ -194,7 +190,7 @@ export function TaskCard({
                       {task.project}
                     </span>
                   )}
-                  {task.tags.map((tag) => (
+                  {parseTags(task.tags).map((tag) => (
                     <span
                       key={tag}
                       className="block items-center px-1.5 py-0.5 rounded text-xs bg-gray-100 text-gray-600 mb-1"

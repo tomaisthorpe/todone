@@ -44,6 +44,7 @@ import {
 } from "lucide-react";
 import type { Task, Context } from "@/lib/data";
 import { contextIconOptions } from "@/lib/context-icons";
+import { parseTags } from "@/lib/utils";
 
 // Context form schema
 const contextSchema = z.object({
@@ -161,7 +162,7 @@ export function TaskModal({
           type: task.type,
           habitType: task.habitType || undefined,
           frequency: task.frequency || undefined,
-          tags: task.tags,
+          tags: parseTags(task.tags),
         });
         setActiveTab("task");
       } else if (contextToEdit) {

@@ -4,6 +4,7 @@
 
 import { startOfDay, endOfDay, addDays } from './date-utils';
 import { prisma } from './prisma';
+import { HabitStatus } from './habits';
 
 export interface HabitTask {
   id: string;
@@ -97,12 +98,10 @@ export async function processHabitCompletion(
     },
   });
   
-  // Update the task with new streak and completion info
+  // Update the task with new streak info (no longer setting completed/completedAt)
   await prisma.task.update({
     where: { id: taskId },
     data: {
-      completed: true,
-      completedAt: completionDate,
       streak: streakResult.streak,
       longestStreak: streakResult.longestStreak,
       dueDate: nextDueDate,
@@ -124,15 +123,171 @@ export async function processHabitUncompletion(
   taskId: string,
   task: HabitTask
 ): Promise<void> {
+  // Remove the most recent habit completion record
+  const latestCompletion = await prisma.habitCompletion.findFirst({
+    where: { taskId },
+    orderBy: { completedAt: 'desc' },
+  });
+  
+  if (latestCompletion) {
+    await prisma.habitCompletion.delete({
+      where: { id: latestCompletion.id },
+    });
+  }
+  
+  // Update the task to reflect the reduced streak (no longer setting completed fields)
   await prisma.task.update({
     where: { id: taskId },
     data: {
-      completed: false,
-      completedAt: null,
       streak: Math.max((task.streak || 1) - 1, 0),
     },
   });
+}
+
+/**
+ * Gets the most recent habit completion for a habit task
+ */
+export async function getLatestHabitCompletion(taskId: string): Promise<Date | null> {
+  const latestCompletion = await prisma.habitCompletion.findFirst({
+    where: { taskId },
+    orderBy: { completedAt: 'desc' },
+    select: { completedAt: true },
+  });
   
-  // Note: In a future refactor, we should also remove the most recent 
-  // HabitCompletion record to maintain data consistency
+  return latestCompletion?.completedAt || null;
+}
+
+/**
+ * Checks if a habit was completed today based on habit completions
+ */
+export async function isHabitCompletedToday(taskId: string): Promise<boolean> {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  
+  const completion = await prisma.habitCompletion.findFirst({
+    where: {
+      taskId,
+      completedAt: {
+        gte: today,
+        lt: tomorrow,
+      },
+    },
+  });
+  
+  return !!completion;
+}
+
+/**
+ * Gets all habit completions for a task within a date range
+ */
+export async function getHabitCompletions(
+  taskId: string,
+  startDate?: Date,
+  endDate?: Date
+): Promise<Date[]> {
+  const where: { taskId: string; completedAt?: { gte?: Date; lte?: Date } } = { taskId };
+  
+  if (startDate || endDate) {
+    where.completedAt = {};
+    if (startDate) where.completedAt.gte = startDate;
+    if (endDate) where.completedAt.lte = endDate;
+  }
+  
+  const completions = await prisma.habitCompletion.findMany({
+    where,
+    orderBy: { completedAt: 'desc' },
+    select: { completedAt: true },
+  });
+  
+  return completions.map(c => c.completedAt);
+}
+
+/**
+ * Determines if a habit should show as available (not completed for current period)
+ * based on habit completions instead of the completed field
+ */
+export async function shouldHabitShowAsAvailableFromCompletions(
+  taskId: string,
+  frequency: number | null
+): Promise<boolean> {
+  const latestCompletion = await getLatestHabitCompletion(taskId);
+  
+  if (!latestCompletion) {
+    // No completions yet, show as available
+    return true;
+  }
+  
+  if (!frequency) {
+    // No frequency specified, check if completed today
+    return !(await isHabitCompletedToday(taskId));
+  }
+  
+  // Calculate if we're in the next period after completion
+  const now = new Date();
+  const today = new Date(now);
+  today.setHours(0, 0, 0, 0);
+  
+  const completedDate = new Date(latestCompletion);
+  completedDate.setHours(0, 0, 0, 0);
+  
+  // Show as available after the frequency period has passed
+  const nextAvailableDate = new Date(completedDate);
+  nextAvailableDate.setDate(nextAvailableDate.getDate() + frequency);
+  
+  return today >= nextAvailableDate;
+}
+
+/**
+ * Gets habit status based on habit completions instead of completed/completedAt fields
+ */
+export async function getHabitStatusFromCompletions(
+  taskId: string,
+  frequency: number | null
+): Promise<HabitStatus | null> {
+  if (!frequency) return null;
+  
+  const latestCompletion = await getLatestHabitCompletion(taskId);
+  if (!latestCompletion) return null;
+  
+  const today = new Date();
+  const completedAt = new Date(latestCompletion);
+  
+  const nextDueDate = new Date(completedAt);
+  nextDueDate.setDate(nextDueDate.getDate() + frequency);
+  const daysUntilDue = Math.ceil(
+    (nextDueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+  );
+
+  if (daysUntilDue > 1) {
+    return {
+      status: "fresh",
+      text: "✓ Fresh",
+      color: "text-green-700 bg-green-100",
+      actionNeeded: false,
+    };
+  } else if (daysUntilDue === 1) {
+    return {
+      status: "getting-due",
+      text: "⏰ Getting due",
+      color: "text-yellow-700 bg-yellow-100",
+      actionNeeded: false,
+    };
+  } else if (daysUntilDue === 0) {
+    return {
+      status: "ready",
+      text: "⚡ Ready",
+      color: "text-blue-700 bg-blue-100",
+      actionNeeded: true,
+    };
+  } else {
+    return {
+      status: "time-for-another",
+      text: "🔄 Time for another",
+      color: "text-orange-700 bg-orange-100",
+      actionNeeded: true,
+    };
+  }
 }

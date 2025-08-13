@@ -11,7 +11,7 @@ export interface TaskForCompletion {
   title: string;
   project: string | null;
   priority: "LOW" | "MEDIUM" | "HIGH";
-  tags: string[];
+  tags: string;
   contextId: string;
   dueDate: Date | null;
   type: "TASK" | "HABIT" | "RECURRING";
@@ -112,16 +112,15 @@ export async function completeTask(
 ): Promise<void> {
   switch (task.type) {
     case "HABIT":
-      if (!task.completed) {
-        await processHabitCompletion(task.id, {
-          id: task.id,
-          dueDate: task.dueDate,
-          frequency: task.frequency,
-          completedAt: task.completedAt,
-          streak: task.streak,
-          longestStreak: task.longestStreak,
-        }, completionDate);
-      }
+      // For habits, always process the completion (logic in server-actions checks if already completed today)
+      await processHabitCompletion(task.id, {
+        id: task.id,
+        dueDate: task.dueDate,
+        frequency: task.frequency,
+        completedAt: task.completedAt,
+        streak: task.streak,
+        longestStreak: task.longestStreak,
+      }, completionDate);
       break;
     
     case "RECURRING":
@@ -145,7 +144,8 @@ export async function completeTask(
  * Handles habit uncompletion
  */
 export async function uncompleteHabit(task: TaskForCompletion): Promise<void> {
-  if (task.type === "HABIT" && task.completed) {
+  if (task.type === "HABIT") {
+    // For habits, always process the uncompletion (logic in server-actions checks if completed today)
     await processHabitUncompletion(task.id, {
       id: task.id,
       dueDate: task.dueDate,

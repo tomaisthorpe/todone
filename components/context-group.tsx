@@ -30,7 +30,8 @@ function getContextCompletion(tasks: Task[]) {
     return { percentage: 100, completed: 0, total: 0 };
   }
 
-  const completed = contextHabits.filter((task) => task.completed).length;
+  // For habits, use the computed isCompletedToday field instead of completed
+  const completed = contextHabits.filter((task) => task.isCompletedToday).length;
   const total = contextHabits.length;
   const percentage = Math.round((completed / total) * 100);
 
@@ -144,7 +145,11 @@ export function ContextGroup({
       return true;
     })
     .sort((a, b) => {
-      if (a.completed !== b.completed) return a.completed ? 1 : -1;
+      // For habits, use isCompletedToday; for others use completed
+      const aCompleted = a.type === "HABIT" ? a.isCompletedToday : a.completed;
+      const bCompleted = b.type === "HABIT" ? b.isCompletedToday : b.completed;
+      
+      if (aCompleted !== bCompleted) return aCompleted ? 1 : -1;
       return b.urgency - a.urgency;
     });
 
