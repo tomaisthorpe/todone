@@ -427,32 +427,37 @@ export function TaskModal({
               fieldIdPrefix={modalId}
             />
 
-            <div className="flex justify-between pt-4">
-              <div className="flex space-x-2">
-                {isEditing && !task?.completed && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleCompleteYesterday}
-                    disabled={isLoading}
-                  >
-                    <Calendar className="w-4 h-4 mr-2" />
-                    Complete Yesterday
-                  </Button>
-                )}
-                {isEditing && (
+            <div className="space-y-3 pt-4">
+              {/* Quick Actions Row - Only for editing existing tasks */}
+              {isEditing && (
+                <div className="flex justify-center space-x-3">
+                  {!task?.completed && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleCompleteYesterday}
+                      disabled={isLoading}
+                      size="sm"
+                    >
+                      <Calendar className="w-4 h-4 mr-2" />
+                      Complete Yesterday
+                    </Button>
+                  )}
                   <Button
                     type="button"
                     variant="outline-destructive"
                     onClick={() => setShowDeleteConfirm(true)}
                     disabled={isLoading}
+                    size="sm"
                   >
                     <Trash2 className="w-4 h-4 mr-2" />
                     Delete Task
                   </Button>
-                )}
-              </div>
-              <div className="flex space-x-2">
+                </div>
+              )}
+              
+              {/* Main Actions Row */}
+              <div className="flex justify-end space-x-3">
                 <Button type="button" variant="outline" onClick={onClose}>
                   Cancel
                 </Button>
