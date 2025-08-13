@@ -30,6 +30,7 @@ import {
   deleteTaskAction,
   archiveContextAction,
   getExistingTags,
+  completeTaskYesterdayAction,
 } from "@/lib/server-actions";
 import {
   CheckSquare,
@@ -39,6 +40,7 @@ import {
   AlertTriangle,
   AlertCircle,
   Archive,
+  Calendar,
 } from "lucide-react";
 import type { Task, Context } from "@/lib/data";
 import { contextIconOptions } from "@/lib/context-icons";
@@ -304,6 +306,23 @@ export function TaskModal({
     }
   };
 
+  const handleCompleteYesterday = async () => {
+    if (!task) return;
+    setIsLoading(true);
+
+    try {
+      await completeTaskYesterdayAction(task.id);
+      onClose();
+    } catch (error) {
+      console.error("Failed to complete task yesterday:", error);
+      setError(
+        error instanceof Error ? error.message : "Failed to complete task yesterday"
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleArchiveContext = async () => {
     if (!contextToEdit) return;
     setIsLoading(true);
@@ -340,13 +359,45 @@ export function TaskModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white shadow-xl rounded-2xl border-0">
         <DialogHeader>
-          <DialogTitle>
-            {isEditing
-              ? "Edit Task"
-              : isEditingContext
-              ? "Edit Context"
-              : "Add New Item"}
-          </DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle>
+              {isEditing
+                ? "Edit Task"
+                : isEditingContext
+                ? "Edit Context"
+                : "Add New Item"}
+            </DialogTitle>
+            
+            {/* Quick Actions in Header - Only for editing tasks */}
+            {isEditing && activeTab === "task" && (
+              <div className="flex items-center space-x-2">
+                {!task?.completed && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleCompleteYesterday}
+                    disabled={isLoading}
+                    className="text-xs"
+                  >
+                    <Calendar className="w-3 h-3 mr-1" />
+                    Complete Yesterday
+                  </Button>
+                )}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  disabled={isLoading}
+                  className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <Trash2 className="w-3 h-3 mr-1" />
+                  Delete
+                </Button>
+              </div>
+            )}
+          </div>
         </DialogHeader>
 
         {/* Error Display */}
@@ -408,34 +459,19 @@ export function TaskModal({
               fieldIdPrefix={modalId}
             />
 
-            <div className="flex justify-between pt-4">
-              <div>
-                {isEditing && (
-                  <Button
-                    type="button"
-                    variant="outline-destructive"
-                    onClick={() => setShowDeleteConfirm(true)}
-                    disabled={isLoading}
-                  >
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Delete Task
-                  </Button>
-                )}
-              </div>
-              <div className="flex space-x-2">
-                <Button type="button" variant="outline" onClick={onClose}>
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isLoading}>
-                  {isLoading
-                    ? isEditing
-                      ? "Updating..."
-                      : "Creating..."
-                    : isEditing
-                    ? "Update Task"
-                    : "Create Task"}
-                </Button>
-              </div>
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button type="button" variant="outline" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading
+                  ? isEditing
+                    ? "Updating..."
+                    : "Creating..."
+                  : isEditing
+                  ? "Update Task"
+                  : "Create Task"}
+              </Button>
             </div>
           </form>
         )}
