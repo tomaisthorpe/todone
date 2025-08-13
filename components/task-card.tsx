@@ -71,8 +71,7 @@ export function TaskCard({
   const effectiveCompleted = task.type === "HABIT" 
     ? !shouldHabitShowAsAvailable({
         completed: task.completed,
-        lastCompleted: task.lastCompleted,
-        frequency: task.frequency,
+        completedAt: task.completedAt,
         type: task.type,
       })
     : task.completed;

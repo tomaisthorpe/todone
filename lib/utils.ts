@@ -236,8 +236,7 @@ export function shouldHideCompletedTask(task: { completed: boolean; completedAt:
 
 export function shouldHabitShowAsAvailable(habit: {
   completed: boolean;
-  lastCompleted: Date | null;
-  frequency: number | null;
+  completedAt: Date | null;
   type: string;
 }): boolean {
   // Only apply to habits
@@ -250,8 +249,8 @@ export function shouldHabitShowAsAvailable(habit: {
     return true;
   }
 
-  // If no lastCompleted, show current completion state
-  if (!habit.lastCompleted) {
+  // If no completedAt, show current completion state
+  if (!habit.completedAt) {
     return !habit.completed;
   }
 
@@ -260,8 +259,8 @@ export function shouldHabitShowAsAvailable(habit: {
   const today = new Date(now);
   today.setHours(0, 0, 0, 0);
   
-  const lastCompleted = new Date(habit.lastCompleted);
-  const completedDate = new Date(lastCompleted);
+  const completedAt = new Date(habit.completedAt);
+  const completedDate = new Date(completedAt);
   completedDate.setHours(0, 0, 0, 0);
 
   // Show as available the day after completion (allows early completion)
