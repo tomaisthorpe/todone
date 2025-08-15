@@ -56,15 +56,15 @@ export function evaluateUrgency(task: UrgencyInput): UrgencyResult {
     let proximity = 0;
     if (daysUntilDue >= 0) {
       // Exponential scaling for non-overdue tasks
-      // Start scaling 30 days before due date with exponential curve
+      // Start scaling 7 days before due date with exponential curve
       if (daysUntilDue <= URGENCY_CONSTANTS.due.nearWindowDays) {
-        // Normalize days to 0-1 range (1 = due today, 0 = 30 days away)
+        // Normalize days to 0-1 range (1 = due today, 0 = 7 days away)
         const normalizedDays = (URGENCY_CONSTANTS.due.nearWindowDays - daysUntilDue) / 
           URGENCY_CONSTANTS.due.nearWindowDays;
         // Apply exponential curve: f(x) = x^2 for a smooth exponential increase
         proximity = Math.pow(normalizedDays, 2);
       }
-      // Tasks more than 30 days away have proximity of 0
+      // Tasks more than 7 days away have proximity of 0
     } else {
       const overdueDays = Math.abs(daysUntilDue);
       // Overdue should be at least as urgent as due today.
