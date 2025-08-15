@@ -34,19 +34,16 @@ export function evaluateUrgency(task: UrgencyInput): UrgencyResult {
   };
 
   // Priority (mirror Taskwarrior values via normalized * coefficient)
-  const prioNorm = URGENCY_CONSTANTS.priority.normalized[
-    task.priority
-  ];
+  const prioNorm = URGENCY_CONSTANTS.priority.normalized[task.priority];
   const prioContribution = prioNorm * URGENCY_CONSTANTS.priority.coefficient;
-  add(prioContribution, `${task.priority[0]}${task.priority.slice(1).toLowerCase()} priority`);
+  add(
+    prioContribution,
+    `${task.priority[0]}${task.priority.slice(1).toLowerCase()} priority`
+  );
 
   // Age factor
   const ageInDays = diffInLocalCalendarDays(new Date(), task.createdAt);
-  const ageNorm = clamp(
-    ageInDays / URGENCY_CONSTANTS.age.horizonDays,
-    0,
-    1
-  );
+  const ageNorm = clamp(ageInDays / URGENCY_CONSTANTS.age.horizonDays, 0, 1);
   const ageContribution = ageNorm * URGENCY_CONSTANTS.age.coefficient;
   add(ageContribution, `Task age (${ageInDays} days)`);
 
@@ -55,21 +52,24 @@ export function evaluateUrgency(task: UrgencyInput): UrgencyResult {
     const daysUntilDue = diffInLocalCalendarDays(task.dueDate);
     let proximity = 0;
     if (daysUntilDue >= 0) {
-      proximity = clamp(
-        (URGENCY_CONSTANTS.due.nearWindowDays - daysUntilDue) /
-          URGENCY_CONSTANTS.due.nearWindowDays,
-        0,
-        1
-      );
+      // Exponential scaling for non-overdue tasks
+      // Start scaling 7 days before due date with exponential curve
+      if (daysUntilDue <= URGENCY_CONSTANTS.due.nearWindowDays) {
+        // Normalize days to 0-1 range (1 = due today, 0 = 7 days away)
+        const normalizedDays =
+          (URGENCY_CONSTANTS.due.nearWindowDays - daysUntilDue) /
+          URGENCY_CONSTANTS.due.nearWindowDays;
+        // Apply gentler exponential curve: f(x) = x^1.5 for a smoother exponential increase
+        proximity = Math.pow(normalizedDays, 1.5);
+      }
+      // Tasks more than 7 days away have proximity of 0
     } else {
       const overdueDays = Math.abs(daysUntilDue);
       // Overdue should be at least as urgent as due today.
       // Start at 1 and increase up to 2 as it saturates.
-      proximity = 1 + clamp(
-        overdueDays / URGENCY_CONSTANTS.due.overdueSaturationDays,
-        0,
-        1
-      );
+      proximity =
+        1 +
+        clamp(overdueDays / URGENCY_CONSTANTS.due.overdueSaturationDays, 0, 1);
     }
     const dueContribution = proximity * URGENCY_CONSTANTS.due.coefficient;
     const label =
@@ -116,17 +116,24 @@ export function explainUrgency(task: UrgencyInput): UrgencyResult {
 export function parseTags(tagsString: string): string[] {
   if (!tagsString.trim()) return [];
   return tagsString
-    .split(',')
-    .map(tag => tag.trim())
-    .filter(tag => tag.length > 0);
+    .split(",")
+    .map((tag) => tag.trim())
+    .filter((tag) => tag.length > 0);
 }
 
 export function formatTagsForInput(tags: string[]): string {
-  return tags.join(', ');
+  return tags.join(", ");
 }
 
-export function diffInLocalCalendarDays(target: Date, base: Date = new Date()): number {
-  const targetUTC = Date.UTC(target.getFullYear(), target.getMonth(), target.getDate());
+export function diffInLocalCalendarDays(
+  target: Date,
+  base: Date = new Date()
+): number {
+  const targetUTC = Date.UTC(
+    target.getFullYear(),
+    target.getMonth(),
+    target.getDate()
+  );
   const baseUTC = Date.UTC(base.getFullYear(), base.getMonth(), base.getDate());
   return Math.round((targetUTC - baseUTC) / 86400000);
 }
@@ -139,7 +146,7 @@ export function formatDate(date: Date): string {
   if (diffDays === -1) return "Yesterday";
   if (diffDays < 0) return `${Math.abs(diffDays)}d overdue`;
   if (diffDays < 7) return `In ${diffDays}d`;
-  
+
   return date.toLocaleDateString();
 }
 
@@ -150,9 +157,11 @@ export function getUrgencyColor(urgency: number): string {
   return "text-green-600 bg-green-100";
 }
 
-export function formatDateForTask(date: Date | null): { text: string; color: string; isOverdue: boolean } | null {
+export function formatDateForTask(
+  date: Date | null
+): { text: string; color: string; isOverdue: boolean } | null {
   if (!date) return null;
-  
+
   const diffDays = diffInLocalCalendarDays(date);
 
   if (diffDays === 0) {
@@ -190,7 +199,7 @@ export function formatDateForTask(date: Date | null): { text: string; color: str
       isOverdue: false,
     };
   }
-  
+
   return {
     text: date.toLocaleDateString(),
     color: "text-gray-600 bg-gray-100",
@@ -198,7 +207,11 @@ export function formatDateForTask(date: Date | null): { text: string; color: str
   };
 }
 
-export function shouldHideCompletedTask(task: { completed: boolean; completedAt: Date | null; type?: string }): boolean {
+export function shouldHideCompletedTask(task: {
+  completed: boolean;
+  completedAt: Date | null;
+  type?: string;
+}): boolean {
   // Never hide habits - they are ongoing behaviors that should always be visible
   if (task.type === "HABIT") {
     return false;
@@ -214,13 +227,13 @@ export function shouldHideCompletedTask(task: { completed: boolean; completedAt:
   const completedDate = new Date(task.completedAt);
   const completedDateOnly = new Date(completedDate);
   completedDateOnly.setHours(0, 0, 0, 0);
-  
+
   // If task was completed before today
   if (completedDateOnly.getTime() < today.getTime()) {
     // Check if it was completed less than an hour ago
     const now = new Date();
     const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
-    
+
     // If completed less than an hour ago, don't hide it
     if (completedDate >= oneHourAgo) {
       return false;
@@ -258,7 +271,7 @@ export function shouldHabitShowAsAvailable(habit: {
   const now = new Date();
   const today = new Date(now);
   today.setHours(0, 0, 0, 0);
-  
+
   const completedAt = new Date(habit.completedAt);
   const completedDate = new Date(completedAt);
   completedDate.setHours(0, 0, 0, 0);
