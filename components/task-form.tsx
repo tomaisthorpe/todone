@@ -32,6 +32,7 @@ export interface TaskFormData {
   habitType?: "STREAK" | "LEARNING" | "WELLNESS" | "MAINTENANCE";
   frequency?: number;
   tags: string[];
+  notes?: string;
 }
 
 interface TaskFormProps {

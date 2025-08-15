@@ -50,6 +50,7 @@ interface ParsedTask {
   type: "TASK" | "RECURRING";
   frequency: number | undefined;
   recurringText: string | null;
+  notes?: string;
 }
 
 interface ParsedSegment {

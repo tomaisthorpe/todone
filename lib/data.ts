@@ -27,6 +27,7 @@ export interface Task {
   completed: boolean;
   completedAt: Date | null;
   type: "TASK" | "HABIT" | "RECURRING";
+  notes: string | null;
   userId: string;
   createdAt: Date;
   updatedAt: Date;
