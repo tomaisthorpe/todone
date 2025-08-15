@@ -13,11 +13,11 @@ export const URGENCY_CONSTANTS = {
   },
 
   // Due date proximity: day-difference only.
-  // For due in d >= 0 days: proximity = clamp((nearWindowDays - d)/nearWindowDays, 0..1)
+  // For due in d >= 0 days: proximity = exponential scaling starting 30 days before
   // For overdue by o > 0 days: proximity = clamp(o/overdueSaturationDays, 0..1)
   due: {
     coefficient: 12.0,
-    nearWindowDays: 7,
+    nearWindowDays: 30,
     overdueSaturationDays: 7,
   },
 
