@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { RotateCcw, Dumbbell, BookOpen, Flame, Wrench } from "lucide-react";
+import { RotateCcw, Dumbbell, BookOpen, Flame, Wrench, FileText } from "lucide-react";
 import {
   formatDateForTask,
   evaluateUrgency,
@@ -202,6 +202,20 @@ export function TaskCard({
                       {tag}
                     </span>
                   ))}
+                  {task.notes && (
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <FileText className="w-3 h-3 text-gray-500 mb-1" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="text-xs max-w-xs">
+                          {task.notes.length > 100 
+                            ? `${task.notes.substring(0, 100)}...` 
+                            : task.notes}
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
                 </div>
               )}
             </div>

@@ -119,6 +119,7 @@ export function TaskModal({
     habitType: undefined,
     frequency: undefined,
     tags: [],
+    notes: "",
   });
 
   // Generate unique IDs for this modal instance to prevent conflicts
@@ -162,6 +163,7 @@ export function TaskModal({
           habitType: task.habitType || undefined,
           frequency: task.frequency || undefined,
           tags: task.tags,
+          notes: task.notes || "",
         });
         setActiveTab("task");
       } else if (contextToEdit) {
@@ -187,6 +189,7 @@ export function TaskModal({
           habitType: undefined,
           frequency: undefined,
           tags: [],
+          notes: "",
         });
         // Also reset context form to defaults
         contextForm.reset({

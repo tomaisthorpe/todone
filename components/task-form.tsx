@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -340,6 +341,21 @@ export function TaskForm({
               value={data.project}
               onChange={(e) => onChange("project", e.target.value)}
               placeholder="Optional project name"
+            />
+          </div>
+        )}
+
+        {/* Notes - only in full mode */}
+        {!compact && (
+          <div className="col-span-2">
+            <Label htmlFor={getFieldId("notes")}>Notes</Label>
+            <Textarea
+              id={getFieldId("notes")}
+              value={data.notes || ""}
+              onChange={(e) => onChange("notes", e.target.value)}
+              placeholder="Add any additional notes..."
+              rows={3}
+              className="resize-none"
             />
           </div>
         )}

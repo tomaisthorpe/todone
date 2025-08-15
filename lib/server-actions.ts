@@ -133,6 +133,7 @@ export async function createTaskAction(formData: FormData) {
     ? parseInt(formData.get("frequency") as string)
     : null;
   const tagsString = formData.get("tags") as string;
+  const notes = formData.get("notes") as string;
 
   if (!title) {
     throw new Error("Title is required");
@@ -166,6 +167,7 @@ export async function createTaskAction(formData: FormData) {
     contextId: finalContextId,
     dueDate: dueDate ? new Date(dueDate) : null,
     type,
+    notes: notes || null,
     userId,
   };
 
@@ -209,6 +211,7 @@ export async function updateTaskAction(formData: FormData) {
     ? parseInt(formData.get("frequency") as string)
     : null;
   const tagsString = formData.get("tags") as string;
+  const notes = formData.get("notes") as string;
 
   if (!taskId || !title || !contextId) {
     throw new Error("Task ID, title and context are required");
@@ -255,6 +258,7 @@ export async function updateTaskAction(formData: FormData) {
     dueDate: dueDate ? new Date(dueDate) : null,
     urgency,
     type,
+    notes: notes || null,
     // Clear type-specific fields first
     habitType: null,
     frequency: null,
