@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Calendar, ChevronDown, ChevronUp } from "lucide-react";
 import { TaskCard } from "./task-card";
-import { shouldHideCompletedTask } from "@/lib/utils";
+import { shouldHideCompletedTask, shouldHabitShowAsAvailable } from "@/lib/utils";
 import type { Task } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 
@@ -38,8 +38,16 @@ function getTodayTasks(tasks: Task[]): Task[] {
       return taskDate.getTime() <= today.getTime();
     })
     .sort((a, b) => {
+      // For habits, consider them incomplete if they're available for completion
+      const aEffectivelyCompleted = a.type === "HABIT" ? 
+        a.completed && !shouldHabitShowAsAvailable(a) : 
+        a.completed;
+      const bEffectivelyCompleted = b.type === "HABIT" ? 
+        b.completed && !shouldHabitShowAsAvailable(b) : 
+        b.completed;
+      
       // Sort completed tasks to bottom
-      if (a.completed !== b.completed) return a.completed ? 1 : -1;
+      if (aEffectivelyCompleted !== bEffectivelyCompleted) return aEffectivelyCompleted ? 1 : -1;
       // Sort by urgency (highest first)
       return b.urgency - a.urgency;
     });
@@ -55,8 +63,16 @@ function getUrgentTasks(tasks: Task[]): Task[] {
       return true;
     })
     .sort((a, b) => {
+      // For habits, consider them incomplete if they're available for completion
+      const aEffectivelyCompleted = a.type === "HABIT" ? 
+        a.completed && !shouldHabitShowAsAvailable(a) : 
+        a.completed;
+      const bEffectivelyCompleted = b.type === "HABIT" ? 
+        b.completed && !shouldHabitShowAsAvailable(b) : 
+        b.completed;
+      
       // Sort completed tasks to bottom
-      if (a.completed !== b.completed) return a.completed ? 1 : -1;
+      if (aEffectivelyCompleted !== bEffectivelyCompleted) return aEffectivelyCompleted ? 1 : -1;
       // Sort by urgency (highest first)
       return b.urgency - a.urgency;
     });
