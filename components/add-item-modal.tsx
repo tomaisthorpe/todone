@@ -244,6 +244,9 @@ export function TaskModal({
 
     // Convert tags array to comma-separated string for form data
     formData.append("tags", taskFormData.tags.join(", "));
+    
+    // Add notes field
+    if (taskFormData.notes) formData.append("notes", taskFormData.notes);
 
     try {
       if (isEditing) {
