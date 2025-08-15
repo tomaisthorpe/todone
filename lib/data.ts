@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth/next";
 import { Session } from "next-auth";
 import { authOptions } from "./auth";
 import { prisma } from "./prisma";
-import { calculateUrgency } from "./utils";
+import { calculateUrgency, shouldHabitShowAsAvailable } from "./utils";
 
 // Type helper for tasks with context from Prisma  
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -92,7 +92,15 @@ export async function getTasks(): Promise<Task[]> {
     }));
 
     return tasksWithUrgency.sort((a: Task, b: Task) => {
-      if (a.completed !== b.completed) return a.completed ? 1 : -1;
+      // For habits, consider them incomplete if they're available for completion
+      const aEffectivelyCompleted = a.type === "HABIT" ? 
+        a.completed && !shouldHabitShowAsAvailable(a) : 
+        a.completed;
+      const bEffectivelyCompleted = b.type === "HABIT" ? 
+        b.completed && !shouldHabitShowAsAvailable(b) : 
+        b.completed;
+      
+      if (aEffectivelyCompleted !== bEffectivelyCompleted) return aEffectivelyCompleted ? 1 : -1;
       return b.urgency - a.urgency;
     });
   } catch (error) {
@@ -111,8 +119,10 @@ export async function getContexts(): Promise<Context[]> {
   try {
     const contexts = await prisma.context.findMany({
       where: {
-        OR: [{ userId: session.user.id }, { shared: true }],
-        archived: { equals: false },
+        AND: [
+          { OR: [{ userId: session.user.id }, { shared: true }] },
+          { archived: false }
+        ]
       },
       orderBy: { name: "asc" },
     });
@@ -219,7 +229,15 @@ export async function getUserTasks(userId: string): Promise<Task[]> {
     }));
 
     return tasksWithUrgency.sort((a: Task, b: Task) => {
-      if (a.completed !== b.completed) return a.completed ? 1 : -1;
+      // For habits, consider them incomplete if they're available for completion
+      const aEffectivelyCompleted = a.type === "HABIT" ? 
+        a.completed && !shouldHabitShowAsAvailable(a) : 
+        a.completed;
+      const bEffectivelyCompleted = b.type === "HABIT" ? 
+        b.completed && !shouldHabitShowAsAvailable(b) : 
+        b.completed;
+      
+      if (aEffectivelyCompleted !== bEffectivelyCompleted) return aEffectivelyCompleted ? 1 : -1;
       return b.urgency - a.urgency;
     });
   } catch (error) {

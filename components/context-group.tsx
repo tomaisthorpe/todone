@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { TaskCard } from "./task-card";
 import { AddItemModal } from "./add-item-modal";
 import { TaskModal } from "./add-item-modal";
-import { cn, shouldHideCompletedTask } from "@/lib/utils";
+import { cn, shouldHideCompletedTask, shouldHabitShowAsAvailable } from "@/lib/utils";
 import { ChevronDown, Pencil } from "lucide-react";
 import {
   ContextCollapsible,
@@ -144,7 +144,15 @@ export function ContextGroup({
       return true;
     })
     .sort((a, b) => {
-      if (a.completed !== b.completed) return a.completed ? 1 : -1;
+      // For habits, consider them incomplete if they're available for completion
+      const aEffectivelyCompleted = a.type === "HABIT" ? 
+        a.completed && !shouldHabitShowAsAvailable(a) : 
+        a.completed;
+      const bEffectivelyCompleted = b.type === "HABIT" ? 
+        b.completed && !shouldHabitShowAsAvailable(b) : 
+        b.completed;
+      
+      if (aEffectivelyCompleted !== bEffectivelyCompleted) return aEffectivelyCompleted ? 1 : -1;
       return b.urgency - a.urgency;
     });
 
