@@ -1,7 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import { RotateCcw, Dumbbell, BookOpen, Flame, Wrench, FileText } from "lucide-react";
+import {
+  RotateCcw,
+  Dumbbell,
+  BookOpen,
+  Flame,
+  Wrench,
+  FileText,
+} from "lucide-react";
 import {
   formatDateForTask,
   evaluateUrgency,
@@ -33,6 +40,7 @@ interface TaskCardProps {
   }>;
   showContext?: boolean;
   onContextClick?: (contextId: string) => void;
+  showUrgency?: boolean;
 }
 
 const renderHabitIcon = (iconType: string, className: string) => {
@@ -54,6 +62,7 @@ export function TaskCard({
   task,
   contexts,
   showContext = false,
+  showUrgency = true,
   onContextClick,
 }: TaskCardProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -68,13 +77,14 @@ export function TaskCard({
   const habitDisplay = getHabitDisplay(task);
 
   // For habits, calculate whether they should show as available (uncompleted) or completed
-  const effectiveCompleted = task.type === "HABIT" 
-    ? !shouldHabitShowAsAvailable({
-        completed: task.completed,
-        completedAt: task.completedAt,
-        type: task.type,
-      })
-    : task.completed;
+  const effectiveCompleted =
+    task.type === "HABIT"
+      ? !shouldHabitShowAsAvailable({
+          completed: task.completed,
+          completedAt: task.completedAt,
+          type: task.type,
+        })
+      : task.completed;
 
   // Find the context for this task to get its coefficient
   const taskContext = contexts.find((ctx) => ctx.id === task.contextId);
@@ -209,8 +219,8 @@ export function TaskCard({
                       </TooltipTrigger>
                       <TooltipContent>
                         <p className="text-xs max-w-xs">
-                          {task.notes.length > 100 
-                            ? `${task.notes.substring(0, 100)}...` 
+                          {task.notes.length > 100
+                            ? `${task.notes.substring(0, 100)}...`
                             : task.notes}
                         </p>
                       </TooltipContent>
@@ -220,52 +230,54 @@ export function TaskCard({
               )}
             </div>
 
-            <div className="flex items-center ml-2 justify-end flex-wrap gap-2 max-w-1/2">
-              {habitStatus && (
-                <div
-                  className={cn(
-                    "px-1.5 py-0.5 rounded text-xs font-medium whitespace-nowrap",
-                    habitStatus.color
-                  )}
-                >
-                  {habitStatus.text}
-                </div>
-              )}
-              {dateInfo && (
-                <div
-                  className={cn(
-                    "px-1.5 py-0.5 rounded text-xs font-medium whitespace-nowrap",
-                    dateInfo.color
-                  )}
-                >
-                  {dateInfo.text}
-                </div>
-              )}
-              <Tooltip>
-                <TooltipTrigger asChild>
+            {showUrgency && (
+              <div className="flex items-center ml-2 justify-end flex-wrap gap-2 max-w-1/2">
+                {habitStatus && (
                   <div
                     className={cn(
-                      "px-1.5 py-0.5 rounded text-xs font-semibold cursor-help",
-                      getUrgencyColor(task.urgency)
+                      "px-1.5 py-0.5 rounded text-xs font-medium whitespace-nowrap",
+                      habitStatus.color
                     )}
                   >
-                    {task.urgency.toFixed(1)}
+                    {habitStatus.text}
                   </div>
-                </TooltipTrigger>
-                <TooltipContent className="max-w-xs">
-                  <div className="text-sm">
-                    <div className="font-semibold mb-1">
-                      Urgency Calculation:
+                )}
+                {dateInfo && (
+                  <div
+                    className={cn(
+                      "px-1.5 py-0.5 rounded text-xs font-medium whitespace-nowrap",
+                      dateInfo.color
+                    )}
+                  >
+                    {dateInfo.text}
+                  </div>
+                )}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div
+                      className={cn(
+                        "px-1.5 py-0.5 rounded text-xs font-semibold cursor-help",
+                        getUrgencyColor(task.urgency)
+                      )}
+                    >
+                      {task.urgency.toFixed(1)}
                     </div>
-                    {urgencyExplanation.explanation.map((line, index) => (
-                      <div key={index} className="text-xs">
-                        {line}
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs">
+                    <div className="text-sm">
+                      <div className="font-semibold mb-1">
+                        Urgency Calculation:
                       </div>
-                    ))}
-                  </div>
-                </TooltipContent>
-              </Tooltip>
-            </div>
+                      {urgencyExplanation.explanation.map((line, index) => (
+                        <div key={index} className="text-xs">
+                          {line}
+                        </div>
+                      ))}
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            )}
           </div>
         </div>
       </div>
