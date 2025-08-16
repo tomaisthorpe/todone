@@ -13,7 +13,7 @@ const config = {
     '!lib/data.ts',
   ],
   coverageDirectory: 'coverage',
-  coverageReporters: ['text', 'html'],
+  coverageReporters: ['text', 'html', 'lcov'],
 };
 
 module.exports = config;

@@ -32,8 +32,8 @@ describe('getContextIconComponent', () => {
 
   it('should return Home icon as fallback for null/undefined inputs', () => {
     // TypeScript prevents this, but testing runtime behavior
-    const result1 = getContextIconComponent(null as any);
-    const result2 = getContextIconComponent(undefined as any);
+    const result1 = getContextIconComponent(null as unknown as string);
+    const result2 = getContextIconComponent(undefined as unknown as string);
     expect(result1).toBe(Home);
     expect(result2).toBe(Home);
   });
