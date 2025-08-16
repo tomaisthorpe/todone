@@ -4,7 +4,7 @@ import { authOptions } from "./auth";
 import { prisma } from "./prisma";
 import { calculateUrgency, shouldHabitShowAsAvailable } from "./utils";
 
-// Type helper for tasks with context from Prisma  
+// Type helper for tasks with context from Prisma
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type TaskWithContext = any;
 
@@ -94,14 +94,17 @@ export async function getTasks(): Promise<Task[]> {
 
     return tasksWithUrgency.sort((a: Task, b: Task) => {
       // For habits, consider them incomplete if they're available for completion
-      const aEffectivelyCompleted = a.type === "HABIT" ? 
-        a.completed && !shouldHabitShowAsAvailable(a) : 
-        a.completed;
-      const bEffectivelyCompleted = b.type === "HABIT" ? 
-        b.completed && !shouldHabitShowAsAvailable(b) : 
-        b.completed;
-      
-      if (aEffectivelyCompleted !== bEffectivelyCompleted) return aEffectivelyCompleted ? 1 : -1;
+      const aEffectivelyCompleted =
+        a.type === "HABIT"
+          ? a.completed && !shouldHabitShowAsAvailable(a)
+          : a.completed;
+      const bEffectivelyCompleted =
+        b.type === "HABIT"
+          ? b.completed && !shouldHabitShowAsAvailable(b)
+          : b.completed;
+
+      if (aEffectivelyCompleted !== bEffectivelyCompleted)
+        return aEffectivelyCompleted ? 1 : -1;
       return b.urgency - a.urgency;
     });
   } catch (error) {
@@ -122,8 +125,8 @@ export async function getContexts(): Promise<Context[]> {
       where: {
         AND: [
           { OR: [{ userId: session.user.id }, { shared: true }] },
-          { archived: false }
-        ]
+          { archived: false },
+        ],
       },
       orderBy: { name: "asc" },
     });
@@ -231,14 +234,17 @@ export async function getUserTasks(userId: string): Promise<Task[]> {
 
     return tasksWithUrgency.sort((a: Task, b: Task) => {
       // For habits, consider them incomplete if they're available for completion
-      const aEffectivelyCompleted = a.type === "HABIT" ? 
-        a.completed && !shouldHabitShowAsAvailable(a) : 
-        a.completed;
-      const bEffectivelyCompleted = b.type === "HABIT" ? 
-        b.completed && !shouldHabitShowAsAvailable(b) : 
-        b.completed;
-      
-      if (aEffectivelyCompleted !== bEffectivelyCompleted) return aEffectivelyCompleted ? 1 : -1;
+      const aEffectivelyCompleted =
+        a.type === "HABIT"
+          ? a.completed && !shouldHabitShowAsAvailable(a)
+          : a.completed;
+      const bEffectivelyCompleted =
+        b.type === "HABIT"
+          ? b.completed && !shouldHabitShowAsAvailable(b)
+          : b.completed;
+
+      if (aEffectivelyCompleted !== bEffectivelyCompleted)
+        return aEffectivelyCompleted ? 1 : -1;
       return b.urgency - a.urgency;
     });
   } catch (error) {
@@ -405,7 +411,7 @@ export async function getBurndownData(): Promise<BurndownDataPoint[]> {
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - 30);
-    
+
     // Reset times to start/end of day for consistent querying
     startDate.setHours(0, 0, 0, 0);
     endDate.setHours(23, 59, 59, 999);
@@ -467,33 +473,36 @@ export async function getBurndownData(): Promise<BurndownDataPoint[]> {
     }
 
     // Calculate initial incomplete count (tasks created before our range that were incomplete)
-    let runningIncompleteCount = olderIncompleteTasks.filter(task => 
-      !task.completed || (task.completedAt && task.completedAt >= startDate)
+    let runningIncompleteCount = olderIncompleteTasks.filter(
+      (task) =>
+        !task.completed || (task.completedAt && task.completedAt >= startDate)
     ).length;
 
     // Generate data points for each day
-    const dataPoints: BurndownDataPoint[] = dates.map(date => {
+    const dataPoints: BurndownDataPoint[] = dates.map((date) => {
       const nextDay = new Date(date);
       nextDay.setDate(nextDay.getDate() + 1);
 
       // Tasks created on this day
-      const createdToday = tasks.filter(task => {
+      const createdToday = tasks.filter((task) => {
         const createdDate = new Date(task.createdAt);
         return createdDate >= date && createdDate < nextDay;
       }).length;
 
       // Tasks completed on this day
-      const completedToday = [...tasks, ...olderIncompleteTasks].filter(task => {
-        if (!task.completedAt) return false;
-        const completedDate = new Date(task.completedAt);
-        return completedDate >= date && completedDate < nextDay;
-      }).length;
+      const completedToday = [...tasks, ...olderIncompleteTasks].filter(
+        (task) => {
+          if (!task.completedAt) return false;
+          const completedDate = new Date(task.completedAt);
+          return completedDate >= date && completedDate < nextDay;
+        }
+      ).length;
 
       // Update running count
       runningIncompleteCount += createdToday - completedToday;
 
       return {
-        date: date.toISOString().split('T')[0], // YYYY-MM-DD format
+        date: date.toISOString().split("T")[0], // YYYY-MM-DD format
         incompleteTasks: Math.max(0, runningIncompleteCount), // Ensure non-negative
         createdTasks: createdToday,
         completedTasks: completedToday,
