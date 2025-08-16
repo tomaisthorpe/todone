@@ -122,6 +122,13 @@ Examples:
 
 **Impact**: Users can no longer accidentally interact with background elements when task editing modal, context creation modal, or confirmation dialogs are open, providing better UX and preventing data loss scenarios.
 
+### Z-Index Layering Strategy
+**Decision**: Use a clear z-index hierarchy: Modal overlays at z-50, modal content at z-[51], and dropdown components at z-[100].
+
+**Reasoning**: Dropdown components (Select, TagsInput, Tooltips) that appear in modals need to render above the modal overlay to remain interactive. Using z-[100] ensures these components work correctly within modal contexts.
+
+**Impact**: All dropdown interactions work seamlessly within modals, including task form selects, context form selects, and tag input suggestions.
+
 ### State Management
 **Decision**: Start with local state, design for future persistence.
 
