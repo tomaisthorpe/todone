@@ -7,6 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "db:migrate": "prisma migrate dev",
@@ -45,13 +48,17 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@jest/globals": "^30.0.5",
     "@tailwindcss/postcss": "^4",
+    "@types/jest": "^30.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
+    "jest": "^30.0.5",
     "tailwindcss": "^4",
+    "ts-jest": "^29.4.1",
     "tsx": "^4.20.3",
     "typescript": "^5"
   }
