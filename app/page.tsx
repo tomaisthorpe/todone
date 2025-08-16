@@ -3,11 +3,9 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth/next";
 import { Session } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { getTasks, getContexts, getArchivedContexts } from "@/lib/data";
 import { signOutAction } from "@/lib/server-actions";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { AutoRefresher } from "@/components/auto-refresher";
 import { DashboardClient } from "@/components/dashboard-client";
 
 export default async function Dashboard() {
@@ -17,13 +15,6 @@ export default async function Dashboard() {
   if (!session) {
     redirect("/auth/signin");
   }
-
-  // Server-side data fetching
-  const [tasks, contexts, archivedContexts] = await Promise.all([
-    getTasks(),
-    getContexts(),
-    getArchivedContexts(),
-  ]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -57,10 +48,7 @@ export default async function Dashboard() {
         </div>
       </div>
 
-      <DashboardClient tasks={tasks} contexts={contexts} archivedContexts={archivedContexts} />
-
-      {/* Periodic auto-refresh for multi-device sync */}
-      <AutoRefresher intervalMs={5000} />
+      <DashboardClient />
     </div>
   );
 }
