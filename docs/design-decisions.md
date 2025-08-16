@@ -115,6 +115,13 @@ Examples:
 
 **Reasoning**: shadcn provides solid foundation (buttons, cards, inputs) while allowing full customization for unique components (TaskCard, ContextGroup, habit badges).
 
+### Modal Interaction Blocking
+**Decision**: Explicitly enable modal behavior for all dialogs to prevent background interaction.
+
+**Reasoning**: Modal dialogs should block user interaction with background elements to maintain focus and prevent accidental actions. Added `modal={true}` prop to all Dialog components and enhanced overlay with proper z-index layering and pointer events.
+
+**Impact**: Users can no longer accidentally interact with background elements when task editing modal, context creation modal, or confirmation dialogs are open, providing better UX and preventing data loss scenarios.
+
 ### State Management
 **Decision**: Start with local state, design for future persistence.
 

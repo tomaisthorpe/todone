@@ -362,7 +362,7 @@ export function TaskModal({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={onClose} modal={true}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white shadow-xl rounded-2xl border-0">
         <DialogHeader>
           <div className="flex items-center justify-between">
@@ -626,7 +626,7 @@ export function TaskModal({
 
       {/* Delete confirmation dialog */}
       {isEditing && (
-        <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm} modal={true}>
           <DialogContent className="bg-white">
             <DialogHeader>
               <DialogTitle className="flex items-center">
@@ -655,7 +655,7 @@ export function TaskModal({
 
       {/* Archive confirmation dialog */}
       {isEditingContext && (
-        <Dialog open={showArchiveConfirm} onOpenChange={setShowArchiveConfirm}>
+        <Dialog open={showArchiveConfirm} onOpenChange={setShowArchiveConfirm} modal={true}>
           <DialogContent className="bg-white">
             <DialogHeader>
               <DialogTitle className="flex items-center">
