@@ -12,7 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { TaskForm, type TaskFormData } from "@/components/task-form";
-import { createTaskAction, getExistingTags } from "@/lib/server-actions";
+import { getExistingTags } from "@/lib/server-actions";
+import { useDashboardActions } from "@/lib/hooks/use-dashboard-actions";
 import {
   Send,
   Calendar,
@@ -101,6 +102,7 @@ export function SmartTaskInput({
 
   const [error, setError] = useState<string | null>(null);
   const [isInputFocused, setIsInputFocused] = useState(false);
+  const { createTask } = useDashboardActions();
 
   const inputRef = useRef<HTMLInputElement>(null);
   const highlightRef = useRef<HTMLDivElement>(null);
@@ -582,7 +584,7 @@ export function SmartTaskInput({
 
       try {
         // Call server action outside of startTransition to properly catch errors
-        await createTaskAction(formData);
+        await createTask(formData);
 
         // Mark that we should refocus once pending clears
         shouldRefocusAfterSubmitRef.current = true;

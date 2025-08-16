@@ -5,16 +5,13 @@ import { TodaySection } from "@/components/today-section";
 import { AddItemModal } from "@/components/add-item-modal";
 import { SmartTaskInput } from "@/components/smart-task-input";
 import { ContextsSection } from "@/components/contexts-section";
-import type { Task, Context } from "@/lib/data";
+import { useDashboardData } from "@/lib/hooks/use-dashboard-data";
 
-interface DashboardClientProps {
-  tasks: Task[];
-  contexts: Context[];
-  archivedContexts: Context[];
-}
-
-export function DashboardClient({ tasks, contexts, archivedContexts }: DashboardClientProps) {
+export function DashboardClient() {
   const [collapsedState, setCollapsedState] = useState<Record<string, boolean>>({});
+  
+  // Use SWR hook for client-side data fetching
+  const { tasks, contexts, archivedContexts, isLoading, isError } = useDashboardData();
 
   const scrollToContext = (contextId: string) => {
     // First, ensure the context is expanded
@@ -40,6 +37,34 @@ export function DashboardClient({ tasks, contexts, archivedContexts }: Dashboard
       }
     }, 100);
   };
+
+  // Loading state
+  if (isLoading && tasks.length === 0) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-6">
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          <div className="animate-pulse space-y-4">
+            <div className="h-12 bg-gray-200 rounded"></div>
+            <div className="space-y-2">
+              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (isError) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-6">
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6">
+          <p className="text-red-600">Failed to load dashboard data. Please refresh the page.</p>
+        </div>
+      </div>
+    );
+  }
 
   // Sort contexts by health (lowest first), then by highest urgency task
   // This sorting is stable and only calculated on server-side load/reload

@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+// import { revalidatePath } from "next/cache"; // No longer needed with SWR
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth/next";
 import { Session } from "next-auth";
@@ -83,7 +83,7 @@ export async function toggleTaskAction(taskId: string) {
     await toggleRegularTask(taskId, task.completed, now);
   }
 
-  revalidatePath("/");
+  // revalidatePath("/"); // No longer needed with SWR
 }
 
 // Server action to mark task as completed yesterday
@@ -109,7 +109,7 @@ export async function completeTaskYesterdayAction(taskId: string) {
     await completeTask(task as TaskForCompletion, yesterday);
   }
 
-  revalidatePath("/");
+  // revalidatePath("/"); // No longer needed with SWR
 }
 
 // Server action to create a new task
@@ -186,7 +186,7 @@ export async function createTaskAction(formData: FormData) {
     data: taskData,
   });
 
-  revalidatePath("/");
+  // revalidatePath("/"); // No longer needed with SWR
 }
 
 // Server action to update an existing task
@@ -281,7 +281,7 @@ export async function updateTaskAction(formData: FormData) {
     data: updateData,
   });
 
-  revalidatePath("/");
+  // revalidatePath("/"); // No longer needed with SWR
 }
 
 // Server action to create a new context
@@ -310,7 +310,7 @@ export async function createContextAction(formData: FormData) {
     },
   });
 
-  revalidatePath("/");
+  // revalidatePath("/"); // No longer needed with SWR
 }
 
 // Server action to update an existing context
@@ -353,7 +353,7 @@ export async function updateContextAction(formData: FormData) {
     },
   });
 
-  revalidatePath("/");
+  // revalidatePath("/"); // No longer needed with SWR
 }
 
 // Server action to delete a task
@@ -372,7 +372,7 @@ export async function deleteTaskAction(taskId: string) {
     where: { id: taskId },
   });
 
-  revalidatePath("/");
+  // revalidatePath("/"); // No longer needed with SWR
 }
 
 // Sign out action
@@ -445,7 +445,7 @@ export async function archiveContextAction(contextId: string) {
     data: { archived: true },
   });
 
-  revalidatePath("/");
+  // revalidatePath("/"); // No longer needed with SWR
 }
 
 // Unarchive context action
@@ -467,5 +467,5 @@ export async function unarchiveContextAction(contextId: string) {
     data: { archived: false },
   });
 
-  revalidatePath("/");
+  // revalidatePath("/"); // No longer needed with SWR
 }
