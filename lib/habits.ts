@@ -1,3 +1,5 @@
+import { diffInLocalCalendarDays } from "./date-utils";
+
 export type HabitStatus = {
   status: "fresh" | "getting-due" | "ready" | "time-for-another";
   text: string;
@@ -13,12 +15,15 @@ export function getHabitStatus(habit: {
 
   const today = new Date();
   const completedAt = new Date(habit.completedAt);
-  
+
   const nextDueDate = new Date(completedAt);
   nextDueDate.setDate(nextDueDate.getDate() + habit.frequency);
-  const daysUntilDue = Math.ceil(
-    (nextDueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
-  );
+  const daysUntilDue = diffInLocalCalendarDays(nextDueDate, today);
+
+  // If it was completed today, don't show the status
+  if (diffInLocalCalendarDays(today, completedAt) < 1) {
+    return null;
+  }
 
   if (daysUntilDue > 1) {
     return {
@@ -123,7 +128,9 @@ export function getHabitDisplay(task: {
     return {
       iconType: habitIcon.icon,
       iconColor: habitIcon.color,
-      primaryText: task.frequency ? `/${task.frequency}d` : String(task.streak || 0),
+      primaryText: task.frequency
+        ? `/${task.frequency}d`
+        : String(task.streak || 0),
       secondaryText: null,
       showLarge: false,
     };

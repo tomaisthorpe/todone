@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { URGENCY_CONSTANTS } from "./urgency-config";
+import { diffInLocalCalendarDays } from "./date-utils";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -123,19 +124,6 @@ export function parseTags(tagsString: string): string[] {
 
 export function formatTagsForInput(tags: string[]): string {
   return tags.join(", ");
-}
-
-export function diffInLocalCalendarDays(
-  target: Date,
-  base: Date = new Date()
-): number {
-  const targetUTC = Date.UTC(
-    target.getFullYear(),
-    target.getMonth(),
-    target.getDate()
-  );
-  const baseUTC = Date.UTC(base.getFullYear(), base.getMonth(), base.getDate());
-  return Math.round((targetUTC - baseUTC) / 86400000);
 }
 
 export function formatDate(date: Date): string {

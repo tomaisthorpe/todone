@@ -32,7 +32,15 @@ export function addDays(date: Date, days: number): Date {
 /**
  * Returns the number of days between two dates (rounded up)
  */
-export function daysBetween(date1: Date, date2: Date): number {
-  const timeDiff = Math.abs(date2.getTime() - date1.getTime());
-  return Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+export function diffInLocalCalendarDays(
+  target: Date,
+  base: Date = new Date()
+): number {
+  const targetUTC = Date.UTC(
+    target.getFullYear(),
+    target.getMonth(),
+    target.getDate()
+  );
+  const baseUTC = Date.UTC(base.getFullYear(), base.getMonth(), base.getDate());
+  return Math.round((targetUTC - baseUTC) / 86400000);
 }
