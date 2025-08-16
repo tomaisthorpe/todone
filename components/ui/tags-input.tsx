@@ -38,7 +38,7 @@ export function TagsInput({
 
   // Handle input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
+    const newValue = e.target.value.toLowerCase();
     setInputValue(newValue);
     setShowSuggestions(newValue.trim().length > 0);
     setSelectedSuggestionIndex(-1);
@@ -84,8 +84,9 @@ export function TagsInput({
 
   // Add a tag
   const addTag = (tag: string) => {
-    if (tag && !value.includes(tag)) {
-      onChange([...value, tag]);
+    const lowercaseTag = tag.toLowerCase();
+    if (lowercaseTag && !value.includes(lowercaseTag)) {
+      onChange([...value, lowercaseTag]);
     }
     setInputValue("");
     setShowSuggestions(false);
