@@ -329,7 +329,7 @@ export function SmartTaskInput({
       // Parse tags (#tagname)
       const tagMatches = [...workingText.matchAll(/#([a-zA-Z0-9_-]+)/gi)];
       tagMatches.forEach((match) => {
-        const tagName = match[1];
+        const tagName = match[1].toLowerCase();
         result.tags.push(tagName);
 
         const startIndex = text.indexOf(match[0]);

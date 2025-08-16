@@ -118,7 +118,7 @@ export function parseTags(tagsString: string): string[] {
   if (!tagsString.trim()) return [];
   return tagsString
     .split(",")
-    .map((tag) => tag.trim())
+    .map((tag) => tag.trim().toLowerCase())
     .filter((tag) => tag.length > 0);
 }
 
