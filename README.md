@@ -1,7 +1,5 @@
 # Todone
 
-[![Build and Push Docker Image](https://github.com/user/todone/actions/workflows/docker.yml/badge.svg)](https://github.com/user/todone/actions/workflows/docker.yml)
-
 > [!CAUTION]
 > I'm using this project to experiment with LLM-assisted development. Something I've been curious but cautious about. 
 > The codebase will likely evolve quickly and unconventionally as I experiment with AI tools. 
