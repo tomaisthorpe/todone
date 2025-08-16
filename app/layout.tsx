@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "todone - Context-Based Task Management",
+  title: "todone",
   description:
     "A context-based task management app with customizable urgency scoring and flexible habit tracking.",
   manifest: "/manifest.json",
@@ -29,13 +29,13 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: "todone",
-    title: "todone - Context-Based Task Management",
+    title: "todone",
     description:
       "A context-based task management app with customizable urgency scoring and flexible habit tracking.",
   },
   twitter: {
     card: "summary",
-    title: "todone - Context-Based Task Management",
+    title: "todone",
     description:
       "A context-based task management app with customizable urgency scoring and flexible habit tracking.",
   },

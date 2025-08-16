@@ -9,11 +9,16 @@ import { signOutAction } from "@/lib/server-actions";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/pagination";
 import Link from "next/link";
+import { Metadata } from "next";
 
 interface CompletedPageProps {
   searchParams: Promise<{
     page?: string;
   }>;
+}
+
+export const metadata: Metadata = {
+  title: 'todone / Completed Tasks',
 }
 
 export default async function CompletedPage({

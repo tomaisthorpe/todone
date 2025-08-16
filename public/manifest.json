@@ -1,5 +1,5 @@
 {
-  "name": "todone - Context-Based Task Management",
+  "name": "todone",
   "short_name": "todone",
   "description": "A context-based task management app with customizable urgency scoring and flexible habit tracking.",
   "start_url": "/",
