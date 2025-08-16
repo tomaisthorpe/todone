@@ -4,10 +4,11 @@ import { getServerSession } from "next-auth/next";
 import { Session } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { TaskCard } from "@/components/task-card";
-import { getCompletedTasks, getContexts } from "@/lib/data";
+import { getCompletedTasks, getContexts, getBurndownData } from "@/lib/data";
 import { signOutAction } from "@/lib/server-actions";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/pagination";
+import { BurndownChart } from "@/components/burndown-chart";
 import Link from "next/link";
 import { Metadata } from "next";
 
@@ -39,9 +40,10 @@ export default async function CompletedPage({
   const pageSize = 20;
 
   // Server-side data fetching
-  const [completedResult, contexts] = await Promise.all([
+  const [completedResult, contexts, burndownData] = await Promise.all([
     getCompletedTasks(page, pageSize),
     getContexts(),
+    getBurndownData(),
   ]);
 
   return (
@@ -101,6 +103,11 @@ export default async function CompletedPage({
               <Button variant="outline">Back to Dashboard</Button>
             </Link>
           </div>
+        </div>
+
+        {/* Burndown Chart */}
+        <div className="mb-6">
+          <BurndownChart data={burndownData} />
         </div>
 
         {/* Completed Tasks List */}

@@ -384,3 +384,125 @@ export async function getCompletedTasks(
     };
   }
 }
+
+export interface BurndownDataPoint {
+  date: string; // YYYY-MM-DD format
+  incompleteTasks: number;
+  createdTasks: number;
+  completedTasks: number;
+}
+
+// Get burndown chart data for the past month (excluding habits)
+export async function getBurndownData(): Promise<BurndownDataPoint[]> {
+  const session = await getAuthenticatedSession();
+
+  if (!session?.user?.id) {
+    return [];
+  }
+
+  try {
+    // Get date range for the past 30 days
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - 30);
+    
+    // Reset times to start/end of day for consistent querying
+    startDate.setHours(0, 0, 0, 0);
+    endDate.setHours(23, 59, 59, 999);
+
+    // Get all tasks (excluding habits) created or completed in the past 30 days
+    const tasks = await prisma.task.findMany({
+      where: {
+        userId: session.user.id,
+        type: { not: "HABIT" }, // Exclude habits
+        OR: [
+          {
+            createdAt: {
+              gte: startDate,
+              lte: endDate,
+            },
+          },
+          {
+            completedAt: {
+              gte: startDate,
+              lte: endDate,
+            },
+          },
+        ],
+      },
+      select: {
+        id: true,
+        createdAt: true,
+        completedAt: true,
+        completed: true,
+      },
+    });
+
+    // Also get tasks created before our date range that were still incomplete at the start
+    const olderIncompleteTasks = await prisma.task.findMany({
+      where: {
+        userId: session.user.id,
+        type: { not: "HABIT" },
+        createdAt: { lt: startDate },
+        OR: [
+          { completed: false },
+          { completedAt: { gte: startDate } }, // Completed during our range
+        ],
+      },
+      select: {
+        id: true,
+        createdAt: true,
+        completedAt: true,
+        completed: true,
+      },
+    });
+
+    // Create array of dates for the past 30 days
+    const dates: Date[] = [];
+    for (let i = 30; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      date.setHours(0, 0, 0, 0);
+      dates.push(date);
+    }
+
+    // Calculate initial incomplete count (tasks created before our range that were incomplete)
+    let runningIncompleteCount = olderIncompleteTasks.filter(task => 
+      !task.completed || (task.completedAt && task.completedAt >= startDate)
+    ).length;
+
+    // Generate data points for each day
+    const dataPoints: BurndownDataPoint[] = dates.map(date => {
+      const nextDay = new Date(date);
+      nextDay.setDate(nextDay.getDate() + 1);
+
+      // Tasks created on this day
+      const createdToday = tasks.filter(task => {
+        const createdDate = new Date(task.createdAt);
+        return createdDate >= date && createdDate < nextDay;
+      }).length;
+
+      // Tasks completed on this day
+      const completedToday = [...tasks, ...olderIncompleteTasks].filter(task => {
+        if (!task.completedAt) return false;
+        const completedDate = new Date(task.completedAt);
+        return completedDate >= date && completedDate < nextDay;
+      }).length;
+
+      // Update running count
+      runningIncompleteCount += createdToday - completedToday;
+
+      return {
+        date: date.toISOString().split('T')[0], // YYYY-MM-DD format
+        incompleteTasks: Math.max(0, runningIncompleteCount), // Ensure non-negative
+        createdTasks: createdToday,
+        completedTasks: completedToday,
+      };
+    });
+
+    return dataPoints;
+  } catch (error) {
+    console.error("Error fetching burndown data:", error);
+    return [];
+  }
+}
