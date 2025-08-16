@@ -50,6 +50,7 @@ interface ParsedTask {
   type: "TASK" | "RECURRING";
   frequency: number | undefined;
   recurringText: string | null;
+  notes?: string;
 }
 
 interface ParsedSegment {
@@ -572,6 +573,7 @@ export function SmartTaskInput({
         formData.append("frequency", parsedTask.frequency.toString());
       }
       formData.append("tags", parsedTask.tags.join(", "));
+      formData.append("notes", parsedTask.notes || "");
 
       try {
         // Call server action outside of startTransition to properly catch errors

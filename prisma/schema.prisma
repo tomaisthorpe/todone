@@ -117,6 +117,7 @@ model Task {
   completed Boolean   @default(false)
   completedAt DateTime? // When the task was marked complete
   type      TaskType  @default(TASK)
+  notes     String?   // Optional notes for the task
   userId    String
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

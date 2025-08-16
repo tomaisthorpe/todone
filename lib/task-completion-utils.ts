@@ -15,6 +15,7 @@ export interface TaskForCompletion {
   contextId: string;
   dueDate: Date | null;
   type: "TASK" | "HABIT" | "RECURRING";
+  notes: string | null;
   userId: string;
   frequency: number | null;
   completed: boolean;

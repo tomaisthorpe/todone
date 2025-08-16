@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -32,6 +33,7 @@ export interface TaskFormData {
   habitType?: "STREAK" | "LEARNING" | "WELLNESS" | "MAINTENANCE";
   frequency?: number;
   tags: string[];
+  notes?: string;
 }
 
 interface TaskFormProps {
@@ -76,11 +78,11 @@ export function TaskForm({
   const spacing = compact ? "space-y-2" : "space-y-4";
 
   // Find inbox context for default selection
-  const inboxContext = contexts.find(c => c.isInbox);
-  
+  const inboxContext = contexts.find((c) => c.isInbox);
+
   // Get the selected context or default to inbox
   const selectedContextId = data.contextId || inboxContext?.id || "";
-  const selectedContext = contexts.find(c => c.id === selectedContextId);
+  const selectedContext = contexts.find((c) => c.id === selectedContextId);
 
   return (
     <div className={spacing}>
@@ -192,12 +194,16 @@ export function TaskForm({
                       className={`w-3 h-3 rounded-full ${selectedContext.color} mr-2`}
                     />
                     {(() => {
-                      const IconComponent = getContextIconComponent(selectedContext.icon);
+                      const IconComponent = getContextIconComponent(
+                        selectedContext.icon
+                      );
                       return <IconComponent className="w-4 h-4 mr-2" />;
                     })()}
                     {selectedContext.name}
                     {selectedContext.isInbox && (
-                      <span className="text-xs text-gray-500 ml-2">(default)</span>
+                      <span className="text-xs text-gray-500 ml-2">
+                        (default)
+                      </span>
                     )}
                   </div>
                 )}
@@ -222,7 +228,9 @@ export function TaskForm({
                         <IconComponent className="w-4 h-4 mr-2" />
                         {context.name}
                         {context.isInbox && (
-                          <span className="text-xs text-gray-500 ml-2">(default)</span>
+                          <span className="text-xs text-gray-500 ml-2">
+                            (default)
+                          </span>
                         )}
                       </div>
                     </SelectItem>
@@ -339,6 +347,20 @@ export function TaskForm({
               value={data.project}
               onChange={(e) => onChange("project", e.target.value)}
               placeholder="Optional project name"
+            />
+          </div>
+        )}
+
+        {/* Notes - only in full mode */}
+        {!compact && (
+          <div className="col-span-2">
+            <Label htmlFor={getFieldId("notes")}>Notes</Label>
+            <Textarea
+              id={getFieldId("notes")}
+              value={data.notes || ""}
+              onChange={(e) => onChange("notes", e.target.value)}
+              placeholder="Add any additional notes..."
+              rows={2}
             />
           </div>
         )}
