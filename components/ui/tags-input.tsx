@@ -38,7 +38,7 @@ export function TagsInput({
 
   // Handle input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
+    const newValue = e.target.value.toLowerCase();
     setInputValue(newValue);
     setShowSuggestions(newValue.trim().length > 0);
     setSelectedSuggestionIndex(-1);

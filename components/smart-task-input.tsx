@@ -197,8 +197,13 @@ export function SmartTaskInput({
 
   // Handle input change with suggestions
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
+    const rawValue = e.target.value;
     const cursorPos = e.target.selectionStart || 0;
+
+    // Convert tags to lowercase while preserving other text
+    const newValue = rawValue.replace(/#([a-zA-Z0-9_-]+)/g, (match, tagName) => {
+      return `#${tagName.toLowerCase()}`;
+    });
 
     setInput(newValue);
     updateSuggestions(newValue, cursorPos);
