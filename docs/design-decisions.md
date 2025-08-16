@@ -115,6 +115,20 @@ Examples:
 
 **Reasoning**: shadcn provides solid foundation (buttons, cards, inputs) while allowing full customization for unique components (TaskCard, ContextGroup, habit badges).
 
+### Modal Interaction Blocking
+**Decision**: Explicitly enable modal behavior for all dialogs to prevent background interaction.
+
+**Reasoning**: Modal dialogs should block user interaction with background elements to maintain focus and prevent accidental actions. Added `modal={true}` prop to all Dialog components and enhanced overlay with proper z-index layering and pointer events.
+
+**Impact**: Users can no longer accidentally interact with background elements when task editing modal, context creation modal, or confirmation dialogs are open, providing better UX and preventing data loss scenarios.
+
+### Z-Index Layering Strategy
+**Decision**: Use a clear z-index hierarchy: Modal overlays at z-50, modal content at z-[51], and dropdown components at z-[100].
+
+**Reasoning**: Dropdown components (Select, TagsInput, Tooltips) that appear in modals need to render above the modal overlay to remain interactive. Using z-[100] ensures these components work correctly within modal contexts.
+
+**Impact**: All dropdown interactions work seamlessly within modals, including task form selects, context form selects, and tag input suggestions.
+
 ### State Management
 **Decision**: Start with local state, design for future persistence.
 

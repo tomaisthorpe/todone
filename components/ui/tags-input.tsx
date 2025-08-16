@@ -168,7 +168,7 @@ export function TagsInput({
       {showSuggestions && filteredSuggestions.length > 0 && (
         <div
           ref={suggestionsRef}
-          className="absolute z-50 w-full mt-1 bg-white border-input border rounded-md shadow-md max-h-48 overflow-y-auto"
+          className="absolute z-[100] w-full mt-1 bg-white border-input border rounded-md shadow-md max-h-48 overflow-y-auto"
         >
           {filteredSuggestions.map((suggestion, index) => (
             <button
