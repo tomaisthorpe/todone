@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { TagsInput } from "@/components/ui/tags-input";
+import { SubtasksInput } from "@/components/ui/subtasks-input";
 import {
   CheckSquare,
   RotateCcw,
@@ -22,6 +23,12 @@ import {
   Calendar,
 } from "lucide-react";
 import { getContextIconComponent } from "@/lib/context-icons";
+
+export interface Subtask {
+  id: string;
+  text: string;
+  completed: boolean;
+}
 
 export interface TaskFormData {
   title: string;
@@ -34,6 +41,7 @@ export interface TaskFormData {
   frequency?: number;
   tags: string[];
   notes?: string;
+  subtasks: Subtask[];
 }
 
 interface TaskFormProps {
@@ -361,6 +369,18 @@ export function TaskForm({
               onChange={(e) => onChange("notes", e.target.value)}
               placeholder="Add any additional notes..."
               rows={2}
+            />
+          </div>
+        )}
+
+        {/* Subtasks - only in full mode */}
+        {!compact && (
+          <div className="col-span-2">
+            <Label htmlFor={getFieldId("subtasks")}>Subtasks</Label>
+            <SubtasksInput
+              value={data.subtasks}
+              onChange={(subtasks) => onChange("subtasks", subtasks)}
+              placeholder="Add a subtask..."
             />
           </div>
         )}

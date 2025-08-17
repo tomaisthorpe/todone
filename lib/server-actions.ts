@@ -132,6 +132,7 @@ export async function createTaskAction(formData: FormData) {
     : null;
   const tagsString = formData.get("tags") as string;
   const notes = formData.get("notes") as string;
+  const subtasksString = formData.get("subtasks") as string;
 
   if (!title) {
     throw new Error("Title is required");
@@ -154,6 +155,17 @@ export async function createTaskAction(formData: FormData) {
   }
 
   const tags = parseTags(tagsString || "");
+  
+  // Parse subtasks JSON
+  let subtasks = [];
+  if (subtasksString) {
+    try {
+      subtasks = JSON.parse(subtasksString);
+    } catch (e) {
+      // If parsing fails, default to empty array
+      subtasks = [];
+    }
+  }
 
   // Prepare task data based on type
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -166,6 +178,7 @@ export async function createTaskAction(formData: FormData) {
     dueDate: dueDate ? new Date(dueDate) : null,
     type,
     notes: notes || null,
+    subtasks: subtasks,
     userId,
   };
 
@@ -209,6 +222,7 @@ export async function updateTaskAction(formData: FormData) {
     : null;
   const tagsString = formData.get("tags") as string;
   const notes = formData.get("notes") as string;
+  const subtasksString = formData.get("subtasks") as string;
 
   if (!taskId || !title || !contextId) {
     throw new Error("Task ID, title and context are required");
@@ -233,6 +247,17 @@ export async function updateTaskAction(formData: FormData) {
   }
 
   const tags = parseTags(tagsString || "");
+  
+  // Parse subtasks JSON
+  let subtasks = [];
+  if (subtasksString) {
+    try {
+      subtasks = JSON.parse(subtasksString);
+    } catch (e) {
+      // If parsing fails, default to empty array
+      subtasks = [];
+    }
+  }
 
   // Calculate urgency
   const urgency = calculateUrgency({
@@ -256,6 +281,7 @@ export async function updateTaskAction(formData: FormData) {
     urgency,
     type,
     notes: notes || null,
+    subtasks: subtasks,
     // Clear type-specific fields first
     habitType: null,
     frequency: null,

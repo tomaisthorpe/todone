@@ -293,6 +293,19 @@ Empty State
 </div>
 ```
 
+### Subtasks Component
+```jsx
+<SubtasksInput
+  value={[
+    { id: "1", text: "Research competitors", completed: true },
+    { id: "2", text: "Create wireframes", completed: false },
+    { id: "3", text: "Get feedback", completed: false }
+  ]}
+  onChange={(subtasks) => handleSubtasksChange(subtasks)}
+  placeholder="Add a subtask..."
+/>
+```
+
 ## Navigation Patterns
 
 ### Header Navigation
@@ -479,7 +492,9 @@ Dialog Modal
 - Habit Type (conditional, select with icons)
 - Frequency (conditional, number input)
 - Project (optional text)
-- Tags (disabled, placeholder for future)
+- Notes (optional textarea)
+- Subtasks (interactive checklist, full-width)
+- Tags (tags input with autocomplete)
 
 **Context Form Fields:**
 - Name (required, full-width)
@@ -491,5 +506,44 @@ Dialog Modal
 - Habit-specific fields only show when Task Type = "HABIT"
 - Form validation prevents submission with missing required fields
 - Loading states show "Creating..." text on submit buttons
+
+### SubtasksInput Component
+**Structure:**
+```
+Subtasks Section
+├── Existing Subtasks List
+│   └── For each subtask:
+│       ├── Drag Handle (GripVertical icon)
+│       ├── Checkbox (completion toggle)
+│       ├── Inline Text Input (editable)
+│       └── Delete Button (X icon, hover-visible)
+├── Add New Subtask Row
+│   ├── Text Input (full-width)
+│   └── Add Button (Plus icon)
+└── Progress Summary ("X of Y completed")
+```
+
+**Interaction Patterns:**
+- **Add Subtask**: Enter text and press Enter or click Plus button
+- **Edit Subtask**: Click on text to edit inline
+- **Complete Subtask**: Click checkbox (doesn't affect main task completion)
+- **Delete Subtask**: Hover over subtask row to reveal X button
+- **Visual Feedback**: Completed subtasks show checked state but remain editable
+
+**Styling:**
+- Background: Light gray (`bg-gray-50`) for subtask rows
+- Hover states: Show delete button with opacity transition
+- Drag handle: Gray color (`text-gray-400`) with grab cursor
+- Progress summary: Small gray text (`text-xs text-gray-500`)
+- Spacing: Consistent gaps between subtask items
+
+**Data Structure:**
+```typescript
+interface Subtask {
+  id: string;           // Unique identifier
+  text: string;         // Subtask description
+  completed: boolean;   // Completion status
+}
+```
 
 These patterns ensure consistency across the app while maintaining the flexibility to evolve specific components as needed.

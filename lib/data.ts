@@ -15,6 +15,12 @@ async function getAuthenticatedSession() {
 }
 
 // Server-side data types
+export interface Subtask {
+  id: string;
+  text: string;
+  completed: boolean;
+}
+
 export interface Task {
   id: string;
   title: string;
@@ -28,6 +34,7 @@ export interface Task {
   completedAt: Date | null;
   type: "TASK" | "HABIT" | "RECURRING";
   notes: string | null;
+  subtasks: Subtask[];
   userId: string;
   createdAt: Date;
   updatedAt: Date;
@@ -72,25 +79,39 @@ export async function getTasks(): Promise<Task[]> {
       orderBy: [{ completed: "asc" }, { createdAt: "desc" }],
     });
 
-    const tasksWithUrgency = tasks.map((task: TaskWithContext) => ({
-      ...task,
-      priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
-      type: task.type as "TASK" | "HABIT" | "RECURRING",
-      habitType: task.habitType as
-        | "STREAK"
-        | "LEARNING"
-        | "WELLNESS"
-        | "MAINTENANCE"
-        | null,
-      urgency: calculateUrgency({
+    const tasksWithUrgency = tasks.map((task: TaskWithContext) => {
+      // Parse subtasks from JSON
+      let subtasks: Subtask[] = [];
+      if (task.subtasks) {
+        try {
+          subtasks = Array.isArray(task.subtasks) ? task.subtasks : JSON.parse(task.subtasks as string);
+        } catch (e) {
+          console.error("Failed to parse subtasks for task", task.id, e);
+          subtasks = [];
+        }
+      }
+
+      return {
+        ...task,
         priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
-        dueDate: task.dueDate,
-        createdAt: task.createdAt,
-        tags: task.tags,
-        project: task.project,
-        contextCoefficient: task.context?.coefficient || 0,
-      }),
-    }));
+        type: task.type as "TASK" | "HABIT" | "RECURRING",
+        habitType: task.habitType as
+          | "STREAK"
+          | "LEARNING"
+          | "WELLNESS"
+          | "MAINTENANCE"
+          | null,
+        subtasks,
+        urgency: calculateUrgency({
+          priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
+          dueDate: task.dueDate,
+          createdAt: task.createdAt,
+          tags: task.tags,
+          project: task.project,
+          contextCoefficient: task.context?.coefficient || 0,
+        }),
+      };
+    });
 
     return tasksWithUrgency.sort((a: Task, b: Task) => {
       // For habits, consider them incomplete if they're available for completion
@@ -212,25 +233,39 @@ export async function getUserTasks(userId: string): Promise<Task[]> {
       orderBy: [{ completed: "asc" }, { createdAt: "desc" }],
     });
 
-    const tasksWithUrgency = tasks.map((task: TaskWithContext) => ({
-      ...task,
-      priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
-      type: task.type as "TASK" | "HABIT" | "RECURRING",
-      habitType: task.habitType as
-        | "STREAK"
-        | "LEARNING"
-        | "WELLNESS"
-        | "MAINTENANCE"
-        | null,
-      urgency: calculateUrgency({
+    const tasksWithUrgency = tasks.map((task: TaskWithContext) => {
+      // Parse subtasks from JSON
+      let subtasks: Subtask[] = [];
+      if (task.subtasks) {
+        try {
+          subtasks = Array.isArray(task.subtasks) ? task.subtasks : JSON.parse(task.subtasks as string);
+        } catch (e) {
+          console.error("Failed to parse subtasks for task", task.id, e);
+          subtasks = [];
+        }
+      }
+
+      return {
+        ...task,
         priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
-        dueDate: task.dueDate,
-        createdAt: task.createdAt,
-        tags: task.tags,
-        project: task.project,
-        contextCoefficient: task.context?.coefficient || 0,
-      }),
-    }));
+        type: task.type as "TASK" | "HABIT" | "RECURRING",
+        habitType: task.habitType as
+          | "STREAK"
+          | "LEARNING"
+          | "WELLNESS"
+          | "MAINTENANCE"
+          | null,
+        subtasks,
+        urgency: calculateUrgency({
+          priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
+          dueDate: task.dueDate,
+          createdAt: task.createdAt,
+          tags: task.tags,
+          project: task.project,
+          contextCoefficient: task.context?.coefficient || 0,
+        }),
+      };
+    });
 
     return tasksWithUrgency.sort((a: Task, b: Task) => {
       // For habits, consider them incomplete if they're available for completion
@@ -348,25 +383,39 @@ export async function getCompletedTasks(
       take: pageSize,
     });
 
-    const tasksWithUrgency = tasks.map((task: TaskWithContext) => ({
-      ...task,
-      priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
-      type: task.type as "TASK" | "HABIT" | "RECURRING",
-      habitType: task.habitType as
-        | "STREAK"
-        | "LEARNING"
-        | "WELLNESS"
-        | "MAINTENANCE"
-        | null,
-      urgency: calculateUrgency({
+    const tasksWithUrgency = tasks.map((task: TaskWithContext) => {
+      // Parse subtasks from JSON
+      let subtasks: Subtask[] = [];
+      if (task.subtasks) {
+        try {
+          subtasks = Array.isArray(task.subtasks) ? task.subtasks : JSON.parse(task.subtasks as string);
+        } catch (e) {
+          console.error("Failed to parse subtasks for task", task.id, e);
+          subtasks = [];
+        }
+      }
+
+      return {
+        ...task,
         priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
-        dueDate: task.dueDate,
-        createdAt: task.createdAt,
-        tags: task.tags,
-        project: task.project,
-        contextCoefficient: task.context?.coefficient || 0,
-      }),
-    }));
+        type: task.type as "TASK" | "HABIT" | "RECURRING",
+        habitType: task.habitType as
+          | "STREAK"
+          | "LEARNING"
+          | "WELLNESS"
+          | "MAINTENANCE"
+          | null,
+        subtasks,
+        urgency: calculateUrgency({
+          priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
+          dueDate: task.dueDate,
+          createdAt: task.createdAt,
+          tags: task.tags,
+          project: task.project,
+          contextCoefficient: task.context?.coefficient || 0,
+        }),
+      };
+    });
 
     const totalPages = Math.ceil(totalCount / pageSize);
 

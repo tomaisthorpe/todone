@@ -118,6 +118,7 @@ model Task {
   completedAt DateTime? // When the task was marked complete
   type      TaskType  @default(TASK)
   notes     String?   // Optional notes for the task
+  subtasks  Json?     @default("[]") // Array of subtask objects: {id: string, text: string, completed: boolean}
   userId    String
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
