@@ -1,5 +1,5 @@
-import React from 'react';
-import { cn } from '@/lib/utils';
+import React from "react";
+import { cn } from "@/lib/utils";
 
 interface MarkdownTextProps {
   text: string;
@@ -15,9 +15,9 @@ export function MarkdownText({ text, className }: MarkdownTextProps) {
 
     // Regex patterns for different markdown elements
     const patterns = [
-      { regex: /`([^`]+)`/g, type: 'code' },           // `code`
-      { regex: /\*\*([^*]+)\*\*/g, type: 'bold' },     // **bold**
-      { regex: /_([^_]+)_/g, type: 'italic' },         // _italic_
+      { regex: /`([^`]+)`/g, type: "code" }, // `code`
+      { regex: /\*\*([^*]+)\*\*/g, type: "bold" }, // **bold**
+      { regex: /_([^_]+)_/g, type: "italic" }, // _italic_
     ];
 
     // Find all matches and their positions
@@ -49,11 +49,14 @@ export function MarkdownText({ text, className }: MarkdownTextProps) {
     // Remove overlapping matches (keep the first one)
     const validMatches: typeof matches = [];
     for (const match of matches) {
-      if (!validMatches.some(vm => 
-        (match.start >= vm.start && match.start < vm.end) ||
-        (match.end > vm.start && match.end <= vm.end) ||
-        (match.start <= vm.start && match.end >= vm.end)
-      )) {
+      if (
+        !validMatches.some(
+          (vm) =>
+            (match.start >= vm.start && match.start < vm.end) ||
+            (match.end > vm.start && match.end <= vm.end) ||
+            (match.start <= vm.start && match.end >= vm.end)
+        )
+      ) {
         validMatches.push(match);
       }
     }
@@ -70,24 +73,24 @@ export function MarkdownText({ text, className }: MarkdownTextProps) {
 
       // Add the formatted match
       switch (match.type) {
-        case 'code':
+        case "code":
           parts.push(
             <code
               key={`code-${partIndex++}`}
-              className="bg-gray-100 text-gray-600 px-1 py-0.5 rounded text-xs font-mono"
+              className="bg-gray-200 text-gray-800 px-1.5 py-0.5 rounded-sm font-mono text-[11px] border border-gray-300 inline align-middle"
             >
               {match.content}
             </code>
           );
           break;
-        case 'bold':
+        case "bold":
           parts.push(
             <strong key={`bold-${partIndex++}`} className="font-semibold">
               {match.content}
             </strong>
           );
           break;
-        case 'italic':
+        case "italic":
           parts.push(
             <em key={`italic-${partIndex++}`} className="italic">
               {match.content}
@@ -118,8 +121,6 @@ export function MarkdownText({ text, className }: MarkdownTextProps) {
   const parsedContent = parseInlineMarkdown(text);
 
   return (
-    <span className={cn("markdown-text", className)}>
-      {parsedContent}
-    </span>
+    <span className={cn("markdown-text", className)}>{parsedContent}</span>
   );
 }
