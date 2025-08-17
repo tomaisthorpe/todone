@@ -203,9 +203,12 @@ export function SmartTaskInput({
     const cursorPos = e.target.selectionStart || 0;
 
     // Convert tags to lowercase while preserving other text
-    const newValue = rawValue.replace(/#([a-zA-Z0-9_-]+)/g, (match, tagName) => {
-      return `#${tagName.toLowerCase()}`;
-    });
+    const newValue = rawValue.replace(
+      /#([a-zA-Z0-9_-]+)/g,
+      (match, tagName) => {
+        return `#${tagName.toLowerCase()}`;
+      }
+    );
 
     setInput(newValue);
     updateSuggestions(newValue, cursorPos);
@@ -518,6 +521,7 @@ export function SmartTaskInput({
     habitType: undefined,
     frequency: parsedTask.frequency,
     tags: parsedTask.tags,
+    subtasks: [],
   });
 
   const handleTaskFormChange = <K extends keyof TaskFormData>(
