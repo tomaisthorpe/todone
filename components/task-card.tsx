@@ -21,6 +21,7 @@ import { getContextIconComponent } from "@/lib/context-icons";
 import { cn } from "@/lib/utils";
 import { TaskToggleButton } from "./task-toggle-button";
 import { TaskModal } from "./add-item-modal";
+import { MarkdownText } from "@/components/ui/markdown-text";
 import {
   Tooltip,
   TooltipContent,
@@ -93,7 +94,9 @@ const renderSubtaskDisplay = (subtasks: Array<{id: string; text: string; complet
                 {subtask.completed ? "✓" : "○"}
               </span>
               <span className={subtask.completed ? "line-through text-gray-400" : ""}>
-                {subtask.text.length > 30 ? `${subtask.text.substring(0, 30)}...` : subtask.text}
+                <MarkdownText 
+                  text={subtask.text.length > 30 ? `${subtask.text.substring(0, 30)}...` : subtask.text}
+                />
               </span>
             </div>
           ))}
@@ -182,7 +185,7 @@ export function TaskCard({
                   onClick={() => setIsEditModalOpen(true)}
                   title="Click to edit task"
                 >
-                  {task.title}
+                  <MarkdownText text={task.title} />
                 </h3>
 
                 {task.type === "RECURRING" && (
@@ -265,9 +268,11 @@ export function TaskCard({
                       </TooltipTrigger>
                       <TooltipContent>
                         <p className="text-xs max-w-xs">
-                          {task.notes.length > 100
-                            ? `${task.notes.substring(0, 100)}...`
-                            : task.notes}
+                          <MarkdownText 
+                            text={task.notes.length > 100
+                              ? `${task.notes.substring(0, 100)}...`
+                              : task.notes}
+                          />
                         </p>
                       </TooltipContent>
                     </Tooltip>
