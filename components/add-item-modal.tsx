@@ -26,6 +26,9 @@ import {
   archiveContextAction,
   getExistingTags,
   completeTaskYesterdayAction,
+  createTagAction,
+  updateTagAction,
+  deleteTagAction,
 } from "@/lib/server-actions";
 import { useDashboardActions } from "@/lib/hooks/use-dashboard-actions";
 import {
@@ -37,8 +40,9 @@ import {
   AlertCircle,
   Archive,
   Calendar,
+  Tag as TagIcon,
 } from "lucide-react";
-import type { Task, Context } from "@/lib/data";
+import type { Task, Context, Tag } from "@/lib/data";
 import { contextIconOptions } from "@/lib/context-icons";
 
 // Context form schema
@@ -53,7 +57,18 @@ const contextSchema = z.object({
     .max(100, "Coefficient must be at most 100"),
 });
 
+// Tag form schema
+const tagSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  coefficient: z
+    .number()
+    .min(-100, "Coefficient must be at least -100")
+    .max(100, "Coefficient must be at most 100"),
+  color: z.string(),
+});
+
 type ContextFormData = z.infer<typeof contextSchema>;
+type TagFormData = z.infer<typeof tagSchema>;
 
 interface TaskModalProps {
   contexts: Array<{
@@ -64,11 +79,13 @@ interface TaskModalProps {
     coefficient: number;
     isInbox: boolean;
   }>;
+  tags?: Tag[];
   task?: Task;
   isOpen: boolean;
   onClose: () => void;
   defaultContextId?: string;
   contextToEdit?: Context;
+  tagToEdit?: Tag;
 }
 
 const contextColors = [
@@ -88,19 +105,22 @@ const contextColors = [
 
 export function TaskModal({
   contexts,
+  tags = [],
   task,
   isOpen,
   onClose,
   defaultContextId,
   contextToEdit,
+  tagToEdit,
 }: TaskModalProps) {
-  const [activeTab, setActiveTab] = useState<"task" | "context">("task");
+  const [activeTab, setActiveTab] = useState<"task" | "context" | "tag">("task");
   const [isLoading, setIsLoading] = useState(false);
   const [existingTags, setExistingTags] = useState<string[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { createTask, updateTask, deleteTask, createContext, updateContext } = useDashboardActions();
+  const { createTask, updateTask, deleteTask, createContext, updateContext } =
+    useDashboardActions();
   
   // Find inbox context for default selection
   const inboxContext = contexts.find(c => c.isInbox);
@@ -126,6 +146,7 @@ export function TaskModal({
 
   const isEditing = !!task;
   const isEditingContext = !!contextToEdit;
+  const isEditingTag = !!tagToEdit;
 
   const contextForm = useForm<ContextFormData>({
     resolver: zodResolver(contextSchema),
@@ -175,6 +196,14 @@ export function TaskModal({
           coefficient: contextToEdit.coefficient || 0,
         });
         setActiveTab("context");
+      } else if (tagToEdit) {
+        // Editing a tag - populate tag form
+        tagForm.reset({
+          name: tagToEdit.name,
+          coefficient: tagToEdit.coefficient || 0,
+          color: tagToEdit.color,
+        });
+        setActiveTab("tag");
       } else {
         // Adding mode - reset to defaults
         const currentFallbackContextId = defaultContextId || inboxContext?.id || "";
@@ -202,7 +231,7 @@ export function TaskModal({
         setActiveTab("task");
       }
     }
-  }, [isOpen, task?.id, defaultContextId, contextToEdit?.id, inboxContext?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isOpen, task?.id, defaultContextId, contextToEdit?.id, inboxContext?.id, tagToEdit?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleTaskFormChange = <K extends keyof TaskFormData>(
     field: K,
@@ -212,6 +241,29 @@ export function TaskModal({
     // Clear error when user makes changes
     if (error) {
       setError(null);
+    }
+  };
+
+  const handleTagEdit = (tagName: string) => {
+    // Find the tag in the tags array
+    const existingTag = tags.find(tag => tag.name.toLowerCase() === tagName.toLowerCase());
+    
+    if (existingTag) {
+      // Edit existing tag
+      tagForm.reset({
+        name: existingTag.name,
+        coefficient: existingTag.coefficient,
+        color: existingTag.color,
+      });
+      setActiveTab("tag");
+    } else {
+      // Create new tag with this name
+      tagForm.reset({
+        name: tagName,
+        coefficient: 0,
+        color: "bg-blue-500",
+      });
+      setActiveTab("tag");
     }
   };
 
@@ -296,6 +348,62 @@ export function TaskModal({
     }
   };
 
+  const tagForm = useForm<TagFormData>({
+    resolver: zodResolver(tagSchema),
+    defaultValues: {
+      name: "",
+      coefficient: 0,
+      color: "bg-blue-500",
+    },
+  });
+
+  const onSubmitTag = async (data: TagFormData) => {
+    setIsLoading(true);
+    const formData = new FormData();
+    
+    // Check if we're editing an existing tag
+    const existingTag = tags.find(tag => tag.name.toLowerCase() === data.name.toLowerCase());
+    
+    if (existingTag) {
+      // Update existing tag
+      formData.append("tagId", existingTag.id);
+      formData.append("name", data.name);
+      formData.append("coefficient", data.coefficient.toString());
+      formData.append("color", data.color);
+
+      try {
+        await updateTagAction(formData);
+        tagForm.reset();
+        onClose();
+      } catch (error) {
+        console.error("Failed to update tag:", error);
+        setError(
+          error instanceof Error ? error.message : "Failed to update tag"
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      // Create new tag
+      formData.append("name", data.name);
+      formData.append("coefficient", data.coefficient.toString());
+      formData.append("color", data.color);
+
+      try {
+        await createTagAction(formData);
+        tagForm.reset();
+        onClose();
+      } catch (error) {
+        console.error("Failed to create tag:", error);
+        setError(
+          error instanceof Error ? error.message : "Failed to create tag"
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
   const handleDeleteTask = async () => {
     if (!task) return;
     setIsLoading(true);
@@ -374,6 +482,8 @@ export function TaskModal({
                 ? "Edit Task"
                 : isEditingContext
                 ? "Edit Context"
+                : isEditingTag
+                ? "Edit Tag"
                 : "Add New Item"}
             </DialogTitle>
             
@@ -421,7 +531,7 @@ export function TaskModal({
 
         {/* Tab Navigation */}
         <div className="flex gap-2 bg-gray-100 rounded-lg p-1 mt-2 mb-6">
-          {!isEditingContext && (
+          {!isEditingContext && !isEditingTag && (
             <button
               onClick={() => setActiveTab("task")}
               className={`flex-1 px-4 py-2 text-sm font-medium rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400
@@ -453,6 +563,22 @@ export function TaskModal({
               {isEditingContext ? "Edit Context" : "Add Context"}
             </button>
           )}
+          {!isEditing && (
+            <button
+              onClick={() => setActiveTab("tag")}
+              className={`flex-1 px-4 py-2 text-sm font-medium rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400
+                ${
+                  activeTab === "tag"
+                    ? "bg-blue-50 text-blue-700 shadow-sm"
+                    : "bg-transparent text-gray-500 hover:text-gray-700"
+                }
+              `}
+              type="button"
+            >
+              <TagIcon className="w-4 h-4 inline mr-2" />
+              {isEditingTag ? "Edit Tag" : "Add Tag"}
+            </button>
+          )}
         </div>
 
         {/* Task Form */}
@@ -468,6 +594,7 @@ export function TaskModal({
               isEditing={isEditing}
               task={task}
               fieldIdPrefix={modalId}
+              onTagEdit={handleTagEdit}
             />
 
             <div className="flex justify-end space-x-2 pt-4">
@@ -625,6 +752,130 @@ export function TaskModal({
             </div>
           </form>
         )}
+
+        {/* Tag Form */}
+        {activeTab === "tag" && (
+          <form
+            onSubmit={tagForm.handleSubmit(onSubmitTag)}
+            className="space-y-4"
+          >
+            <div className="grid grid-cols-2 gap-4">
+              <div className="col-span-2">
+                <Label htmlFor={getFieldId("name")}>
+                  Tag Name *
+                </Label>
+                <Input
+                  id={getFieldId("name")}
+                  placeholder="e.g., Work, Home, Kitchen"
+                  {...tagForm.register("name")}
+                />
+                {tagForm.formState.errors.name && (
+                  <p className="text-sm text-red-500 mt-1">
+                    {tagForm.formState.errors.name.message}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor={getFieldId("color")}>Color</Label>
+                <Select
+                  value={tagForm.watch("color")}
+                  onValueChange={(value) =>
+                    tagForm.setValue("color", value)
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {contextColors.map(({ value, label, color }) => (
+                      <SelectItem key={value} value={value}>
+                        <div className="flex items-center">
+                          <div
+                            className={`w-4 h-4 rounded-full ${color} mr-2`}
+                          />
+                          {label}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="col-span-2">
+                <Label htmlFor={getFieldId("coefficient")}>
+                  Tag Coefficient
+                </Label>
+                <Input
+                  id={getFieldId("coefficient")}
+                  type="number"
+                  min="-100"
+                  max="100"
+                  step="0.1"
+                  placeholder="0 (default)"
+                  {...tagForm.register("coefficient", {
+                    valueAsNumber: true,
+                  })}
+                />
+                {tagForm.formState.errors.coefficient && (
+                  <p className="text-sm text-red-500 mt-1">
+                    {tagForm.formState.errors.coefficient.message}
+                  </p>
+                )}
+                <p className="text-sm text-gray-500 mt-1">
+                  Adds a fixed value to task urgency calculations. Use positive
+                  values for higher priority tags.
+                </p>
+              </div>
+
+              
+            </div>
+
+            <div className="flex justify-end pt-4">
+              <div className="flex space-x-2 ml-auto">
+                {/* Delete button for existing tags */}
+                {tags.find(tag => tag.name.toLowerCase() === tagForm.watch("name").toLowerCase()) && (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    onClick={async () => {
+                      const existingTag = tags.find(tag => tag.name.toLowerCase() === tagForm.watch("name").toLowerCase());
+                      if (existingTag) {
+                        setIsLoading(true);
+                        try {
+                          await deleteTagAction(existingTag.id);
+                          tagForm.reset();
+                          onClose();
+                        } catch (error) {
+                          console.error("Failed to delete tag:", error);
+                          setError(error instanceof Error ? error.message : "Failed to delete tag");
+                        } finally {
+                          setIsLoading(false);
+                        }
+                      }
+                    }}
+                    disabled={isLoading}
+                  >
+                    <Trash2 className="w-4 h-4 mr-1" />
+                    Delete Tag
+                  </Button>
+                )}
+                <Button type="button" variant="outline" onClick={onClose}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading
+                    ? tags.find(tag => tag.name.toLowerCase() === tagForm.watch("name").toLowerCase())
+                      ? "Updating..."
+                      : "Creating..."
+                    : tags.find(tag => tag.name.toLowerCase() === tagForm.watch("name").toLowerCase())
+                    ? "Update Tag"
+                    : "Create Tag"}
+                </Button>
+              </div>
+            </div>
+          </form>
+        )}
       </DialogContent>
 
       {/* Delete confirmation dialog */}
@@ -701,6 +952,7 @@ export function TaskModal({
 // Legacy component for backward compatibility and add button
 export function AddItemModal({
   contexts,
+  tags = [],
   defaultContextId,
   addButtonSize = "lg",
 }: {
@@ -712,6 +964,7 @@ export function AddItemModal({
     coefficient: number;
     isInbox: boolean;
   }>;
+  tags?: Tag[];
   defaultContextId?: string;
   addButtonSize?: "sm" | "lg";
 }) {
@@ -736,6 +989,7 @@ export function AddItemModal({
 
       <TaskModal
         contexts={contexts}
+        tags={tags}
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
         defaultContextId={defaultContextId}

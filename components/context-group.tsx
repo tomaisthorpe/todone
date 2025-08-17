@@ -12,13 +12,14 @@ import {
   ContextCollapsibleTrigger,
   useCollapsible,
 } from "./context-collapsible";
-import type { Task, Context } from "@/lib/data";
+import type { Task, Context, Tag } from "@/lib/data";
 import { getContextIconComponent } from "@/lib/context-icons";
 
 interface ContextGroupProps {
   context: Context;
   tasks: Task[];
   allContexts: Context[];
+  tags: Tag[];
   collapsed?: boolean;
   onCollapsedChange?: (value: boolean) => void;
 }
@@ -41,12 +42,14 @@ function getContextCompletion(tasks: Task[]) {
 function ContextGroupHeader({
   context,
   allContexts,
+  tags,
   completion,
   todayTasksInContext,
   hasHabits,
 }: {
   context: Context;
   allContexts: Context[];
+  tags: Tag[];
   completion: { percentage: number; completed: number; total: number };
   todayTasksInContext: number;
   hasHabits: boolean;
@@ -88,6 +91,7 @@ function ContextGroupHeader({
                 )}
                 <AddItemModal
                   contexts={allContexts}
+                  tags={tags}
                   defaultContextId={context.id}
                   addButtonSize="sm"
                 />
@@ -118,6 +122,7 @@ function ContextGroupHeader({
 
       <TaskModal
         contexts={allContexts}
+        tags={tags}
         contextToEdit={context}
         isOpen={isEditContextOpen}
         onClose={() => setIsEditContextOpen(false)}
@@ -130,6 +135,7 @@ export function ContextGroup({
   context,
   tasks,
   allContexts,
+  tags,
   collapsed,
   onCollapsedChange,
 }: ContextGroupProps) {
@@ -170,38 +176,38 @@ export function ContextGroup({
   }).length;
 
   return (
-    <div
-      id={`context-${context.id}`}
-      className="bg-white rounded-xl shadow-sm overflow-hidden"
+    <ContextCollapsible
+      defaultOpen={!collapsed}
+      onOpenChange={onCollapsedChange}
     >
-      <ContextCollapsible
-        defaultCollapsed={contextTasks.length === 0}
-        collapsed={collapsed}
-        onCollapsedChange={onCollapsedChange}
-      >
-        <ContextGroupHeader
-          context={context}
-          allContexts={allContexts}
-          completion={completion}
-          todayTasksInContext={todayTasksInContext}
-          hasHabits={hasHabits}
-        />
-        <ContextCollapsibleContent>
-          <div className="p-2 md:p-4">
-            {contextTasks.length > 0 ? (
-              <div className="space-y-1">
-                {contextTasks.map((task) => (
-                  <TaskCard key={task.id} task={task} contexts={allContexts} />
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-gray-500 text-center py-4">
-                No tasks in this context
-              </p>
-            )}
-          </div>
-        </ContextCollapsibleContent>
-      </ContextCollapsible>
-    </div>
+      <ContextGroupHeader
+        context={context}
+        allContexts={allContexts}
+        tags={tags}
+        completion={completion}
+        todayTasksInContext={todayTasksInContext}
+        hasHabits={hasHabits}
+      />
+      <ContextCollapsibleContent>
+        <div className="p-2 md:p-4">
+          {contextTasks.length > 0 ? (
+            <div className="space-y-1">
+              {contextTasks.map((task) => (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  contexts={allContexts}
+                  tags={tags}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              <p>No tasks in this context yet.</p>
+            </div>
+          )}
+        </div>
+      </ContextCollapsibleContent>
+    </ContextCollapsible>
   );
 }

@@ -26,7 +26,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import type { Task } from "@/lib/data";
+import type { Task, Tag as TagType } from "@/lib/data";
 
 interface TaskCardProps {
   task: Task;
@@ -38,6 +38,7 @@ interface TaskCardProps {
     coefficient: number;
     isInbox: boolean;
   }>;
+  tags?: TagType[];
   showContext?: boolean;
   onContextClick?: (contextId: string) => void;
   showUrgency?: boolean;
@@ -61,6 +62,7 @@ const renderHabitIcon = (iconType: string, className: string) => {
 export function TaskCard({
   task,
   contexts,
+  tags = [],
   showContext = false,
   showUrgency = true,
   onContextClick,
@@ -270,6 +272,7 @@ export function TaskCard({
 
       <TaskModal
         contexts={contexts}
+        tags={tags}
         task={task}
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}

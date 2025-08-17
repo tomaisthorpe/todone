@@ -11,7 +11,7 @@ export function DashboardClient() {
   const [collapsedState, setCollapsedState] = useState<Record<string, boolean>>({});
   
   // Use SWR hook for client-side data fetching
-  const { tasks, contexts, archivedContexts, isLoading, isError } = useDashboardData();
+  const { tasks, contexts, archivedContexts, tags, isLoading, isError } = useDashboardData();
 
   const scrollToContext = (contextId: string) => {
     // First, ensure the context is expanded
@@ -121,19 +121,20 @@ export function DashboardClient() {
         </div>
 
         {/* Today Section */}
-        <TodaySection tasks={tasks} contexts={contexts} onContextClick={scrollToContext} />
+        <TodaySection tasks={tasks} contexts={contexts} tags={tags} onContextClick={scrollToContext} />
 
         {/* Context Groups */}
         <ContextsSection 
           contexts={sortedContexts} 
           tasks={tasks} 
+          tags={tags}
           collapsedState={collapsedState}
           onCollapsedStateChange={setCollapsedState}
           archivedContexts={archivedContexts}
         />
       </div>
       <div className="flex justify-center mt-2 pb-16">
-        <AddItemModal contexts={contexts} />
+        <AddItemModal contexts={contexts} tags={tags} />
       </div>
     </>
   );

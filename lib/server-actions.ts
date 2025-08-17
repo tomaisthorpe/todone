@@ -8,6 +8,7 @@ import { authOptions } from "./auth";
 import { prisma } from "./prisma";
 import { calculateUrgency, parseTags } from "./utils";
 import { completeTask, uncompleteHabit, toggleRegularTask, TaskForCompletion } from "./task-completion-utils";
+import { revalidatePath } from "next/cache";
 
 // Get authenticated user or redirect
 async function getAuthenticatedUser() {
@@ -197,6 +198,7 @@ export async function createTaskAction(formData: FormData) {
     data: taskData,
   });
 
+  revalidatePath("/");
 }
 
 // Server action to update an existing task
@@ -304,6 +306,7 @@ export async function updateTaskAction(formData: FormData) {
     data: updateData,
   });
 
+  revalidatePath("/");
 }
 
 // Server action to create a new context
@@ -332,6 +335,7 @@ export async function createContextAction(formData: FormData) {
     },
   });
 
+  revalidatePath("/");
 }
 
 // Server action to update an existing context
@@ -374,6 +378,7 @@ export async function updateContextAction(formData: FormData) {
     },
   });
 
+  revalidatePath("/");
 }
 
 // Server action to delete a task
@@ -464,6 +469,109 @@ export async function archiveContextAction(contextId: string) {
     data: { archived: true },
   });
 
+  revalidatePath("/");
+}
+
+// Server action to create a new tag
+export async function createTagAction(formData: FormData) {
+  const userId = await getAuthenticatedUser();
+
+  const name = formData.get("name") as string;
+  const coefficient = parseFloat(formData.get("coefficient") as string) || 0.0;
+  const color = (formData.get("color") as string) || "bg-gray-500";
+
+  if (!name) {
+    throw new Error("Name is required");
+  }
+
+  // Check if tag already exists for this user
+  const existingTag = await prisma.tag.findFirst({
+    where: { name: name.toLowerCase(), userId },
+  });
+
+  if (existingTag) {
+    throw new Error("Tag with this name already exists");
+  }
+
+  // Create tag
+  await prisma.tag.create({
+    data: {
+      name: name.toLowerCase(),
+      coefficient,
+      color,
+      userId,
+    },
+  });
+
+  revalidatePath("/");
+}
+
+// Server action to update an existing tag
+export async function updateTagAction(formData: FormData) {
+  const userId = await getAuthenticatedUser();
+
+  const tagId = formData.get("tagId") as string;
+  const name = formData.get("name") as string;
+  const coefficient = parseFloat(formData.get("coefficient") as string) || 0.0;
+  const color = (formData.get("color") as string) || "bg-gray-500";
+
+  if (!tagId || !name) {
+    throw new Error("Tag ID and name are required");
+  }
+
+  // Verify tag belongs to user
+  const existingTag = await prisma.tag.findFirst({
+    where: { id: tagId, userId },
+  });
+
+  if (!existingTag) {
+    throw new Error("Tag not found");
+  }
+
+  // Check if name conflicts with another tag
+  const conflictingTag = await prisma.tag.findFirst({
+    where: { 
+      name: name.toLowerCase(), 
+      userId,
+      id: { not: tagId }
+    },
+  });
+
+  if (conflictingTag) {
+    throw new Error("Tag with this name already exists");
+  }
+
+  await prisma.tag.update({
+    where: { id: tagId },
+    data: {
+      name: name.toLowerCase(),
+      coefficient,
+      color,
+    },
+  });
+
+  revalidatePath("/");
+}
+
+// Server action to delete a tag
+export async function deleteTagAction(tagId: string) {
+  const userId = await getAuthenticatedUser();
+
+  // Verify tag belongs to user
+  const existingTag = await prisma.tag.findFirst({
+    where: { id: tagId, userId },
+  });
+
+  if (!existingTag) {
+    throw new Error("Tag not found");
+  }
+
+  // Delete the tag (TaskTag relations will be deleted automatically via cascade)
+  await prisma.tag.delete({
+    where: { id: tagId },
+  });
+
+  revalidatePath("/");
 }
 
 // Unarchive context action

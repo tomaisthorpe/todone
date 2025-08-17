@@ -3,19 +3,20 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp, Archive } from "lucide-react";
-import type { Context, Task } from "@/lib/data";
+import type { Context, Task, Tag } from "@/lib/data";
 import { ContextGroup } from "@/components/context-group";
 import { ArchivedContexts } from "@/components/archived-contexts";
 
 interface ContextsSectionProps {
   contexts: Context[];
   tasks: Task[];
+  tags: Tag[];
   collapsedState?: Record<string, boolean>;
   onCollapsedStateChange?: (collapsedState: Record<string, boolean>) => void;
   archivedContexts: Context[];
 }
 
-export function ContextsSection({ contexts, tasks, collapsedState = {}, onCollapsedStateChange, archivedContexts }: ContextsSectionProps) {
+export function ContextsSection({ contexts, tasks, tags, collapsedState = {}, onCollapsedStateChange, archivedContexts }: ContextsSectionProps) {
   const [showArchivedContexts, setShowArchivedContexts] = useState(false);
   const handleExpandAll = () => {
     const next: Record<string, boolean> = {};
@@ -57,63 +58,51 @@ export function ContextsSection({ contexts, tasks, collapsedState = {}, onCollap
           >
             <ChevronUp className="w-4 h-4 mr-1" /> Collapse all
           </Button>
+          {archivedContexts.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-gray-600 hover:text-gray-900"
+              onClick={() => setShowArchivedContexts(!showArchivedContexts)}
+            >
+              <Archive className="w-4 h-4 mr-1" />
+              {showArchivedContexts ? "Hide" : "Show"} archived
+            </Button>
+          )}
         </div>
       </div>
 
-      {contexts.length > 0 ? (
-        <div className="grid grid-cols-1 gap-4">
-          {contexts.map((context) => {
-            const isControlled = Object.prototype.hasOwnProperty.call(
-              collapsedState,
-              context.id
-            );
-            const collapsedValue = collapsedState[context.id];
+      {contexts.map((context) => {
+        const isControlled = onCollapsedStateChange !== undefined;
+        const collapsedValue = collapsedState[context.id] ?? false;
 
-            return (
-              <ContextGroup
-                key={context.id}
-                context={context}
-                tasks={tasks}
-                allContexts={contexts}
-                {...(isControlled
-                  ? {
-                      collapsed: collapsedValue,
-                      onCollapsedChange: (value: boolean) =>
-                        onCollapsedStateChange?.({
-                          ...collapsedState,
-                          [context.id]: value,
-                        }),
-                    }
-                  : {})}
-              />
-            );
-          })}
-        </div>
-      ) : (
-        <div className="text-center py-8">
-          <p className="text-gray-500">No contexts yet. Create one to get started!</p>
-        </div>
+        return (
+          <ContextGroup
+            key={context.id}
+            context={context}
+            tasks={tasks}
+            allContexts={contexts}
+            tags={tags}
+            {...(isControlled
+              ? {
+                  collapsed: collapsedValue,
+                  onCollapsedChange: (value: boolean) =>
+                    onCollapsedStateChange?.({
+                      ...collapsedState,
+                      [context.id]: value,
+                    }),
+                }
+              : {})}
+          />
+        );
+      })}
+
+      {showArchivedContexts && archivedContexts.length > 0 && (
+        <ArchivedContexts
+          archivedContexts={archivedContexts}
+          allContexts={[...contexts, ...archivedContexts]}
+        />
       )}
-
-      {/* View Archived Contexts Button */}
-      <div className="flex justify-center mt-6">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setShowArchivedContexts(true)}
-          className="text-gray-600 hover:text-gray-900"
-        >
-          <Archive className="w-4 h-4 mr-2" />
-          View Archived Contexts
-        </Button>
-      </div>
-
-      {/* Archived Contexts Modal */}
-      <ArchivedContexts
-        archivedContexts={archivedContexts}
-        isOpen={showArchivedContexts}
-        onClose={() => setShowArchivedContexts(false)}
-      />
     </div>
   );
 }
