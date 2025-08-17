@@ -530,6 +530,13 @@ Subtasks Section
 - **Delete Subtask**: Hover over subtask row to reveal X button
 - **Visual Feedback**: Completed subtasks show checked state but remain editable
 
+**Drag and Drop:**
+- Implemented using `@dnd-kit/sortable` for accessible reordering
+- Grip handle (`GripVertical` icon) serves as drag trigger
+- Visual feedback: Dragged items become semi-transparent (`opacity-50`)
+- Cursor states: `cursor-grab` on hover, `cursor-grabbing` while dragging
+- Keyboard navigation supported for accessibility
+
 **Styling:**
 - Background: Light gray (`bg-gray-50`) for subtask rows
 - Hover states: Show delete button with opacity transition

@@ -5,6 +5,25 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, X, GripVertical } from "lucide-react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import {
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 export interface Subtask {
   id: string;
@@ -18,12 +37,80 @@ interface SubtasksInputProps {
   placeholder?: string;
 }
 
+interface SortableSubtaskItemProps {
+  subtask: Subtask;
+  onUpdate: (id: string, updates: Partial<Subtask>) => void;
+  onRemove: (id: string) => void;
+}
+
+function SortableSubtaskItem({ subtask, onUpdate, onRemove }: SortableSubtaskItemProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: subtask.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div 
+      ref={setNodeRef}
+      style={style}
+      className={`flex items-center gap-2 p-2 bg-gray-50 rounded-md group ${
+        isDragging ? 'opacity-50' : ''
+      }`}
+    >
+      <div
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing"
+      >
+        <GripVertical className="w-4 h-4 text-gray-400" />
+      </div>
+      <Checkbox
+        checked={subtask.completed}
+        onCheckedChange={(checked) => 
+          onUpdate(subtask.id, { completed: checked === true })
+        }
+      />
+      <Input
+        value={subtask.text}
+        onChange={(e) => onUpdate(subtask.id, { text: e.target.value })}
+        className="flex-1 border-none bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+        placeholder="Subtask text"
+      />
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        onClick={() => onRemove(subtask.id)}
+        className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-red-500 h-6 w-6 p-0"
+      >
+        <X className="w-4 h-4" />
+      </Button>
+    </div>
+  );
+}
+
 export function SubtasksInput({ 
   value = [], 
   onChange, 
   placeholder = "Add a subtask..." 
 }: SubtasksInputProps) {
   const [newSubtaskText, setNewSubtaskText] = useState("");
+  
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   const addSubtask = () => {
     if (newSubtaskText.trim()) {
@@ -51,6 +138,17 @@ export function SubtasksInput({
     );
   };
 
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (active.id !== over?.id) {
+      const oldIndex = value.findIndex((subtask) => subtask.id === active.id);
+      const newIndex = value.findIndex((subtask) => subtask.id === over?.id);
+
+      onChange(arrayMove(value, oldIndex, newIndex));
+    }
+  };
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -62,37 +160,27 @@ export function SubtasksInput({
     <div className="space-y-2">
       {/* Existing Subtasks */}
       {value.length > 0 && (
-        <div className="space-y-2">
-          {value.map((subtask) => (
-            <div 
-              key={subtask.id} 
-              className="flex items-center gap-2 p-2 bg-gray-50 rounded-md group"
-            >
-              <GripVertical className="w-4 h-4 text-gray-400 cursor-grab" />
-              <Checkbox
-                checked={subtask.completed}
-                onCheckedChange={(checked) => 
-                  updateSubtask(subtask.id, { completed: checked === true })
-                }
-              />
-              <Input
-                value={subtask.text}
-                onChange={(e) => updateSubtask(subtask.id, { text: e.target.value })}
-                className="flex-1 border-none bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
-                placeholder="Subtask text"
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => removeSubtask(subtask.id)}
-                className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-red-500 h-6 w-6 p-0"
-              >
-                <X className="w-4 h-4" />
-              </Button>
+        <DndContext 
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext 
+            items={value.map(subtask => subtask.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="space-y-2">
+              {value.map((subtask) => (
+                <SortableSubtaskItem
+                  key={subtask.id}
+                  subtask={subtask}
+                  onUpdate={updateSubtask}
+                  onRemove={removeSubtask}
+                />
+              ))}
             </div>
-          ))}
-        </div>
+          </SortableContext>
+        </DndContext>
       )}
 
       {/* Add New Subtask */}
