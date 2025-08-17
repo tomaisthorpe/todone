@@ -3,7 +3,10 @@
 import React, { useState } from "react";
 import { Calendar, ChevronDown, ChevronUp } from "lucide-react";
 import { TaskCard } from "./task-card";
-import { shouldHideCompletedTask, shouldHabitShowAsAvailable } from "@/lib/utils";
+import {
+  shouldHideCompletedTask,
+  shouldHabitShowAsAvailable,
+} from "@/lib/utils";
 import type { Task, Tag } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 
@@ -40,15 +43,18 @@ function getTodayTasks(tasks: Task[]): Task[] {
     })
     .sort((a, b) => {
       // For habits, consider them incomplete if they're available for completion
-      const aEffectivelyCompleted = a.type === "HABIT" ? 
-        a.completed && !shouldHabitShowAsAvailable(a) : 
-        a.completed;
-      const bEffectivelyCompleted = b.type === "HABIT" ? 
-        b.completed && !shouldHabitShowAsAvailable(b) : 
-        b.completed;
-      
+      const aEffectivelyCompleted =
+        a.type === "HABIT"
+          ? a.completed && !shouldHabitShowAsAvailable(a)
+          : a.completed;
+      const bEffectivelyCompleted =
+        b.type === "HABIT"
+          ? b.completed && !shouldHabitShowAsAvailable(b)
+          : b.completed;
+
       // Sort completed tasks to bottom
-      if (aEffectivelyCompleted !== bEffectivelyCompleted) return aEffectivelyCompleted ? 1 : -1;
+      if (aEffectivelyCompleted !== bEffectivelyCompleted)
+        return aEffectivelyCompleted ? 1 : -1;
       // Sort by urgency (highest first)
       return b.urgency - a.urgency;
     });
@@ -65,15 +71,18 @@ function getUrgentTasks(tasks: Task[]): Task[] {
     })
     .sort((a, b) => {
       // For habits, consider them incomplete if they're available for completion
-      const aEffectivelyCompleted = a.type === "HABIT" ? 
-        a.completed && !shouldHabitShowAsAvailable(a) : 
-        a.completed;
-      const bEffectivelyCompleted = b.type === "HABIT" ? 
-        b.completed && !shouldHabitShowAsAvailable(b) : 
-        b.completed;
-      
+      const aEffectivelyCompleted =
+        a.type === "HABIT"
+          ? a.completed && !shouldHabitShowAsAvailable(a)
+          : a.completed;
+      const bEffectivelyCompleted =
+        b.type === "HABIT"
+          ? b.completed && !shouldHabitShowAsAvailable(b)
+          : b.completed;
+
       // Sort completed tasks to bottom
-      if (aEffectivelyCompleted !== bEffectivelyCompleted) return aEffectivelyCompleted ? 1 : -1;
+      if (aEffectivelyCompleted !== bEffectivelyCompleted)
+        return aEffectivelyCompleted ? 1 : -1;
       // Sort by urgency (highest first)
       return b.urgency - a.urgency;
     });
@@ -91,111 +100,117 @@ export function TodaySection({
   const todayTasks = getTodayTasks(tasks);
 
   const currentTasks = activeTab === "urgency" ? urgentTasks : todayTasks;
+
+  const completedCount = currentTasks.filter((task) => task.completed).length;
+  const overdueCount =
+    activeTab === "today"
+      ? todayTasks.filter((task) => {
+          if (!task.dueDate || task.completed) return false;
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const taskDate = new Date(task.dueDate);
+          taskDate.setHours(0, 0, 0, 0);
+          return taskDate.getTime() < today.getTime();
+        }).length
+      : 0;
+
   const [showAll, setShowAll] = useState(false);
   const visibleTasks = showAll ? currentTasks : currentTasks.slice(0, 5);
 
-  if (urgentTasks.length === 0 && todayTasks.length === 0) {
-    return null;
-  }
-
   return (
-    <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-      {/* Header with tabs */}
-      <div className="p-4 border-b bg-gradient-to-r from-blue-50 to-cyan-50">
+    <div className="bg-white rounded-xl shadow-sm">
+      <div className="p-6 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <Calendar className="w-5 h-5 text-blue-600" />
-            <h2 className="text-lg font-semibold text-gray-900">Focus</h2>
+            <h2 className="text-xl font-semibold text-gray-900">
+              {activeTab === "urgency" ? "Top by Urgency" : "Today & Overdue"}
+            </h2>
           </div>
-          
-          {/* Tab buttons */}
-          <div className="flex bg-white rounded-lg p-1 shadow-sm">
-            <button
-              onClick={() => setActiveTab("urgency")}
-              className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
-                activeTab === "urgency"
-                  ? "bg-blue-500 text-white shadow-sm"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              High Urgency ({urgentTasks.length})
-            </button>
-            <button
-              onClick={() => setActiveTab("today")}
-              className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
-                activeTab === "today"
-                  ? "bg-blue-500 text-white shadow-sm"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              Due Today ({todayTasks.length})
-            </button>
+          <div className="flex items-center gap-3">
+            <div className="text-sm text-gray-500">
+              {completedCount}/{currentTasks.length} completed
+              {activeTab === "today" && overdueCount > 0 && (
+                <span className="text-red-500 ml-2">
+                  ({overdueCount} overdue)
+                </span>
+              )}
+            </div>
           </div>
         </div>
-        
-        {/* Tab descriptions */}
-        <div className="mt-2">
-          {activeTab === "urgency" && (
-            <p className="text-sm text-gray-600">
-              Tasks with urgency score ≥ 10 - your highest priority items
-            </p>
-          )}
-          {activeTab === "today" && (
-            <p className="text-sm text-gray-600">
-              Tasks due today or overdue - don't let these slip
-            </p>
-          )}
+        <div className="mt-4">
+          <div className="inline-flex rounded-lg bg-gray-100 p-1">
+            <button
+              type="button"
+              onClick={() => setActiveTab("urgency")}
+              className={
+                "px-3 py-1.5 text-sm rounded-md transition-colors " +
+                (activeTab === "urgency"
+                  ? "bg-white text-gray-900 shadow"
+                  : "text-gray-600 hover:text-gray-900")
+              }
+            >
+              Urgency
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("today")}
+              className={
+                "px-3 py-1.5 text-sm rounded-md transition-colors " +
+                (activeTab === "today"
+                  ? "bg-white text-gray-900 shadow"
+                  : "text-gray-600 hover:text-gray-900")
+              }
+            >
+              Today & Overdue
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Task list */}
-      <div className="p-4">
+      <div className="py-4 px-2 md:p-6">
         {currentTasks.length > 0 ? (
-          <>
-            <div className="space-y-1">
-              {visibleTasks.map((task) => (
-                <TaskCard
-                  key={task.id}
-                  task={task}
-                  contexts={contexts}
-                  tags={tags}
-                  showContext={true}
-                  onContextClick={onContextClick}
-                />
-              ))}
-            </div>
-            
-            {/* Show more/less button */}
+          <div className="space-y-1">
+            {visibleTasks.map((task) => (
+              <TaskCard
+                key={task.id}
+                task={task}
+                contexts={contexts}
+                tags={tags}
+                showContext={true}
+                onContextClick={onContextClick}
+              />
+            ))}
             {currentTasks.length > 5 && (
-              <div className="mt-4 text-center">
+              <div className="pt-2 text-center">
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setShowAll(!showAll)}
-                  className="text-gray-600 hover:text-gray-900"
+                  className="text-gray-500 hover:text-gray-700 text-xs"
+                  onClick={() => setShowAll((v) => !v)}
                 >
                   {showAll ? (
                     <>
-                      <ChevronUp className="w-4 h-4 mr-1" />
-                      Show less
+                      <ChevronUp className="w-4 h-4" />
+                      <span>Show less</span>
                     </>
                   ) : (
                     <>
-                      <ChevronDown className="w-4 h-4 mr-1" />
-                      Show {currentTasks.length - 5} more
+                      <ChevronDown className="w-4 h-4" />
+                      <span>{`Show all (${currentTasks.length})`}</span>
                     </>
                   )}
                 </Button>
               </div>
             )}
-          </>
+          </div>
         ) : (
-          <div className="text-center py-8 text-gray-500">
-            <Calendar className="w-12 h-12 mx-auto mb-3 opacity-50" />
-            <p>
-              {activeTab === "urgency" 
-                ? "No high-urgency tasks right now - great job!" 
-                : "No tasks due today - you're all caught up!"}
+          <div className="text-center py-8">
+            <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+            <p className="text-gray-500">
+              {activeTab === "urgency"
+                ? "No tasks to focus on"
+                : "No tasks scheduled for today"}
             </p>
           </div>
         )}

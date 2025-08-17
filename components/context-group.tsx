@@ -4,7 +4,11 @@ import React, { useState } from "react";
 import { TaskCard } from "./task-card";
 import { AddItemModal } from "./add-item-modal";
 import { TaskModal } from "./add-item-modal";
-import { cn, shouldHideCompletedTask, shouldHabitShowAsAvailable } from "@/lib/utils";
+import {
+  cn,
+  shouldHideCompletedTask,
+  shouldHabitShowAsAvailable,
+} from "@/lib/utils";
 import { ChevronDown, Pencil } from "lucide-react";
 import {
   ContextCollapsible,
@@ -151,14 +155,17 @@ export function ContextGroup({
     })
     .sort((a, b) => {
       // For habits, consider them incomplete if they're available for completion
-      const aEffectivelyCompleted = a.type === "HABIT" ? 
-        a.completed && !shouldHabitShowAsAvailable(a) : 
-        a.completed;
-      const bEffectivelyCompleted = b.type === "HABIT" ? 
-        b.completed && !shouldHabitShowAsAvailable(b) : 
-        b.completed;
-      
-      if (aEffectivelyCompleted !== bEffectivelyCompleted) return aEffectivelyCompleted ? 1 : -1;
+      const aEffectivelyCompleted =
+        a.type === "HABIT"
+          ? a.completed && !shouldHabitShowAsAvailable(a)
+          : a.completed;
+      const bEffectivelyCompleted =
+        b.type === "HABIT"
+          ? b.completed && !shouldHabitShowAsAvailable(b)
+          : b.completed;
+
+      if (aEffectivelyCompleted !== bEffectivelyCompleted)
+        return aEffectivelyCompleted ? 1 : -1;
       return b.urgency - a.urgency;
     });
 
@@ -176,38 +183,44 @@ export function ContextGroup({
   }).length;
 
   return (
-    <ContextCollapsible
-      defaultOpen={!collapsed}
-      onOpenChange={onCollapsedChange}
+    <div
+      id={`context-${context.id}`}
+      className="bg-white rounded-xl shadow-sm overflow-hidden"
     >
-      <ContextGroupHeader
-        context={context}
-        allContexts={allContexts}
-        tags={tags}
-        completion={completion}
-        todayTasksInContext={todayTasksInContext}
-        hasHabits={hasHabits}
-      />
-      <ContextCollapsibleContent>
-        <div className="p-2 md:p-4">
-          {contextTasks.length > 0 ? (
-            <div className="space-y-1">
-              {contextTasks.map((task) => (
-                <TaskCard
-                  key={task.id}
-                  task={task}
-                  contexts={allContexts}
-                  tags={tags}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8 text-gray-500">
-              <p>No tasks in this context yet.</p>
-            </div>
-          )}
-        </div>
-      </ContextCollapsibleContent>
-    </ContextCollapsible>
+      <ContextCollapsible
+        defaultCollapsed={contextTasks.length === 0}
+        collapsed={collapsed}
+        onCollapsedChange={onCollapsedChange}
+      >
+        <ContextGroupHeader
+          context={context}
+          allContexts={allContexts}
+          tags={tags}
+          completion={completion}
+          todayTasksInContext={todayTasksInContext}
+          hasHabits={hasHabits}
+        />
+        <ContextCollapsibleContent>
+          <div className="p-2 md:p-4">
+            {contextTasks.length > 0 ? (
+              <div className="space-y-1">
+                {contextTasks.map((task) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    contexts={allContexts}
+                    tags={tags}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500 text-center py-4">
+                No tasks in this context
+              </p>
+            )}
+          </div>
+        </ContextCollapsibleContent>
+      </ContextCollapsible>
+    </div>
   );
 }
