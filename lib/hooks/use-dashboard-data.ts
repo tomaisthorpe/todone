@@ -1,10 +1,11 @@
 import useSWR from "swr";
-import { Task, Context } from "@/lib/data";
+import { Task, Context, Tag } from "@/lib/data";
 
 interface DashboardData {
   tasks: Task[];
   contexts: Context[];
   archivedContexts: Context[];
+  tags: Tag[];
 }
 
 // Types for raw data from API (with date strings instead of Date objects)
@@ -20,6 +21,11 @@ type RawTask = Omit<
 };
 
 type RawContext = Omit<Context, "createdAt" | "updatedAt"> & {
+  createdAt: string;
+  updatedAt: string;
+};
+
+type RawTag = Omit<Tag, "createdAt" | "updatedAt"> & {
   createdAt: string;
   updatedAt: string;
 };
@@ -43,6 +49,14 @@ function transformContext(context: RawContext): Context {
   };
 }
 
+function transformTag(tag: RawTag): Tag {
+  return {
+    ...tag,
+    createdAt: new Date(tag.createdAt),
+    updatedAt: new Date(tag.updatedAt),
+  };
+}
+
 const fetcher = async (url: string): Promise<DashboardData> => {
   const response = await fetch(url);
 
@@ -54,6 +68,7 @@ const fetcher = async (url: string): Promise<DashboardData> => {
     tasks: RawTask[];
     contexts: RawContext[];
     archivedContexts: RawContext[];
+    tags: RawTag[];
   } = await response.json();
 
   // Transform date strings back to Date objects
@@ -61,6 +76,7 @@ const fetcher = async (url: string): Promise<DashboardData> => {
     tasks: data.tasks.map(transformTask),
     contexts: data.contexts.map(transformContext),
     archivedContexts: data.archivedContexts.map(transformContext),
+    tags: data.tags.map(transformTag),
   };
 };
 
@@ -88,6 +104,7 @@ export function useDashboardData() {
     tasks: data?.tasks || [],
     contexts: data?.contexts || [],
     archivedContexts: data?.archivedContexts || [],
+    tags: data?.tags || [],
     isLoading,
     isError: error,
     mutate, // Expose mutate for manual refreshes

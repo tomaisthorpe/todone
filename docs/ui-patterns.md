@@ -48,13 +48,17 @@ Row
 ├── Content
 │   ├── Title + Task Type Indicators
 │   └── Metadata (project, tags)
-└── Status Badges (habit status, due date, urgency)
+├── Context Badge (when showContext=true)
+├── Urgency Score
+└── Edit Button
 ```
 
-**Task Type Indicators:**
-- **Habits**: Icon + streak/frequency info
-- **Recurring**: 🔄 + "Every Xd"
-- **Regular**: No special indicator
+**Visual Styling:**
+- Completed tasks: reduced opacity (60%)
+- High urgency (≥15): red glow
+- Medium urgency (10-14): orange glow
+- Normal urgency (<10): no glow
+- Due dates: color-coded (overdue=red, today=orange, future=gray)
 
 **Habit Icons by Type (all minimal):**
 - Streak: 🏋️ (red, current streak + "(best: X)")
@@ -83,18 +87,133 @@ Row
 - Format: `X.X` (one decimal)
 
 ### Context Health Bar
+
+### TagsInput Component
+**Enhanced with Coefficient Management:**
 ```
-Progress Bar
-├── Background: Semi-transparent white
-├── Fill: Solid white
-├── Height: 8px (h-2)
-└── Rounded: Full
+Container
+├── Tag Pills (clickable when onTagClick provided)
+│   ├── Edit Icon (when editable)
+│   ├── Tag Name
+│   └── Remove Button (X)
+├── Input Field (for new tags)
+└── Suggestions Dropdown (when typing)
 ```
 
-**Health Percentage Colors:**
-- 80%+: Green
-- 50-79%: Yellow
-- <50%: Red
+**Tag Pills:**
+- Background: `bg-blue-100`
+- Text: `text-blue-800`
+- Hover state: `hover:bg-blue-200` (when clickable)
+- Edit icon: `Edit2` from Lucide (small, opacity 60%)
+- Remove button: `X` icon with hover state
+
+**Behavior:**
+- Click on tag pill → opens tag management modal (when `onTagClick` provided)
+- Type to add new tags
+- Autocomplete from existing tags
+- Enter or comma to confirm tag
+
+### AddItemModal - Tag Management Tab
+**Three-Tab Structure:**
+```
+Modal Header
+├── Task Tab (task creation/editing)
+├── Context Tab (context management)
+└── Tag Tab (tag coefficient management)
+```
+
+**Tag Form Fields:**
+```
+Grid Layout (2 columns)
+├── Tag Name (full width)
+├── Color Selection
+├── Coefficient Input (full width)
+│   ├── Range: -100 to +100
+│   ├── Step: 0.1
+│   └── Help text about urgency impact
+└── Action Buttons
+    ├── Delete (for existing tags)
+    ├── Cancel
+    └── Create/Update Tag
+```
+
+**Tag Coefficient Behavior:**
+- Positive values increase task urgency
+- Negative values decrease task urgency
+- Applied to all tasks with that tag
+- Immediately affects urgency calculations
+- Persisted per user
+
+### Tag Management Flow
+**Creating New Tags:**
+1. Type tag name in task form
+2. Click on tag pill to set coefficient
+3. Modal switches to tag tab with name pre-filled
+4. Set coefficient and color
+5. Save creates tag and applies to task
+
+**Editing Existing Tags:**
+1. Click on any tag pill in task forms
+2. Modal opens with existing tag data
+3. Modify coefficient or color
+4. Save updates tag globally
+5. Delete removes tag from all tasks
+
+**Visual Feedback:**
+- Tag pills show edit icon when clickable
+- Tooltip: "Click to edit tag coefficient"
+- Button text changes: "Create Tag" vs "Update Tag"
+- Loading states during CRUD operations
+
+## Data Flow Patterns
+
+### Tag Coefficients in Urgency Calculation
+```
+Task Urgency = Base Urgency + Context Coefficient + Sum(Tag Coefficients)
+
+Where:
+- Base Urgency: priority + age + due date + project
+- Context Coefficient: fixed value per context
+- Tag Coefficients: sum of all tag coefficients for task tags
+```
+
+**Implementation:**
+- Tags fetched with dashboard data
+- Coefficient map built: `{ [tagName]: coefficient }`
+- Applied in `evaluateUrgency()` function
+- Explanation includes individual tag contributions
+
+### Tag Data Management
+**API Endpoints:**
+- `GET /api/dashboard` - includes tags array
+- Server Actions: `createTagAction`, `updateTagAction`, `deleteTagAction`
+
+**Database Schema:**
+```sql
+Tag {
+  id: String (cuid)
+  name: String (lowercase, unique per user)
+  coefficient: Float (-100 to +100)
+  color: String (Tailwind class)
+  userId: String
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+TaskTag {
+  taskId: String
+  tagId: String
+  -- Junction table for future tag relationships
+}
+```
+
+**Component Props Flow:**
+```
+Dashboard → AddItemModal → TaskForm → TagsInput
+       ↓
+Tags passed through component hierarchy
+onTagEdit callback bubbles up to modal
+```
 
 ## Interactive States
 
@@ -552,5 +671,17 @@ interface Subtask {
   completed: boolean;   // Completion status
 }
 ```
+
+### Tag Operations
+- Duplicate tag name validation
+- Network error recovery
+- User feedback for all operations
+- Optimistic UI where appropriate
+
+### Form Validation
+- Required field indicators
+- Real-time validation feedback
+- Clear error messages
+- Prevention of invalid submissions
 
 These patterns ensure consistency across the app while maintaining the flexibility to evolve specific components as needed.

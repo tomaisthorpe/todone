@@ -3,19 +3,27 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp, Archive } from "lucide-react";
-import type { Context, Task } from "@/lib/data";
+import type { Context, Task, Tag } from "@/lib/data";
 import { ContextGroup } from "@/components/context-group";
 import { ArchivedContexts } from "@/components/archived-contexts";
 
 interface ContextsSectionProps {
   contexts: Context[];
   tasks: Task[];
+  tags: Tag[];
   collapsedState?: Record<string, boolean>;
   onCollapsedStateChange?: (collapsedState: Record<string, boolean>) => void;
   archivedContexts: Context[];
 }
 
-export function ContextsSection({ contexts, tasks, collapsedState = {}, onCollapsedStateChange, archivedContexts }: ContextsSectionProps) {
+export function ContextsSection({
+  contexts,
+  tasks,
+  tags,
+  collapsedState = {},
+  onCollapsedStateChange,
+  archivedContexts,
+}: ContextsSectionProps) {
   const [showArchivedContexts, setShowArchivedContexts] = useState(false);
   const handleExpandAll = () => {
     const next: Record<string, boolean> = {};
@@ -32,7 +40,8 @@ export function ContextsSection({ contexts, tasks, collapsedState = {}, onCollap
   const allCollapsed =
     contexts.length > 0 && contexts.every((c) => collapsedState[c.id] === true);
   const allExpanded =
-    contexts.length > 0 && contexts.every((c) => collapsedState[c.id] === false);
+    contexts.length > 0 &&
+    contexts.every((c) => collapsedState[c.id] === false);
 
   return (
     <div className="space-y-4">
@@ -75,6 +84,7 @@ export function ContextsSection({ contexts, tasks, collapsedState = {}, onCollap
                 context={context}
                 tasks={tasks}
                 allContexts={contexts}
+                tags={tags}
                 {...(isControlled
                   ? {
                       collapsed: collapsedValue,
@@ -91,7 +101,9 @@ export function ContextsSection({ contexts, tasks, collapsedState = {}, onCollap
         </div>
       ) : (
         <div className="text-center py-8">
-          <p className="text-gray-500">No contexts yet. Create one to get started!</p>
+          <p className="text-gray-500">
+            No contexts yet. Create one to get started!
+          </p>
         </div>
       )}
 

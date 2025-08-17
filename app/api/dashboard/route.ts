@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
-import { getTasks, getContexts, getArchivedContexts } from "@/lib/data";
+import { getTasks, getContexts, getArchivedContexts, getTags } from "@/lib/data";
 
 export async function GET() {
   try {
@@ -13,16 +13,18 @@ export async function GET() {
     }
 
     // Fetch data in parallel
-    const [tasks, contexts, archivedContexts] = await Promise.all([
+    const [tasks, contexts, archivedContexts, tags] = await Promise.all([
       getTasks(),
       getContexts(),
       getArchivedContexts(),
+      getTags(),
     ]);
 
     return NextResponse.json({
       tasks,
       contexts,
       archivedContexts,
+      tags,
     });
   } catch (error) {
     console.error("Error fetching dashboard data:", error);

@@ -4,7 +4,11 @@ import React, { useState } from "react";
 import { TaskCard } from "./task-card";
 import { AddItemModal } from "./add-item-modal";
 import { TaskModal } from "./add-item-modal";
-import { cn, shouldHideCompletedTask, shouldHabitShowAsAvailable } from "@/lib/utils";
+import {
+  cn,
+  shouldHideCompletedTask,
+  shouldHabitShowAsAvailable,
+} from "@/lib/utils";
 import { ChevronDown, Pencil } from "lucide-react";
 import {
   ContextCollapsible,
@@ -12,13 +16,14 @@ import {
   ContextCollapsibleTrigger,
   useCollapsible,
 } from "./context-collapsible";
-import type { Task, Context } from "@/lib/data";
+import type { Task, Context, Tag } from "@/lib/data";
 import { getContextIconComponent } from "@/lib/context-icons";
 
 interface ContextGroupProps {
   context: Context;
   tasks: Task[];
   allContexts: Context[];
+  tags: Tag[];
   collapsed?: boolean;
   onCollapsedChange?: (value: boolean) => void;
 }
@@ -41,12 +46,14 @@ function getContextCompletion(tasks: Task[]) {
 function ContextGroupHeader({
   context,
   allContexts,
+  tags,
   completion,
   todayTasksInContext,
   hasHabits,
 }: {
   context: Context;
   allContexts: Context[];
+  tags: Tag[];
   completion: { percentage: number; completed: number; total: number };
   todayTasksInContext: number;
   hasHabits: boolean;
@@ -88,6 +95,7 @@ function ContextGroupHeader({
                 )}
                 <AddItemModal
                   contexts={allContexts}
+                  tags={tags}
                   defaultContextId={context.id}
                   addButtonSize="sm"
                 />
@@ -118,6 +126,7 @@ function ContextGroupHeader({
 
       <TaskModal
         contexts={allContexts}
+        tags={tags}
         contextToEdit={context}
         isOpen={isEditContextOpen}
         onClose={() => setIsEditContextOpen(false)}
@@ -130,6 +139,7 @@ export function ContextGroup({
   context,
   tasks,
   allContexts,
+  tags,
   collapsed,
   onCollapsedChange,
 }: ContextGroupProps) {
@@ -145,14 +155,17 @@ export function ContextGroup({
     })
     .sort((a, b) => {
       // For habits, consider them incomplete if they're available for completion
-      const aEffectivelyCompleted = a.type === "HABIT" ? 
-        a.completed && !shouldHabitShowAsAvailable(a) : 
-        a.completed;
-      const bEffectivelyCompleted = b.type === "HABIT" ? 
-        b.completed && !shouldHabitShowAsAvailable(b) : 
-        b.completed;
-      
-      if (aEffectivelyCompleted !== bEffectivelyCompleted) return aEffectivelyCompleted ? 1 : -1;
+      const aEffectivelyCompleted =
+        a.type === "HABIT"
+          ? a.completed && !shouldHabitShowAsAvailable(a)
+          : a.completed;
+      const bEffectivelyCompleted =
+        b.type === "HABIT"
+          ? b.completed && !shouldHabitShowAsAvailable(b)
+          : b.completed;
+
+      if (aEffectivelyCompleted !== bEffectivelyCompleted)
+        return aEffectivelyCompleted ? 1 : -1;
       return b.urgency - a.urgency;
     });
 
@@ -182,6 +195,7 @@ export function ContextGroup({
         <ContextGroupHeader
           context={context}
           allContexts={allContexts}
+          tags={tags}
           completion={completion}
           todayTasksInContext={todayTasksInContext}
           hasHabits={hasHabits}
@@ -191,7 +205,12 @@ export function ContextGroup({
             {contextTasks.length > 0 ? (
               <div className="space-y-1">
                 {contextTasks.map((task) => (
-                  <TaskCard key={task.id} task={task} contexts={allContexts} />
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    contexts={allContexts}
+                    tags={tags}
+                  />
                 ))}
               </div>
             ) : (

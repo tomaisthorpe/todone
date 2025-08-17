@@ -54,6 +54,7 @@ model User {
   sessions Session[]
   contexts Context[]
   tasks    Task[]
+  tags     Tag[]
 
   @@map("users")
 }
@@ -86,6 +87,22 @@ model Context {
   @@map("contexts")
 }
 
+model Tag {
+  id          String   @id @default(cuid())
+  name        String
+  coefficient Float    @default(0.0)
+  color       String   @default("bg-gray-500")
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks TaskTag[]
+
+  @@unique([name, userId])
+  @@map("tags")
+}
+
 enum TaskType {
   TASK
   HABIT
@@ -110,7 +127,7 @@ model Task {
   title     String
   project   String?
   priority  Priority  @default(MEDIUM)
-  tags      String[]  @default([])
+  tags      String[]  @default([]) // Keep for backward compatibility during migration
   contextId String
   dueDate   DateTime?
   urgency   Float     @default(5.0)
@@ -136,8 +153,21 @@ model Task {
   context Context @relation(fields: [contextId], references: [id], onDelete: Cascade)
 
   habitCompletions HabitCompletion[]
+  taskTags         TaskTag[]
 
   @@map("tasks")
+}
+
+model TaskTag {
+  id     String @id @default(cuid())
+  taskId String
+  tagId  String
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, tagId])
+  @@map("task_tags")
 }
 
 model HabitCompletion {

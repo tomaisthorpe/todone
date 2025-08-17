@@ -27,7 +27,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import type { Task } from "@/lib/data";
+import type { Task, Tag as TagType } from "@/lib/data";
 
 interface TaskCardProps {
   task: Task;
@@ -39,6 +39,7 @@ interface TaskCardProps {
     coefficient: number;
     isInbox: boolean;
   }>;
+  tags?: TagType[];
   showContext?: boolean;
   onContextClick?: (contextId: string) => void;
   showUrgency?: boolean;
@@ -110,6 +111,7 @@ const renderSubtaskDisplay = (subtasks: Array<{id: string; text: string; complet
 export function TaskCard({
   task,
   contexts,
+  tags = [],
   showContext = false,
   showUrgency = true,
   onContextClick,
@@ -138,12 +140,20 @@ export function TaskCard({
   // Find the context for this task to get its coefficient
   const taskContext = contexts.find((ctx) => ctx.id === task.contextId);
 
+  // Build tag coefficients map
+  const tagCoefficients: { [tagName: string]: number } = {};
+  tags.forEach((tag) => {
+    tagCoefficients[tag.name.toLowerCase()] = tag.coefficient;
+  });
+
   const urgencyExplanation = evaluateUrgency({
     priority: task.priority,
     dueDate: task.dueDate,
     createdAt: task.createdAt,
     tags: task.tags,
+    project: task.project,
     contextCoefficient: taskContext?.coefficient || 0,
+    tagCoefficients,
   });
 
   // Get context icon component for display
@@ -321,6 +331,7 @@ export function TaskCard({
 
       <TaskModal
         contexts={contexts}
+        tags={tags}
         task={task}
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}

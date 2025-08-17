@@ -66,6 +66,7 @@ interface TaskFormProps {
     createdAt: Date;
   };
   fieldIdPrefix?: string;
+  onTagEdit?: (tagName: string) => void;
 }
 
 export function TaskForm({
@@ -78,6 +79,7 @@ export function TaskForm({
   isEditing = false,
   task,
   fieldIdPrefix = "taskform",
+  onTagEdit,
 }: TaskFormProps) {
   const getFieldId = (fieldName: string) => `${fieldIdPrefix}-${fieldName}`;
 
@@ -393,6 +395,7 @@ export function TaskForm({
             onChange={(tags) => onChange("tags", tags)}
             suggestions={existingTags}
             placeholder="Add tags and press Enter"
+            onTagClick={onTagEdit}
           />
         </div>
       </div>

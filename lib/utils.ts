@@ -14,6 +14,7 @@ export type UrgencyInput = {
   tags: string[];
   project?: string | null;
   contextCoefficient?: number;
+  tagCoefficients?: { [tagName: string]: number };
 };
 
 export type UrgencyResult = {
@@ -101,6 +102,16 @@ export function evaluateUrgency(task: UrgencyInput): UrgencyResult {
   // Context coefficient contribution
   if (task.contextCoefficient !== undefined && task.contextCoefficient !== 0) {
     add(task.contextCoefficient, `Context coefficient`);
+  }
+
+  // Tag coefficients contribution
+  if (task.tagCoefficients && task.tags && task.tags.length > 0) {
+    for (const tag of task.tags) {
+      const coefficient = task.tagCoefficients[tag.toLowerCase()];
+      if (coefficient !== undefined && coefficient !== 0) {
+        add(coefficient, `Tag "${tag}" coefficient`);
+      }
+    }
   }
 
   return { score: urgency, explanation };

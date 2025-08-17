@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, KeyboardEvent } from "react";
-import { X } from "lucide-react";
+import { X, Edit2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "./input";
 
@@ -12,6 +12,7 @@ interface TagsInputProps {
   placeholder?: string;
   className?: string;
   disabled?: boolean;
+  onTagClick?: (tagName: string) => void;
 }
 
 export function TagsInput({
@@ -21,6 +22,7 @@ export function TagsInput({
   placeholder = "Add tags...",
   className,
   disabled = false,
+  onTagClick,
 }: TagsInputProps) {
   const [inputValue, setInputValue] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -105,6 +107,15 @@ export function TagsInput({
     inputRef.current?.focus();
   };
 
+  // Handle tag click
+  const handleTagClick = (tag: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onTagClick) {
+      onTagClick(tag);
+    }
+  };
+
   // Handle input blur
   const handleBlur = () => {
     // Delay hiding suggestions to allow for suggestion clicks
@@ -123,45 +134,46 @@ export function TagsInput({
 
   return (
     <div className={cn("relative", className)}>
-      <div
-        className={cn(
-          "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex min-h-[36px] w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-          "focus-within:border-ring",
-          "flex-wrap gap-1 p-2 bg-white",
-          disabled && "opacity-50 cursor-not-allowed"
-        )}
-        onClick={() => !disabled && inputRef.current?.focus()}
-      >
+      <div className="flex flex-wrap gap-1 p-2 border border-gray-300 rounded-md min-h-[2.5rem] focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent">
         {value.map((tag, index) => (
           <span
             key={index}
-            className="inline-flex items-center px-2 py-1 text-xs bg-secondary text-secondary-foreground rounded-md"
-          >
-            {tag}
-            {!disabled && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  removeTag(index);
-                }}
-                className="ml-1 hover:text-destructive focus:outline-none"
-              >
-                <X className="w-3 h-3" />
-              </button>
+            className={cn(
+              "inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 text-sm rounded-md",
+              onTagClick && "cursor-pointer hover:bg-blue-200 transition-colors"
             )}
+            onClick={onTagClick ? (e) => handleTagClick(tag, e) : undefined}
+            title={onTagClick ? "Click to edit tag coefficient" : undefined}
+          >
+            {onTagClick && (
+              <Edit2 className="w-3 h-3 opacity-60" />
+            )}
+            {tag}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                removeTag(index);
+              }}
+              className="ml-1 hover:bg-blue-200 rounded-sm p-0.5 transition-colors"
+              disabled={disabled}
+            >
+              <X className="w-3 h-3" />
+            </button>
           </span>
         ))}
         <Input
           ref={inputRef}
+          type="text"
           value={inputValue}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           onBlur={handleBlur}
           onFocus={handleFocus}
           placeholder={value.length === 0 ? placeholder : ""}
-          className="flex-1 min-w-20 border-0 shadow-none p-0 h-auto focus-visible:ring-0 focus-visible:ring-offset-0"
           disabled={disabled}
+          className="flex-1 min-w-[120px] border-none outline-none focus:ring-0 p-0 bg-transparent"
         />
       </div>
 
@@ -169,21 +181,21 @@ export function TagsInput({
       {showSuggestions && filteredSuggestions.length > 0 && (
         <div
           ref={suggestionsRef}
-          className="absolute z-[100] w-full mt-1 bg-white border-input border rounded-md shadow-md max-h-48 overflow-y-auto"
+          className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-40 overflow-y-auto"
         >
           {filteredSuggestions.map((suggestion, index) => (
-            <button
+            <div
               key={suggestion}
-              type="button"
               className={cn(
-                "w-full px-3 py-2 text-left text-sm hover:bg-gray-100 hover:text-accent-foreground focus:bg-gray-100 focus:text-accent-foreground",
-                index === selectedSuggestionIndex &&
-                  "bg-accent text-accent-foreground"
+                "px-3 py-2 cursor-pointer text-sm",
+                index === selectedSuggestionIndex
+                  ? "bg-blue-100 text-blue-900"
+                  : "hover:bg-gray-100"
               )}
               onClick={() => handleSuggestionClick(suggestion)}
             >
               {suggestion}
-            </button>
+            </div>
           ))}
         </div>
       )}

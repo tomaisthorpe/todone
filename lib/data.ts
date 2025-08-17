@@ -61,6 +61,16 @@ export interface Context {
   updatedAt: Date;
 }
 
+export interface Tag {
+  id: string;
+  name: string;
+  coefficient: number;
+  color: string;
+  userId: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export async function getTasks(): Promise<Task[]> {
   const session = await getAuthenticatedSession();
 
@@ -69,6 +79,16 @@ export async function getTasks(): Promise<Task[]> {
   }
 
   try {
+    // Get all user tags to build coefficient map
+    const userTags = await prisma.tag.findMany({
+      where: { userId: session.user.id },
+    });
+
+    const tagCoefficients: { [tagName: string]: number } = {};
+    userTags.forEach(tag => {
+      tagCoefficients[tag.name.toLowerCase()] = tag.coefficient;
+    });
+
     const tasks = await prisma.task.findMany({
       where: {
         userId: session.user.id,
@@ -109,6 +129,7 @@ export async function getTasks(): Promise<Task[]> {
           tags: task.tags,
           project: task.project,
           contextCoefficient: task.context?.coefficient || 0,
+          tagCoefficients,
         }),
       };
     });
@@ -144,17 +165,37 @@ export async function getContexts(): Promise<Context[]> {
   try {
     const contexts = await prisma.context.findMany({
       where: {
-        AND: [
-          { OR: [{ userId: session.user.id }, { shared: true }] },
-          { archived: false },
-        ],
+        userId: session.user.id,
+        archived: false,
       },
-      orderBy: { name: "asc" },
+      orderBy: [{ isInbox: "desc" }, { name: "asc" }],
     });
 
     return contexts;
   } catch (error) {
     console.error("Error fetching contexts:", error);
+    return [];
+  }
+}
+
+export async function getTags(): Promise<Tag[]> {
+  const session = await getAuthenticatedSession();
+
+  if (!session?.user?.id) {
+    return [];
+  }
+
+  try {
+    const tags = await prisma.tag.findMany({
+      where: {
+        userId: session.user.id,
+      },
+      orderBy: { name: "asc" },
+    });
+
+    return tags;
+  } catch (error) {
+    console.error("Error fetching tags:", error);
     return [];
   }
 }
@@ -223,6 +264,16 @@ export async function getUserContexts(userId: string): Promise<Context[]> {
 
 export async function getUserTasks(userId: string): Promise<Task[]> {
   try {
+    // Get all user tags to build coefficient map
+    const userTags = await prisma.tag.findMany({
+      where: { userId },
+    });
+
+    const tagCoefficients: { [tagName: string]: number } = {};
+    userTags.forEach(tag => {
+      tagCoefficients[tag.name.toLowerCase()] = tag.coefficient;
+    });
+
     const tasks = await prisma.task.findMany({
       where: {
         userId: userId,
@@ -263,6 +314,7 @@ export async function getUserTasks(userId: string): Promise<Task[]> {
           tags: task.tags,
           project: task.project,
           contextCoefficient: task.context?.coefficient || 0,
+          tagCoefficients,
         }),
       };
     });
@@ -357,6 +409,16 @@ export async function getCompletedTasks(
   try {
     const skip = (page - 1) * pageSize;
 
+    // Get all user tags to build coefficient map
+    const userTags = await prisma.tag.findMany({
+      where: { userId: session.user.id },
+    });
+
+    const tagCoefficients: { [tagName: string]: number } = {};
+    userTags.forEach(tag => {
+      tagCoefficients[tag.name.toLowerCase()] = tag.coefficient;
+    });
+
     // Get total count of completed tasks (exclude habits since they're ongoing behaviors)
     const totalCount = await prisma.task.count({
       where: {
@@ -413,6 +475,7 @@ export async function getCompletedTasks(
           tags: task.tags,
           project: task.project,
           contextCoefficient: task.context?.coefficient || 0,
+          tagCoefficients,
         }),
       };
     });
