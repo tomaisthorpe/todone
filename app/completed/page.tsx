@@ -9,6 +9,7 @@ import { signOutAction } from "@/lib/server-actions";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/pagination";
 import { BurndownChart } from "@/components/burndown-chart";
+import { startOfDay } from "@/lib/date-utils";
 import Link from "next/link";
 import { Metadata } from "next";
 
@@ -45,6 +46,77 @@ export default async function CompletedPage({
     getContexts(),
     getBurndownData(),
   ]);
+
+  // Group tasks by today vs older
+  const today = startOfDay(new Date());
+  const todayTasks = completedResult.data.filter((task) => {
+    if (!task.completedAt) return false;
+    const completedDate = startOfDay(new Date(task.completedAt));
+    return completedDate.getTime() === today.getTime();
+  });
+  
+  const olderTasks = completedResult.data.filter((task) => {
+    if (!task.completedAt) return false;
+    const completedDate = startOfDay(new Date(task.completedAt));
+    return completedDate.getTime() < today.getTime();
+  });
+
+  // Component to render a group of tasks
+  const TaskGroup = ({ 
+    title, 
+    tasks, 
+    emptyMessage 
+  }: { 
+    title: string; 
+    tasks: typeof completedResult.data; 
+    emptyMessage: string;
+  }) => (
+    <div className="bg-white rounded-lg shadow-sm mb-6">
+      <div className="px-4 py-3 border-b border-gray-200">
+        <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+        <p className="text-sm text-gray-600">{tasks.length} tasks</p>
+      </div>
+      {tasks.length > 0 ? (
+        <div className="divide-y divide-gray-200">
+          {tasks.map((task) => {
+            const completedDate = task.completedAt
+              ? new Date(task.completedAt)
+              : null;
+            return (
+              <div key={task.id} className="p-4">
+                <div className="flex items-start justify-between mb-2">
+                  <TaskCard
+                    task={task}
+                    contexts={contexts}
+                    showContext={true}
+                    showUrgency={false}
+                  />
+                  {completedDate && (
+                    <div className="ml-4 text-right">
+                      <div className="text-xs text-gray-500">Completed</div>
+                      <div className="text-sm font-medium text-gray-700">
+                        {completedDate.toLocaleDateString()}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {completedDate.toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="p-8 text-center">
+          <p className="text-gray-500">{emptyMessage}</p>
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -112,40 +184,20 @@ export default async function CompletedPage({
 
         {/* Completed Tasks List */}
         {completedResult.data.length > 0 ? (
-          <div className="bg-white rounded-lg shadow-sm">
-            <div className="divide-y divide-gray-200">
-              {completedResult.data.map((task) => {
-                const completedDate = task.completedAt
-                  ? new Date(task.completedAt)
-                  : null;
-                return (
-                  <div key={task.id} className="p-4">
-                    <div className="flex items-start justify-between mb-2">
-                      <TaskCard
-                        task={task}
-                        contexts={contexts}
-                        showContext={true}
-                        showUrgency={false}
-                      />
-                      {completedDate && (
-                        <div className="ml-4 text-right">
-                          <div className="text-xs text-gray-500">Completed</div>
-                          <div className="text-sm font-medium text-gray-700">
-                            {completedDate.toLocaleDateString()}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {completedDate.toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+          <>
+            {/* Today's Completed Tasks */}
+            <TaskGroup 
+              title="Today"
+              tasks={todayTasks}
+              emptyMessage="No tasks completed today yet."
+            />
+
+            {/* Older Completed Tasks */}
+            <TaskGroup 
+              title="Older"
+              tasks={olderTasks}
+              emptyMessage="No older completed tasks."
+            />
 
             {/* Pagination */}
             <Pagination
@@ -156,7 +208,7 @@ export default async function CompletedPage({
               totalCount={completedResult.totalCount}
               pageSize={pageSize}
             />
-          </div>
+          </>
         ) : (
           /* Empty State */
           <div className="bg-white rounded-lg shadow-sm p-12">
