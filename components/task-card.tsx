@@ -91,12 +91,20 @@ export function TaskCard({
   // Find the context for this task to get its coefficient
   const taskContext = contexts.find((ctx) => ctx.id === task.contextId);
 
+  // Build tag coefficients map
+  const tagCoefficients: { [tagName: string]: number } = {};
+  tags.forEach((tag) => {
+    tagCoefficients[tag.name.toLowerCase()] = tag.coefficient;
+  });
+
   const urgencyExplanation = evaluateUrgency({
     priority: task.priority,
     dueDate: task.dueDate,
     createdAt: task.createdAt,
     tags: task.tags,
+    project: task.project,
     contextCoefficient: taskContext?.coefficient || 0,
+    tagCoefficients,
   });
 
   // Get context icon component for display
