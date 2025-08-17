@@ -170,7 +170,8 @@ export function TaskCard({
 
               {((showContext && taskContext) ||
                 task.project ||
-                task.tags.length > 0) && (
+                task.tags.length > 0 ||
+                task.notes) && (
                 <div className="flex flex-wrap items-center space-x-2 md:space-x-3 mt-1">
                   {showContext &&
                     taskContext &&
