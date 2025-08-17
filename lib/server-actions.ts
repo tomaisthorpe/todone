@@ -161,7 +161,7 @@ export async function createTaskAction(formData: FormData) {
   if (subtasksString) {
     try {
       subtasks = JSON.parse(subtasksString);
-    } catch (e) {
+    } catch {
       // If parsing fails, default to empty array
       subtasks = [];
     }
@@ -253,7 +253,7 @@ export async function updateTaskAction(formData: FormData) {
   if (subtasksString) {
     try {
       subtasks = JSON.parse(subtasksString);
-    } catch (e) {
+    } catch {
       // If parsing fails, default to empty array
       subtasks = [];
     }
