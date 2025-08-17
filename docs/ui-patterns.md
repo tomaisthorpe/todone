@@ -56,19 +56,19 @@ Row
 - **Recurring**: 🔄 + "Every Xd"
 - **Regular**: No special indicator
 
-**Habit Icons by Type:**
-- Streak: 🏋️ (red, prominent badge for streaks)
-- Learning: 📖 (blue, moderate emphasis)
-- Wellness: 🔥 (green, balanced)
-- Maintenance: 🔧 (gray, minimal emphasis)
+**Habit Icons by Type (all minimal):**
+- Streak: 🏋️ (red, current streak + "(best: X)")
+- Learning: 📖 (blue, current streak + "(best: X)")
+- Wellness: 🔥 (green, current streak + "every Xd")
+- Maintenance: 🔧 (gray, "every Xd" primary display)
 
 ### Status Badges
 
-**Habit Status (relaxed language):**
-- `✓ Fresh` - Green
-- `⏰ Getting due` - Yellow
-- `⚡ Ready` - Blue
-- `🔄 Time for another` - Orange
+**Habit Status (minimal text-only):**
+- `✓ Fresh` - Green text (`text-green-600`)
+- `⏰ Getting due` - Yellow text (`text-yellow-600`)
+- `⚡ Ready` - Blue text (`text-blue-600`)
+- `🔄 Time for another` - Orange text (`text-orange-600`)
 
 **Due Date Status:**
 - `Today` - Blue
@@ -248,20 +248,34 @@ Empty State
 
 ## Component Composition Examples
 
-### Streak Habit (Prominent)
+### Habit Display (Consistent Minimal)
 ```jsx
-<div className="flex items-center space-x-1 bg-red-50 px-2 py-1 rounded-md border border-red-200">
-  <Dumbbell className="w-4 h-4 text-red-500" />
-  <span className="text-sm font-bold text-red-700">12</span>
-  <span className="text-xs text-gray-500">best: 28</span>
+// Streak/Learning habits: current streak + best streak
+<div className="flex items-center space-x-1">
+  <Dumbbell className="w-3 h-3 text-red-500" />
+  <span className="text-xs font-medium text-gray-600">12</span>
+  <span className="text-xs text-gray-500">(best: 28)</span>
+</div>
+
+// Wellness habits: current streak + frequency
+<div className="flex items-center space-x-1">
+  <Flame className="w-3 h-3 text-green-500" />
+  <span className="text-xs font-medium text-gray-600">5</span>
+  <span className="text-xs text-gray-500">every 3d</span>
+</div>
+
+// Maintenance habits: frequency only
+<div className="flex items-center space-x-1">
+  <Wrench className="w-3 h-3 text-gray-500" />
+  <span className="text-xs font-medium text-gray-600">every 7d</span>
 </div>
 ```
 
-### Maintenance Habit (Minimal)
+### Habit Status (Text Only)
 ```jsx
-<div className="flex items-center space-x-1">
-  <Wrench className="w-3 h-3 text-gray-500" />
-  <span className="text-xs font-medium text-orange-600">/7d</span>
+// Minimal text-only status without background
+<div className="text-xs font-medium whitespace-nowrap text-green-600">
+  ✓ Fresh
 </div>
 ```
 

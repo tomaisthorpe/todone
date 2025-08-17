@@ -136,27 +136,12 @@ export function TaskCard({
                 )}
 
                 {habitDisplay && (
-                  <div
-                    className={cn(
-                      "flex items-center space-x-1",
-                      habitDisplay.showLarge &&
-                        "bg-red-50 px-2 py-1 rounded-md border border-red-200"
-                    )}
-                  >
+                  <div className="flex items-center space-x-1">
                     {renderHabitIcon(
                       habitDisplay.iconType,
-                      cn(
-                        habitDisplay.showLarge ? "w-4 h-4" : "w-3 h-3",
-                        habitDisplay.iconColor
-                      )
+                      cn("w-3 h-3", habitDisplay.iconColor)
                     )}
-                    <span
-                      className={cn(
-                        habitDisplay.showLarge
-                          ? "text-sm font-bold text-red-700"
-                          : "text-xs font-medium text-orange-600"
-                      )}
-                    >
+                    <span className="text-xs font-medium text-gray-600">
                       {habitDisplay.primaryText}
                     </span>
                     {habitDisplay.secondaryText && (
@@ -236,7 +221,7 @@ export function TaskCard({
                 {habitStatus && (
                   <div
                     className={cn(
-                      "px-1.5 py-0.5 rounded text-xs font-medium whitespace-nowrap",
+                      "text-xs font-medium whitespace-nowrap",
                       habitStatus.color
                     )}
                   >

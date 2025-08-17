@@ -29,28 +29,28 @@ export function getHabitStatus(habit: {
     return {
       status: "fresh",
       text: "✓ Fresh",
-      color: "text-green-700 bg-green-100",
+      color: "text-green-600",
       actionNeeded: false,
     };
   } else if (daysUntilDue === 1) {
     return {
       status: "getting-due",
       text: "⏰ Getting due",
-      color: "text-yellow-700 bg-yellow-100",
+      color: "text-yellow-600",
       actionNeeded: false,
     };
   } else if (daysUntilDue === 0) {
     return {
       status: "ready",
       text: "⚡ Ready",
-      color: "text-blue-700 bg-blue-100",
+      color: "text-blue-600",
       actionNeeded: true,
     };
   } else {
     return {
       status: "time-for-another",
       text: "🔄 Time for another",
-      color: "text-orange-700 bg-orange-100",
+      color: "text-orange-600",
       actionNeeded: true,
     };
   }
@@ -90,47 +90,46 @@ export function getHabitDisplay(task: {
 
   const habitIcon = getHabitIcon(task.habitType);
 
-  // Streak habits show prominent streak info
+  // All habit types use consistent minimal styling
+  const streak = task.streak || 0;
+  const longestStreak = task.longestStreak;
+  const frequency = task.frequency;
+
   if (task.habitType === "STREAK") {
     return {
       iconType: habitIcon.icon,
       iconColor: habitIcon.color,
-      primaryText: String(task.streak || 0),
-      secondaryText: task.longestStreak ? `best: ${task.longestStreak}` : null,
-      showLarge: true,
+      primaryText: String(streak),
+      secondaryText: longestStreak ? `(best: ${longestStreak})` : null,
+      showLarge: false,
     };
   }
 
-  // Learning habits show streak with some prominence
   if (task.habitType === "LEARNING") {
     return {
       iconType: habitIcon.icon,
       iconColor: habitIcon.color,
-      primaryText: String(task.streak || 0),
-      secondaryText: task.longestStreak ? `/${task.longestStreak}` : null,
+      primaryText: String(streak),
+      secondaryText: longestStreak ? `(best: ${longestStreak})` : null,
       showLarge: false,
     };
   }
 
-  // Wellness habits show balanced info
   if (task.habitType === "WELLNESS") {
     return {
       iconType: habitIcon.icon,
       iconColor: habitIcon.color,
-      primaryText: String(task.streak || 0),
-      secondaryText: task.frequency ? `/${task.frequency}d` : null,
+      primaryText: String(streak),
+      secondaryText: frequency ? `every ${frequency}d` : null,
       showLarge: false,
     };
   }
 
-  // Maintenance habits de-emphasize streak
   if (task.habitType === "MAINTENANCE") {
     return {
       iconType: habitIcon.icon,
       iconColor: habitIcon.color,
-      primaryText: task.frequency
-        ? `/${task.frequency}d`
-        : String(task.streak || 0),
+      primaryText: frequency ? `every ${frequency}d` : String(streak),
       secondaryText: null,
       showLarge: false,
     };
