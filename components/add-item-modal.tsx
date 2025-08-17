@@ -117,6 +117,7 @@ export function TaskModal({
     frequency: undefined,
     tags: [],
     notes: "",
+    subtasks: [],
   });
 
   // Generate unique IDs for this modal instance to prevent conflicts
@@ -161,6 +162,7 @@ export function TaskModal({
           frequency: task.frequency || undefined,
           tags: task.tags,
           notes: task.notes || "",
+          subtasks: task.subtasks || [],
         });
         setActiveTab("task");
       } else if (contextToEdit) {
@@ -187,6 +189,7 @@ export function TaskModal({
           frequency: undefined,
           tags: [],
           notes: "",
+          subtasks: [],
         });
         // Also reset context form to defaults
         contextForm.reset({
@@ -244,6 +247,9 @@ export function TaskModal({
     
     // Add notes field
     if (taskFormData.notes) formData.append("notes", taskFormData.notes);
+    
+    // Add subtasks as JSON string
+    formData.append("subtasks", JSON.stringify(taskFormData.subtasks));
 
     try {
       if (isEditing) {
