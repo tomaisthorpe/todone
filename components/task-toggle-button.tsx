@@ -2,8 +2,8 @@
 
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Circle } from "lucide-react";
-import { toggleTaskAction } from "@/lib/server-actions";
 import { useTransition } from "react";
+import { useDashboardActions } from "@/lib/hooks/use-dashboard-actions";
 
 interface TaskToggleButtonProps {
   taskId: string;
@@ -12,10 +12,11 @@ interface TaskToggleButtonProps {
 
 export function TaskToggleButton({ taskId, completed }: TaskToggleButtonProps) {
   const [isPending, startTransition] = useTransition();
+  const { toggleTask } = useDashboardActions();
 
   const handleToggle = () => {
     startTransition(async () => {
-      await toggleTaskAction(taskId);
+      await toggleTask(taskId);
     });
   };
 

@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth/next";
 import { Session } from "next-auth";
@@ -83,7 +83,6 @@ export async function toggleTaskAction(taskId: string) {
     await toggleRegularTask(taskId, task.completed, now);
   }
 
-  revalidatePath("/");
 }
 
 // Server action to mark task as completed yesterday
@@ -109,7 +108,6 @@ export async function completeTaskYesterdayAction(taskId: string) {
     await completeTask(task as TaskForCompletion, yesterday);
   }
 
-  revalidatePath("/");
 }
 
 // Server action to create a new task
@@ -186,7 +184,6 @@ export async function createTaskAction(formData: FormData) {
     data: taskData,
   });
 
-  revalidatePath("/");
 }
 
 // Server action to update an existing task
@@ -281,7 +278,6 @@ export async function updateTaskAction(formData: FormData) {
     data: updateData,
   });
 
-  revalidatePath("/");
 }
 
 // Server action to create a new context
@@ -310,7 +306,6 @@ export async function createContextAction(formData: FormData) {
     },
   });
 
-  revalidatePath("/");
 }
 
 // Server action to update an existing context
@@ -353,7 +348,6 @@ export async function updateContextAction(formData: FormData) {
     },
   });
 
-  revalidatePath("/");
 }
 
 // Server action to delete a task
@@ -372,7 +366,6 @@ export async function deleteTaskAction(taskId: string) {
     where: { id: taskId },
   });
 
-  revalidatePath("/");
 }
 
 // Sign out action
@@ -445,7 +438,6 @@ export async function archiveContextAction(contextId: string) {
     data: { archived: true },
   });
 
-  revalidatePath("/");
 }
 
 // Unarchive context action
@@ -467,5 +459,4 @@ export async function unarchiveContextAction(contextId: string) {
     data: { archived: false },
   });
 
-  revalidatePath("/");
 }

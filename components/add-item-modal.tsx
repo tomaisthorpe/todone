@@ -23,15 +23,11 @@ import {
 } from "@/components/ui/select";
 import { TaskForm, type TaskFormData } from "@/components/task-form";
 import {
-  createTaskAction,
-  updateTaskAction,
-  createContextAction,
-  updateContextAction,
-  deleteTaskAction,
   archiveContextAction,
   getExistingTags,
   completeTaskYesterdayAction,
 } from "@/lib/server-actions";
+import { useDashboardActions } from "@/lib/hooks/use-dashboard-actions";
 import {
   CheckSquare,
   Home,
@@ -104,6 +100,7 @@ export function TaskModal({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { createTask, updateTask, deleteTask, createContext, updateContext } = useDashboardActions();
   
   // Find inbox context for default selection
   const inboxContext = contexts.find(c => c.isInbox);
@@ -250,9 +247,9 @@ export function TaskModal({
 
     try {
       if (isEditing) {
-        await updateTaskAction(formData);
+        await updateTask(formData);
       } else {
-        await createTaskAction(formData);
+        await createTask(formData);
       }
       onClose();
     } catch (error) {
@@ -277,9 +274,9 @@ export function TaskModal({
 
     try {
       if (isEditingContext) {
-        await updateContextAction(formData);
+        await updateContext(formData);
       } else {
-        await createContextAction(formData);
+        await createContext(formData);
       }
       contextForm.reset();
       onClose();
@@ -298,7 +295,7 @@ export function TaskModal({
     setIsLoading(true);
 
     try {
-      await deleteTaskAction(task.id);
+      await deleteTask(task.id);
       setShowDeleteConfirm(false);
       onClose();
     } catch (error) {
