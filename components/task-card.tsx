@@ -8,6 +8,7 @@ import {
   Flame,
   Wrench,
   FileText,
+  CheckSquare,
 } from "lucide-react";
 import {
   formatDateForTask,
@@ -56,6 +57,54 @@ const renderHabitIcon = (iconType: string, className: string) => {
     default:
       return <Flame className={className} />;
   }
+};
+
+// Helper function to render compact subtask display
+const renderSubtaskDisplay = (subtasks: Array<{id: string; text: string; completed: boolean}>) => {
+  if (!subtasks || subtasks.length === 0) return null;
+
+  const completedCount = subtasks.filter(s => s.completed).length;
+  const totalCount = subtasks.length;
+  const completionPercentage = (completedCount / totalCount) * 100;
+
+  return (
+    <Tooltip>
+      <TooltipTrigger>
+        <div className="flex items-center space-x-1 text-xs text-gray-500 mb-1">
+          <CheckSquare className="w-3 h-3" />
+          <span>{completedCount}/{totalCount}</span>
+          {totalCount > 0 && (
+            <div className="w-12 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-green-500 transition-all duration-300"
+                style={{ width: `${completionPercentage}%` }}
+              />
+            </div>
+          )}
+        </div>
+      </TooltipTrigger>
+      <TooltipContent>
+        <div className="text-xs max-w-xs">
+          <div className="font-medium mb-1">Subtasks ({completedCount}/{totalCount})</div>
+          {subtasks.slice(0, 5).map((subtask) => (
+            <div key={subtask.id} className="flex items-center space-x-1 py-0.5">
+              <span className={subtask.completed ? "text-green-500" : "text-gray-400"}>
+                {subtask.completed ? "✓" : "○"}
+              </span>
+              <span className={subtask.completed ? "line-through text-gray-400" : ""}>
+                {subtask.text.length > 30 ? `${subtask.text.substring(0, 30)}...` : subtask.text}
+              </span>
+            </div>
+          ))}
+          {subtasks.length > 5 && (
+            <div className="text-gray-400 text-center pt-1">
+              ... and {subtasks.length - 5} more
+            </div>
+          )}
+        </div>
+      </TooltipContent>
+    </Tooltip>
+  );
 };
 
 export function TaskCard({
@@ -156,7 +205,8 @@ export function TaskCard({
               {((showContext && taskContext) ||
                 task.project ||
                 task.tags.length > 0 ||
-                task.notes) && (
+                task.notes ||
+                (task.subtasks && task.subtasks.length > 0)) && (
                 <div className="flex flex-wrap items-center space-x-2 md:space-x-3 mt-1">
                   {showContext &&
                     taskContext &&
@@ -212,6 +262,7 @@ export function TaskCard({
                       </TooltipContent>
                     </Tooltip>
                   )}
+                  {renderSubtaskDisplay(task.subtasks)}
                 </div>
               )}
             </div>

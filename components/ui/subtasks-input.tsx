@@ -20,9 +20,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import {
-  useSortable,
-} from "@dnd-kit/sortable";
+import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
 export interface Subtask {
@@ -43,7 +41,11 @@ interface SortableSubtaskItemProps {
   onRemove: (id: string) => void;
 }
 
-function SortableSubtaskItem({ subtask, onUpdate, onRemove }: SortableSubtaskItemProps) {
+function SortableSubtaskItem({
+  subtask,
+  onUpdate,
+  onRemove,
+}: SortableSubtaskItemProps) {
   const {
     attributes,
     listeners,
@@ -59,23 +61,23 @@ function SortableSubtaskItem({ subtask, onUpdate, onRemove }: SortableSubtaskIte
   };
 
   return (
-    <div 
+    <div
       ref={setNodeRef}
       style={style}
-      className={`flex items-center gap-2 p-2 bg-gray-50 rounded-md group ${
-        isDragging ? 'opacity-50' : ''
+      className={`flex items-center gap-0 px-0 py-1 hover:bg-gray-50 rounded-md group ${
+        isDragging ? "opacity-50" : ""
       }`}
     >
       <div
         {...attributes}
         {...listeners}
-        className="cursor-grab active:cursor-grabbing"
+        className="cursor-grab active:cursor-grabbing mr-1"
       >
         <GripVertical className="w-4 h-4 text-gray-400" />
       </div>
       <Checkbox
         checked={subtask.completed}
-        onCheckedChange={(checked) => 
+        onCheckedChange={(checked) =>
           onUpdate(subtask.id, { completed: checked === true })
         }
       />
@@ -98,13 +100,13 @@ function SortableSubtaskItem({ subtask, onUpdate, onRemove }: SortableSubtaskIte
   );
 }
 
-export function SubtasksInput({ 
-  value = [], 
-  onChange, 
-  placeholder = "Add a subtask..." 
+export function SubtasksInput({
+  value = [],
+  onChange,
+  placeholder = "Add a subtask...",
 }: SubtasksInputProps) {
   const [newSubtaskText, setNewSubtaskText] = useState("");
-  
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -125,15 +127,13 @@ export function SubtasksInput({
   };
 
   const removeSubtask = (id: string) => {
-    onChange(value.filter(subtask => subtask.id !== id));
+    onChange(value.filter((subtask) => subtask.id !== id));
   };
 
   const updateSubtask = (id: string, updates: Partial<Subtask>) => {
     onChange(
-      value.map(subtask => 
-        subtask.id === id 
-          ? { ...subtask, ...updates }
-          : subtask
+      value.map((subtask) =>
+        subtask.id === id ? { ...subtask, ...updates } : subtask
       )
     );
   };
@@ -160,16 +160,16 @@ export function SubtasksInput({
     <div className="space-y-2">
       {/* Existing Subtasks */}
       {value.length > 0 && (
-        <DndContext 
+        <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
           onDragEnd={handleDragEnd}
         >
-          <SortableContext 
-            items={value.map(subtask => subtask.id)}
+          <SortableContext
+            items={value.map((subtask) => subtask.id)}
             strategy={verticalListSortingStrategy}
           >
-            <div className="space-y-2">
+            <div>
               {value.map((subtask) => (
                 <SortableSubtaskItem
                   key={subtask.id}
@@ -206,7 +206,7 @@ export function SubtasksInput({
       {/* Subtask Summary */}
       {value.length > 0 && (
         <div className="text-xs text-gray-500">
-          {value.filter(s => s.completed).length} of {value.length} completed
+          {value.filter((s) => s.completed).length} of {value.length} completed
         </div>
       )}
     </div>
