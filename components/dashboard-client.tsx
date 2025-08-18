@@ -6,12 +6,16 @@ import { AddItemModal } from "@/components/add-item-modal";
 import { SmartTaskInput } from "@/components/smart-task-input";
 import { ContextsSection } from "@/components/contexts-section";
 import { useDashboardData } from "@/lib/hooks/use-dashboard-data";
+import { usePWABadge } from "@/lib/hooks/use-pwa-badge";
 
 export function DashboardClient() {
   const [collapsedState, setCollapsedState] = useState<Record<string, boolean>>({});
   
   // Use SWR hook for client-side data fetching
   const { tasks, contexts, archivedContexts, tags, isLoading, isError } = useDashboardData();
+  
+  // Update PWA badge based on task data
+  usePWABadge(tasks);
 
   const scrollToContext = (contextId: string) => {
     // First, ensure the context is expanded

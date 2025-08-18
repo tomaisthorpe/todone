@@ -4,6 +4,9 @@ const config = {
   testEnvironment: 'node',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   testMatch: ['**/__tests__/**/*.test.ts', '**/*.test.ts'],
+  moduleNameMapping: {
+    '^@/(.*)$': '<rootDir>/$1',
+  },
   collectCoverageFrom: [
     'lib/**/*.ts',
     '!lib/**/*.d.ts',
