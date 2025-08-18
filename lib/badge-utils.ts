@@ -47,11 +47,84 @@ declare global {
 }
 
 /**
+ * Permission states for badge functionality
+ */
+export type BadgePermissionState = 'granted' | 'denied' | 'prompt' | 'unsupported';
+
+/**
+ * Checks if Badge API is supported
+ */
+export function isBadgeAPISupported(): boolean {
+  return 'setAppBadge' in navigator && 'clearAppBadge' in navigator;
+}
+
+/**
+ * Requests permission to use the Badge API (required for iOS)
+ */
+export async function requestBadgePermission(): Promise<BadgePermissionState> {
+  if (!isBadgeAPISupported()) {
+    return 'unsupported';
+  }
+
+  try {
+    // For iOS, we need to request permission explicitly
+    // The Badge API permission is tied to notifications permission on iOS
+    if ('Notification' in window) {
+      const permission = await Notification.requestPermission();
+      switch (permission) {
+        case 'granted':
+          return 'granted';
+        case 'denied':
+          return 'denied';
+        default:
+          return 'prompt';
+      }
+    }
+    
+    // For other platforms, assume granted if API is available
+    return 'granted';
+  } catch (error) {
+    console.warn('Failed to request badge permission:', error);
+    return 'denied';
+  }
+}
+
+/**
+ * Gets the current badge permission state
+ */
+export function getBadgePermissionState(): BadgePermissionState {
+  if (!isBadgeAPISupported()) {
+    return 'unsupported';
+  }
+
+  if ('Notification' in window) {
+    switch (Notification.permission) {
+      case 'granted':
+        return 'granted';
+      case 'denied':
+        return 'denied';
+      default:
+        return 'prompt';
+    }
+  }
+
+  // For platforms without notification permission, assume granted if API is available
+  return 'granted';
+}
+
+/**
  * Updates the PWA badge with the given count
  */
-export async function updatePWABadge(count: number): Promise<void> {
-  // Check if the Badge API is supported
-  if (navigator.setAppBadge) {
+export async function updatePWABadge(count: number): Promise<boolean> {
+  const permissionState = getBadgePermissionState();
+  
+  // Don't attempt to update if unsupported or denied
+  if (permissionState === 'unsupported' || permissionState === 'denied') {
+    return false;
+  }
+
+  // Check if the Badge API is supported and we have permission
+  if (navigator.setAppBadge && permissionState === 'granted') {
     try {
       if (count > 0) {
         await navigator.setAppBadge(count);
@@ -59,10 +132,14 @@ export async function updatePWABadge(count: number): Promise<void> {
         // Clear the badge when count is 0
         await navigator.clearAppBadge?.();
       }
+      return true;
     } catch (error) {
       console.warn('Failed to update PWA badge:', error);
+      return false;
     }
   }
+  
+  return false;
 }
 
 /**

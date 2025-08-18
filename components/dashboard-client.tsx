@@ -7,6 +7,8 @@ import { SmartTaskInput } from "@/components/smart-task-input";
 import { ContextsSection } from "@/components/contexts-section";
 import { useDashboardData } from "@/lib/hooks/use-dashboard-data";
 import { usePWABadge } from "@/lib/hooks/use-pwa-badge";
+import { BadgePermissionBanner } from "@/components/badge-permission-banner";
+import { countDueAndOverdueTasks } from "@/lib/badge-utils";
 
 export function DashboardClient() {
   const [collapsedState, setCollapsedState] = useState<Record<string, boolean>>({});
@@ -15,7 +17,10 @@ export function DashboardClient() {
   const { tasks, contexts, archivedContexts, tags, isLoading, isError } = useDashboardData();
   
   // Update PWA badge based on task data
-  usePWABadge(tasks);
+  const { requestPermission, permissionState, canUseBadge } = usePWABadge(tasks);
+  
+  // Calculate due task count for the permission banner
+  const dueTaskCount = countDueAndOverdueTasks(tasks);
 
   const scrollToContext = (contextId: string) => {
     // First, ensure the context is expanded
@@ -123,6 +128,13 @@ export function DashboardClient() {
         <div className="bg-white rounded-xl shadow-sm p-6">
           <SmartTaskInput contexts={contexts} />
         </div>
+
+        {/* Badge Permission Banner */}
+        <BadgePermissionBanner
+          permissionState={permissionState}
+          onRequestPermission={requestPermission}
+          taskCount={dueTaskCount}
+        />
 
         {/* Today Section */}
         <TodaySection tasks={tasks} contexts={contexts} tags={tags} onContextClick={scrollToContext} />

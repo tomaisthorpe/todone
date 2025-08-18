@@ -1,29 +1,51 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { Task } from '@/lib/data';
-import { countDueAndOverdueTasks, updatePWABadge } from '@/lib/badge-utils';
+import { 
+  countDueAndOverdueTasks, 
+  updatePWABadge, 
+  requestBadgePermission, 
+  getBadgePermissionState,
+  BadgePermissionState 
+} from '@/lib/badge-utils';
 
 /**
  * Hook to automatically update PWA badge based on tasks
  */
 export function usePWABadge(tasks: Task[]) {
+  const [permissionState, setPermissionState] = useState<BadgePermissionState>('unsupported');
+
   // Function to manually update badge
   const updateBadge = useCallback(async () => {
     const badgeCount = countDueAndOverdueTasks(tasks);
-    await updatePWABadge(badgeCount);
+    const success = await updatePWABadge(badgeCount);
+    return success;
   }, [tasks]);
 
-  // Update badge when tasks change
+  // Function to request badge permission
+  const requestPermission = useCallback(async () => {
+    const permission = await requestBadgePermission();
+    setPermissionState(permission);
+    return permission;
+  }, []);
+
+  // Check permission state on mount
   useEffect(() => {
-    // Only update badge if we have tasks data and the page is visible
-    if (tasks.length === 0) return;
+    const currentPermission = getBadgePermissionState();
+    setPermissionState(currentPermission);
+  }, []);
+
+  // Update badge when tasks change (only if we have permission)
+  useEffect(() => {
+    // Only update badge if we have tasks data and permission
+    if (tasks.length === 0 || permissionState !== 'granted') return;
     
     updateBadge();
-  }, [tasks, updateBadge]);
+  }, [tasks, updateBadge, permissionState]);
 
   // Update badge when page becomes visible (user returns to app)
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (!document.hidden && tasks.length > 0) {
+      if (!document.hidden && tasks.length > 0 && permissionState === 'granted') {
         updateBadge();
       }
     };
@@ -32,12 +54,12 @@ export function usePWABadge(tasks: Task[]) {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [updateBadge, tasks]);
+  }, [updateBadge, tasks, permissionState]);
 
   // Update badge when the app gains focus
   useEffect(() => {
     const handleFocus = () => {
-      if (tasks.length > 0) {
+      if (tasks.length > 0 && permissionState === 'granted') {
         updateBadge();
       }
     };
@@ -46,19 +68,24 @@ export function usePWABadge(tasks: Task[]) {
     return () => {
       window.removeEventListener('focus', handleFocus);
     };
-  }, [updateBadge, tasks]);
+  }, [updateBadge, tasks, permissionState]);
 
   // Periodic badge update (every 5 minutes) to handle time-based changes
   // (e.g., tasks becoming overdue)
   useEffect(() => {
-    if (tasks.length === 0) return;
+    if (tasks.length === 0 || permissionState !== 'granted') return;
 
     const interval = setInterval(() => {
       updateBadge();
     }, 5 * 60 * 1000); // 5 minutes
 
     return () => clearInterval(interval);
-  }, [updateBadge, tasks]);
+  }, [updateBadge, tasks, permissionState]);
 
-  return { updateBadge };
+  return { 
+    updateBadge, 
+    requestPermission, 
+    permissionState,
+    canUseBadge: permissionState === 'granted'
+  };
 }
