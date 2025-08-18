@@ -17,7 +17,7 @@ export function DashboardClient() {
   const { tasks, contexts, archivedContexts, tags, isLoading, isError } = useDashboardData();
   
   // Update PWA badge based on task data
-  const { requestPermission, permissionState, canUseBadge } = usePWABadge(tasks);
+  const { requestPermission, permissionState } = usePWABadge(tasks);
   
   // Calculate due task count for the permission banner
   const dueTaskCount = countDueAndOverdueTasks(tasks);
