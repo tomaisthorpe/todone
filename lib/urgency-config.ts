@@ -17,14 +17,14 @@ export const URGENCY_CONSTANTS = {
   // For overdue by o > 0 days: proximity = clamp(o/overdueSaturationDays, 0..1)
   due: {
     coefficient: 12.0,
-    nearWindowDays: 7,
+    nearWindowDays: 4,
     overdueSaturationDays: 7,
   },
 
   // Age factor: normalized by horizon days, then scaled by coefficient
   age: {
     coefficient: 2.0,
-    horizonDays: 14,
+    horizonDays: 30,
   },
 
   // Project: adding a project adds a fixed 1 * coefficient
