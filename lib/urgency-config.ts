@@ -24,7 +24,7 @@ export const URGENCY_CONSTANTS = {
   // Age factor: normalized by horizon days, then scaled by coefficient
   age: {
     coefficient: 2.0,
-    horizonDays: 30,
+    horizonDays: 14,
   },
 
   // Project: adding a project adds a fixed 1 * coefficient
