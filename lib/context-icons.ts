@@ -36,6 +36,25 @@ import {
   FlaskConical,
   TestTube,
   Beaker,
+  // Added categories
+  Dumbbell,
+  Activity,
+  Server,
+  ServerCog,
+  HardDrive,
+  Fish,
+  Droplets,
+  Anchor,
+  Gamepad2,
+  Joystick,
+  Rocket,
+  Bot,
+  BrainCircuit,
+  Brain,
+  CircuitBoard,
+  Cpu,
+  PlugZap,
+  BatteryCharging,
   Car,
   Briefcase,
   Inbox,
@@ -80,6 +99,30 @@ export const contextIconMap: Record<string, IconComponent> = {
   FlaskConical,
   TestTube,
   Beaker,
+  // Fitness
+  Dumbbell,
+  Activity,
+  // Homelab
+  Server,
+  ServerCog,
+  HardDrive,
+  // Fishkeeping
+  Fish,
+  Droplets,
+  Anchor,
+  // Game Development
+  Gamepad2,
+  Joystick,
+  Rocket,
+  // LLMs / AI
+  Bot,
+  BrainCircuit,
+  Brain,
+  // Electronics
+  CircuitBoard,
+  Cpu,
+  PlugZap,
+  BatteryCharging,
   // Legacy/extra icons that might exist in stored contexts
   Car,
   Briefcase,
@@ -136,4 +179,28 @@ export const contextIconOptions: ReadonlyArray<{
   { value: "FlaskConical", icon: FlaskConical, label: "Brewing" },
   { value: "TestTube", icon: TestTube, label: "Experiments" },
   { value: "Beaker", icon: Beaker, label: "Laboratory" },
+  // Fitness
+  { value: "Dumbbell", icon: Dumbbell, label: "Fitness" },
+  { value: "Activity", icon: Activity, label: "Activity" },
+  // Homelab / Servers
+  { value: "Server", icon: Server, label: "Server" },
+  { value: "ServerCog", icon: ServerCog, label: "Server Admin" },
+  { value: "HardDrive", icon: HardDrive, label: "Storage" },
+  // Fishkeeping / Aquarium
+  { value: "Fish", icon: Fish, label: "Aquarium" },
+  { value: "Droplets", icon: Droplets, label: "Water Care" },
+  { value: "Anchor", icon: Anchor, label: "Marine" },
+  // Game Development
+  { value: "Gamepad2", icon: Gamepad2, label: "Game Dev" },
+  { value: "Joystick", icon: Joystick, label: "Playtesting" },
+  { value: "Rocket", icon: Rocket, label: "Launch" },
+  // LLMs / AI
+  { value: "Bot", icon: Bot, label: "AI Bot" },
+  { value: "BrainCircuit", icon: BrainCircuit, label: "Model" },
+  { value: "Brain", icon: Brain, label: "Research" },
+  // Electronics / Hardware
+  { value: "CircuitBoard", icon: CircuitBoard, label: "Electronics" },
+  { value: "Cpu", icon: Cpu, label: "CPU" },
+  { value: "PlugZap", icon: PlugZap, label: "Power" },
+  { value: "BatteryCharging", icon: BatteryCharging, label: "Battery" },
 ];
