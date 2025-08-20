@@ -36,7 +36,6 @@ import {
   FlaskConical,
   TestTube,
   Beaker,
-  // Added categories
   Dumbbell,
   Activity,
   Server,
