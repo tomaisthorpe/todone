@@ -6,7 +6,7 @@ import { getServerSession } from "next-auth/next";
 import { Session } from "next-auth";
 import { authOptions } from "./auth";
 import { prisma } from "./prisma";
-import { calculateUrgency, parseTags } from "./utils";
+import { calculateUrgency, parseTags, shouldHabitShowAsAvailable } from "./utils";
 import { completeTask, uncompleteHabit, toggleRegularTask, TaskForCompletion } from "./task-completion-utils";
 import { revalidatePath } from "next/cache";
 
@@ -70,12 +70,21 @@ export async function toggleTaskAction(taskId: string) {
   const now = new Date();
 
   // Handle different task types
-  if (task.type === "HABIT" && task.completed) {
-    // Habit is being uncompleted
-    await uncompleteHabit(task as TaskForCompletion);
-  } else if (task.type === "HABIT" && !task.completed) {
-    // Habit is being completed
-    await completeTask(task as TaskForCompletion, now);
+  if (task.type === "HABIT") {
+    // For habits, use the same logic as the UI to determine effective completion state
+    const habitShowsAsAvailable = shouldHabitShowAsAvailable({
+      completed: task.completed,
+      completedAt: task.completedAt,
+      type: task.type,
+    });
+    
+    if (!habitShowsAsAvailable) {
+      // Habit shows as completed, so we're uncompleting it
+      await uncompleteHabit(task as TaskForCompletion);
+    } else {
+      // Habit shows as available, so we're completing it
+      await completeTask(task as TaskForCompletion, now);
+    }
   } else if (task.type === "RECURRING" && !task.completed) {
     // Recurring task is being completed
     await completeTask(task as TaskForCompletion, now);
