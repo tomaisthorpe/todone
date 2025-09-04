@@ -267,7 +267,7 @@ describe('waitDays functionality', () => {
     const dueDate = new Date();
     dueDate.setDate(dueDate.getDate() + 3); // 3 days from now
     
-    const task: UrgencyInput = {
+    const taskWithNullWait: UrgencyInput = {
       priority: 'MEDIUM',
       dueDate,
       waitDays: null,
@@ -275,9 +275,20 @@ describe('waitDays functionality', () => {
       tags: [],
     };
 
-    const result = evaluateUrgency(task);
-    expect(result.score).toBeGreaterThan(0);
-    expect(result.explanation.some(exp => exp.includes('waiting'))).toBe(false);
+    const taskWithoutWaitField: UrgencyInput = {
+      priority: 'MEDIUM',
+      dueDate,
+      createdAt: new Date('2024-01-01T00:00:00.000Z'),
+      tags: [],
+    };
+
+    const resultWithNull = evaluateUrgency(taskWithNullWait);
+    const resultWithoutField = evaluateUrgency(taskWithoutWaitField);
+    
+    // Both should have the same urgency (normal behavior)
+    expect(resultWithNull.score).toBeCloseTo(resultWithoutField.score, 2);
+    expect(resultWithNull.score).toBeGreaterThan(0);
+    expect(resultWithNull.explanation.some(exp => exp.includes('waiting'))).toBe(false);
   });
 });
 

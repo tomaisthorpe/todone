@@ -56,12 +56,13 @@ export function evaluateUrgency(task: UrgencyInput): UrgencyResult {
     let proximity = 0;
     
     // Check if we should wait before increasing urgency
-    const waitDays = task.waitDays ?? 0; // Default to 0 if not specified
+    const waitDays = task.waitDays; // Keep as null/undefined if not specified
     
     if (daysUntilDue >= 0) {
       // Only start calculating urgency if we're within the wait period
+      // If waitDays is not set (null/undefined), use normal behavior
       // If waitDays is set, only calculate urgency when we're waitDays or fewer days away
-      const shouldCalculateUrgency = waitDays === 0 || daysUntilDue <= waitDays;
+      const shouldCalculateUrgency = waitDays === null || waitDays === undefined || daysUntilDue <= waitDays;
       
       if (shouldCalculateUrgency && daysUntilDue <= URGENCY_CONSTANTS.due.nearWindowDays) {
         // Exponential scaling for non-overdue tasks
@@ -88,7 +89,7 @@ export function evaluateUrgency(task: UrgencyInput): UrgencyResult {
         : `Due in ${daysUntilDue} days`;
     
     // Add wait days info to label if specified and still waiting
-    if (waitDays > 0 && daysUntilDue > waitDays) {
+    if (waitDays != null && waitDays > 0 && daysUntilDue > waitDays) {
       label += ` (waiting ${waitDays} days)`;
     }
     

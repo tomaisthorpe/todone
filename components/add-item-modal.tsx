@@ -291,6 +291,7 @@ export function TaskModal({
     formData.append("priority", taskFormData.priority);
     formData.append("contextId", taskFormData.contextId);
     if (taskFormData.dueDate) formData.append("dueDate", taskFormData.dueDate);
+    if (taskFormData.waitDays != null) formData.append("waitDays", taskFormData.waitDays.toString());
     formData.append("type", taskFormData.type);
     if (taskFormData.habitType)
       formData.append("habitType", taskFormData.habitType);
