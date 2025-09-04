@@ -190,6 +190,97 @@ describe('explainUrgency', () => {
   });
 });
 
+describe('waitDays functionality', () => {
+  it('should suppress urgency when still in wait period', () => {
+    const dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + 7); // 7 days from now
+    
+    const taskWithWait: UrgencyInput = {
+      priority: 'MEDIUM',
+      dueDate,
+      waitDays: 5, // Wait until 5 days before due date (7 > 5, so still waiting)
+      createdAt: new Date('2024-01-01T00:00:00.000Z'),
+      tags: [],
+    };
+
+    const taskWithoutWait: UrgencyInput = {
+      priority: 'MEDIUM',
+      dueDate,
+      createdAt: new Date('2024-01-01T00:00:00.000Z'),
+      tags: [],
+    };
+
+    const urgencyWithWait = evaluateUrgency(taskWithWait);
+    const urgencyWithoutWait = evaluateUrgency(taskWithoutWait);
+
+    // Both should have same urgency since 7 days is outside nearWindowDays (4)
+    // But the waiting label should be present
+    expect(urgencyWithWait.score).toBeCloseTo(urgencyWithoutWait.score, 1);
+    expect(urgencyWithWait.explanation.some(exp => exp.includes('waiting'))).toBe(true);
+  });
+
+  it('should suppress urgency when outside wait period', () => {
+    const dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + 3); // 3 days from now (within nearWindowDays)
+    
+    const taskWithShortWait: UrgencyInput = {
+      priority: 'MEDIUM',
+      dueDate,
+      waitDays: 2, // Wait until 2 days before due date (3 > 2, so urgency should be suppressed)
+      createdAt: new Date('2024-01-01T00:00:00.000Z'),
+      tags: [],
+    };
+
+    const taskWithoutWait: UrgencyInput = {
+      priority: 'MEDIUM',
+      dueDate,
+      createdAt: new Date('2024-01-01T00:00:00.000Z'),
+      tags: [],
+    };
+
+    const urgencyWithWait = evaluateUrgency(taskWithShortWait);
+    const urgencyWithoutWait = evaluateUrgency(taskWithoutWait);
+
+    // Task with short wait should have lower urgency since 3 > 2 (still waiting)
+    expect(urgencyWithWait.score).toBeLessThan(urgencyWithoutWait.score);
+    expect(urgencyWithWait.explanation.some(exp => exp.includes('waiting'))).toBe(true);
+  });
+
+  it('should handle waitDays of 0 (no wait)', () => {
+    const dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + 3); // 3 days from now
+    
+    const task: UrgencyInput = {
+      priority: 'MEDIUM',
+      dueDate,
+      waitDays: 0,
+      createdAt: new Date('2024-01-01T00:00:00.000Z'),
+      tags: [],
+    };
+
+    const result = evaluateUrgency(task);
+    expect(result.score).toBeGreaterThan(0);
+    expect(result.explanation.some(exp => exp.includes('waiting'))).toBe(false);
+  });
+
+  it('should handle null waitDays (default behavior)', () => {
+    const dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + 3); // 3 days from now
+    
+    const task: UrgencyInput = {
+      priority: 'MEDIUM',
+      dueDate,
+      waitDays: null,
+      createdAt: new Date('2024-01-01T00:00:00.000Z'),
+      tags: [],
+    };
+
+    const result = evaluateUrgency(task);
+    expect(result.score).toBeGreaterThan(0);
+    expect(result.explanation.some(exp => exp.includes('waiting'))).toBe(false);
+  });
+});
+
 describe('parseTags', () => {
   it('should parse comma-separated tags', () => {
     const result = parseTags('tag1, tag2, tag3');

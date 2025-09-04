@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { TagsInput } from "@/components/ui/tags-input";
 import { SubtasksInput } from "@/components/ui/subtasks-input";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   CheckSquare,
   RotateCcw,
@@ -21,6 +22,7 @@ import {
   Heart,
   Wrench,
   Calendar,
+  HelpCircle,
 } from "lucide-react";
 import { getContextIconComponent } from "@/lib/context-icons";
 
@@ -36,6 +38,7 @@ export interface TaskFormData {
   priority: "LOW" | "MEDIUM" | "HIGH";
   contextId: string;
   dueDate: string;
+  waitDays?: number;
   type: "TASK" | "HABIT" | "RECURRING";
   habitType?: "STREAK" | "LEARNING" | "WELLNESS" | "MAINTENANCE";
   frequency?: number;
@@ -269,6 +272,38 @@ export function TaskForm({
             className={compact ? "text-sm mt-1" : ""}
           />
         </div>
+
+        {/* Wait Days - only show when due date is set and not in compact mode */}
+        {!compact && data.dueDate && (
+          <div>
+            <Label
+              htmlFor={getFieldId("waitDays")}
+              className="flex items-center gap-2"
+            >
+              Wait Days
+              <Tooltip>
+                <TooltipTrigger>
+                  <HelpCircle className="w-4 h-4 text-gray-400" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Number of days before due date to start increasing urgency</p>
+                </TooltipContent>
+              </Tooltip>
+            </Label>
+            <Input
+              id={getFieldId("waitDays")}
+              type="number"
+              min="0"
+              max="365"
+              value={data.waitDays || ""}
+              onChange={(e) => 
+                onChange("waitDays", e.target.value ? parseInt(e.target.value) : undefined)
+              }
+              placeholder="0"
+              className="text-sm mt-1"
+            />
+          </div>
+        )}
 
         {/* Habit-specific fields - only in full mode */}
         {!compact && data.type === "HABIT" && (
