@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp, Archive } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ChevronDown, ChevronUp, Archive, Search } from "lucide-react";
 import type { Context, Task, Tag } from "@/lib/data";
 import { ContextGroup } from "@/components/context-group";
 import { ArchivedContexts } from "@/components/archived-contexts";
@@ -25,23 +26,51 @@ export function ContextsSection({
   archivedContexts,
 }: ContextsSectionProps) {
   const [showArchivedContexts, setShowArchivedContexts] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const handleExpandAll = () => {
     const next: Record<string, boolean> = {};
-    for (const c of contexts) next[c.id] = false;
+    for (const c of filteredContexts) next[c.id] = false;
     onCollapsedStateChange?.(next);
   };
 
   const handleCollapseAll = () => {
     const next: Record<string, boolean> = {};
-    for (const c of contexts) next[c.id] = true;
+    for (const c of filteredContexts) next[c.id] = true;
     onCollapsedStateChange?.(next);
   };
 
+  // Filter contexts based on search query
+  const filteredContexts = searchQuery.trim() === "" 
+    ? contexts 
+    : contexts.filter((context) => {
+        // Check if context name matches
+        if (context.name.toLowerCase().includes(searchQuery.toLowerCase())) {
+          return true;
+        }
+        
+        // Check if context description matches
+        if (context.description?.toLowerCase().includes(searchQuery.toLowerCase())) {
+          return true;
+        }
+        
+        // Check if any tasks in this context match the search
+        const contextTasks = tasks.filter(task => task.contextId === context.id);
+        return contextTasks.some(task => {
+          const searchLower = searchQuery.toLowerCase();
+          return (
+            task.title.toLowerCase().includes(searchLower) ||
+            task.project?.toLowerCase().includes(searchLower) ||
+            task.notes?.toLowerCase().includes(searchLower) ||
+            task.tags.some(tag => tag.toLowerCase().includes(searchLower))
+          );
+        });
+      });
+
   const allCollapsed =
-    contexts.length > 0 && contexts.every((c) => collapsedState[c.id] === true);
+    filteredContexts.length > 0 && filteredContexts.every((c) => collapsedState[c.id] === true);
   const allExpanded =
-    contexts.length > 0 &&
-    contexts.every((c) => collapsedState[c.id] === false);
+    filteredContexts.length > 0 &&
+    filteredContexts.every((c) => collapsedState[c.id] === false);
 
   return (
     <div className="space-y-4">
@@ -69,9 +98,21 @@ export function ContextsSection({
         </div>
       </div>
 
-      {contexts.length > 0 ? (
+      {/* Search Input */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <Input
+          type="text"
+          placeholder="Search tasks, contexts, or tags..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-10 bg-gray-50 border-gray-200 focus:bg-white"
+        />
+      </div>
+
+      {filteredContexts.length > 0 ? (
         <div className="grid grid-cols-1 gap-4">
-          {contexts.map((context) => {
+          {filteredContexts.map((context) => {
             const isControlled = Object.prototype.hasOwnProperty.call(
               collapsedState,
               context.id
@@ -102,7 +143,10 @@ export function ContextsSection({
       ) : (
         <div className="text-center py-8">
           <p className="text-gray-500">
-            No contexts yet. Create one to get started!
+            {searchQuery.trim() === "" 
+              ? "No contexts yet. Create one to get started!"
+              : `No contexts or tasks match "${searchQuery}"`
+            }
           </p>
         </div>
       )}

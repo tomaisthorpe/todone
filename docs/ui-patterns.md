@@ -38,6 +38,17 @@ Card
 └── Task List (when expanded)
 ```
 
+### Contexts Section
+```
+Section
+├── Header
+│   ├── "Contexts" Title
+│   └── Expand/Collapse All Buttons
+├── Search Input (with search icon)
+├── Filtered Context Groups
+└── Archived Contexts Button
+```
+
 ## Component Patterns
 
 ### TaskCard
@@ -683,5 +694,36 @@ interface Subtask {
 - Real-time validation feedback
 - Clear error messages
 - Prevention of invalid submissions
+
+### Search and Filtering
+**Context Search Pattern:**
+```jsx
+<div className="relative">
+  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+  <Input
+    type="text"
+    placeholder="Search tasks, contexts, or tags..."
+    value={searchQuery}
+    onChange={(e) => setSearchQuery(e.target.value)}
+    className="pl-10 bg-gray-50 border-gray-200 focus:bg-white"
+  />
+</div>
+```
+
+**Search Behavior:**
+- **Multi-field Search**: Searches across task titles, project names, notes, tags, context names, and context descriptions
+- **Case Insensitive**: All searches are case-insensitive for better usability
+- **Context Filtering**: Hides entire contexts that don't contain matching content
+- **Real-time Results**: Updates immediately as user types
+- **Empty State Handling**: Shows different messages for no contexts vs no search results
+- **Expand/Collapse Integration**: Expand/collapse all buttons work with filtered results only
+
+**Search Fields:**
+- Task title
+- Task project name
+- Task notes
+- Task tags
+- Context name
+- Context description
 
 These patterns ensure consistency across the app while maintaining the flexibility to evolve specific components as needed.
