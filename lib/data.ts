@@ -29,6 +29,7 @@ export interface Task {
   tags: string[];
   contextId: string;
   dueDate: Date | null;
+  waitDays: number | null;
   urgency: number;
   completed: boolean;
   completedAt: Date | null;
@@ -125,6 +126,7 @@ export async function getTasks(): Promise<Task[]> {
         urgency: calculateUrgency({
           priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
           dueDate: task.dueDate,
+          waitDays: task.waitDays,
           createdAt: task.createdAt,
           tags: task.tags,
           project: task.project,
@@ -310,6 +312,7 @@ export async function getUserTasks(userId: string): Promise<Task[]> {
         urgency: calculateUrgency({
           priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
           dueDate: task.dueDate,
+          waitDays: task.waitDays,
           createdAt: task.createdAt,
           tags: task.tags,
           project: task.project,
@@ -471,6 +474,7 @@ export async function getCompletedTasks(
         urgency: calculateUrgency({
           priority: task.priority as "LOW" | "MEDIUM" | "HIGH",
           dueDate: task.dueDate,
+          waitDays: task.waitDays,
           createdAt: task.createdAt,
           tags: task.tags,
           project: task.project,

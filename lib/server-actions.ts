@@ -130,6 +130,9 @@ export async function createTaskAction(formData: FormData) {
     (formData.get("priority") as "LOW" | "MEDIUM" | "HIGH") || "MEDIUM";
   const contextId = formData.get("contextId") as string;
   const dueDate = formData.get("dueDate") as string;
+  const waitDays = formData.get("waitDays") 
+    ? parseInt(formData.get("waitDays") as string) 
+    : null;
   const type =
     (formData.get("type") as "TASK" | "HABIT" | "RECURRING") || "TASK";
   const habitType = formData.get("habitType") as
@@ -186,6 +189,7 @@ export async function createTaskAction(formData: FormData) {
     tags,
     contextId: finalContextId,
     dueDate: dueDate ? new Date(dueDate) : null,
+    waitDays,
     type,
     notes: notes || null,
     subtasks: subtasks,
@@ -221,6 +225,9 @@ export async function updateTaskAction(formData: FormData) {
     (formData.get("priority") as "LOW" | "MEDIUM" | "HIGH") || "MEDIUM";
   const contextId = formData.get("contextId") as string;
   const dueDate = formData.get("dueDate") as string;
+  const waitDays = formData.get("waitDays") 
+    ? parseInt(formData.get("waitDays") as string) 
+    : null;
   const type =
     (formData.get("type") as "TASK" | "HABIT" | "RECURRING") || "TASK";
   const habitType = formData.get("habitType") as
@@ -274,6 +281,7 @@ export async function updateTaskAction(formData: FormData) {
   const urgency = calculateUrgency({
     priority,
     dueDate: dueDate ? new Date(dueDate) : null,
+    waitDays,
     createdAt: existingTask.createdAt,
     tags,
     project: project || null,
@@ -289,6 +297,7 @@ export async function updateTaskAction(formData: FormData) {
     tags,
     contextId,
     dueDate: dueDate ? new Date(dueDate) : null,
+    waitDays,
     urgency,
     type,
     notes: notes || null,

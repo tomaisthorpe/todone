@@ -517,6 +517,7 @@ export function SmartTaskInput({
     priority: parsedTask.priority,
     contextId: parsedTask.contextId || "",
     dueDate: parsedTask.dueDate?.toISOString().slice(0, 16) || "",
+    waitDays: undefined,
     type: parsedTask.type,
     habitType: undefined,
     frequency: parsedTask.frequency,

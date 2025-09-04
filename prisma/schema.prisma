@@ -130,6 +130,7 @@ model Task {
   tags      String[]  @default([]) // Keep for backward compatibility during migration
   contextId String
   dueDate   DateTime?
+  waitDays  Int?      // Number of days before due date to start increasing urgency
   urgency   Float     @default(5.0)
   completed Boolean   @default(false)
   completedAt DateTime? // When the task was marked complete

@@ -132,6 +132,7 @@ export function TaskModal({
     priority: "MEDIUM",
     contextId: fallbackContextId,
     dueDate: "",
+    waitDays: undefined,
     type: "TASK",
     habitType: undefined,
     frequency: undefined,
@@ -178,6 +179,7 @@ export function TaskModal({
           dueDate: task.dueDate
             ? new Date(task.dueDate).toISOString().slice(0, 10)
             : "",
+          waitDays: task.waitDays || undefined,
           type: task.type,
           habitType: task.habitType || undefined,
           frequency: task.frequency || undefined,
@@ -213,6 +215,7 @@ export function TaskModal({
           priority: "MEDIUM",
           contextId: currentFallbackContextId,
           dueDate: "",
+          waitDays: undefined,
           type: "TASK",
           habitType: undefined,
           frequency: undefined,
@@ -288,6 +291,7 @@ export function TaskModal({
     formData.append("priority", taskFormData.priority);
     formData.append("contextId", taskFormData.contextId);
     if (taskFormData.dueDate) formData.append("dueDate", taskFormData.dueDate);
+    if (taskFormData.waitDays != null) formData.append("waitDays", taskFormData.waitDays.toString());
     formData.append("type", taskFormData.type);
     if (taskFormData.habitType)
       formData.append("habitType", taskFormData.habitType);

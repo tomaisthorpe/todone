@@ -10,6 +10,7 @@ export function cn(...inputs: ClassValue[]) {
 export type UrgencyInput = {
   priority: "LOW" | "MEDIUM" | "HIGH";
   dueDate: Date | null;
+  waitDays?: number | null; // Number of days before due date to start increasing urgency
   createdAt: Date;
   tags: string[];
   project?: string | null;
@@ -53,18 +54,26 @@ export function evaluateUrgency(task: UrgencyInput): UrgencyResult {
   if (task.dueDate) {
     const daysUntilDue = diffInLocalCalendarDays(task.dueDate);
     let proximity = 0;
+    
+    // Check if we should wait before increasing urgency
+    const waitDays = task.waitDays; // Keep as null/undefined if not specified
+    
     if (daysUntilDue >= 0) {
-      // Exponential scaling for non-overdue tasks
-      // Start scaling 7 days before due date with exponential curve
-      if (daysUntilDue <= URGENCY_CONSTANTS.due.nearWindowDays) {
-        // Normalize days to 0-1 range (1 = due today, 0 = 7 days away)
+      // Only start calculating urgency if we're within the wait period
+      // If waitDays is not set (null/undefined), use normal behavior
+      // If waitDays is set, only calculate urgency when we're waitDays or fewer days away
+      const shouldCalculateUrgency = waitDays === null || waitDays === undefined || daysUntilDue <= waitDays;
+      
+      if (shouldCalculateUrgency && daysUntilDue <= URGENCY_CONSTANTS.due.nearWindowDays) {
+        // Exponential scaling for non-overdue tasks
+        // Start scaling 4 days before due date with exponential curve
         const normalizedDays =
           (URGENCY_CONSTANTS.due.nearWindowDays - daysUntilDue) /
           URGENCY_CONSTANTS.due.nearWindowDays;
         // Apply gentler exponential curve: f(x) = x^1.5 for a smoother exponential increase
         proximity = Math.pow(normalizedDays, 1.5);
       }
-      // Tasks more than 7 days away have proximity of 0
+      // Tasks outside the effective window have proximity of 0
     } else {
       const overdueDays = Math.abs(daysUntilDue);
       // Overdue should be at least as urgent as due today.
@@ -74,10 +83,16 @@ export function evaluateUrgency(task: UrgencyInput): UrgencyResult {
         clamp(overdueDays / URGENCY_CONSTANTS.due.overdueSaturationDays, 0, 1);
     }
     const dueContribution = proximity * URGENCY_CONSTANTS.due.coefficient;
-    const label =
+    let label =
       daysUntilDue < 0
         ? `Overdue (${Math.abs(daysUntilDue)} days)`
         : `Due in ${daysUntilDue} days`;
+    
+    // Add wait days info to label if specified and still waiting
+    if (waitDays != null && waitDays > 0 && daysUntilDue > waitDays) {
+      label += ` (waiting ${waitDays} days)`;
+    }
+    
     add(dueContribution, label);
   } else {
     add(0.0, "No due date");
