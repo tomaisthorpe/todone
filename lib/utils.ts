@@ -36,6 +36,18 @@ export function evaluateUrgency(task: UrgencyInput): UrgencyResult {
     explanation.push(`${label}: ${delta >= 0 ? "+" : ""}${delta.toFixed(2)}`);
   };
 
+  // Check if we should wait before calculating any urgency
+  const waitDays = task.waitDays; // Keep as null/undefined if not specified
+  
+  if (task.dueDate && waitDays != null && waitDays > 0) {
+    const daysUntilDue = diffInLocalCalendarDays(task.dueDate);
+    // If waitDays is set and we're still outside the wait period, set urgency to 0
+    if (daysUntilDue > waitDays) {
+      add(0, `Waiting ${waitDays} days (${daysUntilDue} days until due)`);
+      return { score: 0, explanation };
+    }
+  }
+
   // Priority (mirror Taskwarrior values via normalized * coefficient)
   const prioNorm = URGENCY_CONSTANTS.priority.normalized[task.priority];
   const prioContribution = prioNorm * URGENCY_CONSTANTS.priority.coefficient;
@@ -55,16 +67,8 @@ export function evaluateUrgency(task: UrgencyInput): UrgencyResult {
     const daysUntilDue = diffInLocalCalendarDays(task.dueDate);
     let proximity = 0;
     
-    // Check if we should wait before increasing urgency
-    const waitDays = task.waitDays; // Keep as null/undefined if not specified
-    
     if (daysUntilDue >= 0) {
-      // Only start calculating urgency if we're within the wait period
-      // If waitDays is not set (null/undefined), use normal behavior
-      // If waitDays is set, only calculate urgency when we're waitDays or fewer days away
-      const shouldCalculateUrgency = waitDays === null || waitDays === undefined || daysUntilDue <= waitDays;
-      
-      if (shouldCalculateUrgency && daysUntilDue <= URGENCY_CONSTANTS.due.nearWindowDays) {
+      if (daysUntilDue <= URGENCY_CONSTANTS.due.nearWindowDays) {
         // Exponential scaling for non-overdue tasks
         // Start scaling 4 days before due date with exponential curve
         const normalizedDays =
@@ -83,15 +87,10 @@ export function evaluateUrgency(task: UrgencyInput): UrgencyResult {
         clamp(overdueDays / URGENCY_CONSTANTS.due.overdueSaturationDays, 0, 1);
     }
     const dueContribution = proximity * URGENCY_CONSTANTS.due.coefficient;
-    let label =
+    const label =
       daysUntilDue < 0
         ? `Overdue (${Math.abs(daysUntilDue)} days)`
         : `Due in ${daysUntilDue} days`;
-    
-    // Add wait days info to label if specified and still waiting
-    if (waitDays != null && waitDays > 0 && daysUntilDue > waitDays) {
-      label += ` (waiting ${waitDays} days)`;
-    }
     
     add(dueContribution, label);
   } else {
