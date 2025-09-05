@@ -38,13 +38,11 @@ export function evaluateUrgency(task: UrgencyInput): UrgencyResult {
 
   // Check if we should wait before calculating any urgency
   const waitDays = task.waitDays; // Keep as null/undefined if not specified
-  let isWaiting = false;
   
   if (task.dueDate && waitDays != null && waitDays > 0) {
     const daysUntilDue = diffInLocalCalendarDays(task.dueDate);
     // If waitDays is set and we're still outside the wait period, set urgency to 0
     if (daysUntilDue > waitDays) {
-      isWaiting = true;
       add(0, `Waiting ${waitDays} days (${daysUntilDue} days until due)`);
       return { score: 0, explanation };
     }
