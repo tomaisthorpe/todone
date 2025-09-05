@@ -286,7 +286,7 @@ export function TaskForm({
                   <HelpCircle className="w-4 h-4 text-gray-400" />
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Number of days before due date to start increasing urgency</p>
+                  <p>Number of days before due date to start calculating urgency (task urgency will be 0 until then)</p>
                 </TooltipContent>
               </Tooltip>
             </Label>

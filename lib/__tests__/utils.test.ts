@@ -191,7 +191,7 @@ describe('explainUrgency', () => {
 });
 
 describe('waitDays functionality', () => {
-  it('should suppress urgency when still in wait period', () => {
+  it('should set urgency to 0 when still in wait period', () => {
     const dueDate = new Date();
     dueDate.setDate(dueDate.getDate() + 7); // 7 days from now
     
@@ -213,20 +213,21 @@ describe('waitDays functionality', () => {
     const urgencyWithWait = evaluateUrgency(taskWithWait);
     const urgencyWithoutWait = evaluateUrgency(taskWithoutWait);
 
-    // Both should have same urgency since 7 days is outside nearWindowDays (4)
-    // But the waiting label should be present
-    expect(urgencyWithWait.score).toBeCloseTo(urgencyWithoutWait.score, 1);
-    expect(urgencyWithWait.explanation.some(exp => exp.includes('waiting'))).toBe(true);
+    // Task with wait should have urgency of 0 since we're still waiting
+    expect(urgencyWithWait.score).toBe(0);
+    expect(urgencyWithWait.explanation.some(exp => exp.includes('Waiting'))).toBe(true);
+    // Task without wait should have normal urgency
+    expect(urgencyWithoutWait.score).toBeGreaterThan(0);
   });
 
-  it('should suppress urgency when outside wait period', () => {
+  it('should set urgency to 0 when outside wait period', () => {
     const dueDate = new Date();
     dueDate.setDate(dueDate.getDate() + 3); // 3 days from now (within nearWindowDays)
     
     const taskWithShortWait: UrgencyInput = {
       priority: 'MEDIUM',
       dueDate,
-      waitDays: 2, // Wait until 2 days before due date (3 > 2, so urgency should be suppressed)
+      waitDays: 2, // Wait until 2 days before due date (3 > 2, so urgency should be 0)
       createdAt: new Date('2024-01-01T00:00:00.000Z'),
       tags: [],
     };
@@ -241,9 +242,11 @@ describe('waitDays functionality', () => {
     const urgencyWithWait = evaluateUrgency(taskWithShortWait);
     const urgencyWithoutWait = evaluateUrgency(taskWithoutWait);
 
-    // Task with short wait should have lower urgency since 3 > 2 (still waiting)
-    expect(urgencyWithWait.score).toBeLessThan(urgencyWithoutWait.score);
-    expect(urgencyWithWait.explanation.some(exp => exp.includes('waiting'))).toBe(true);
+    // Task with wait should have urgency of 0 since 3 > 2 (still waiting)
+    expect(urgencyWithWait.score).toBe(0);
+    expect(urgencyWithWait.explanation.some(exp => exp.includes('Waiting'))).toBe(true);
+    // Task without wait should have normal urgency
+    expect(urgencyWithoutWait.score).toBeGreaterThan(0);
   });
 
   it('should handle waitDays of 0 (no wait)', () => {
@@ -261,6 +264,34 @@ describe('waitDays functionality', () => {
     const result = evaluateUrgency(task);
     expect(result.score).toBeGreaterThan(0);
     expect(result.explanation.some(exp => exp.includes('waiting'))).toBe(false);
+  });
+
+  it('should calculate normal urgency when wait period has passed', () => {
+    const dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + 2); // 2 days from now
+    
+    const taskWithWaitPeriodPassed: UrgencyInput = {
+      priority: 'MEDIUM',
+      dueDate,
+      waitDays: 3, // Wait until 3 days before due date (2 <= 3, so wait period has passed)
+      createdAt: new Date('2024-01-01T00:00:00.000Z'),
+      tags: [],
+    };
+
+    const taskWithoutWait: UrgencyInput = {
+      priority: 'MEDIUM',
+      dueDate,
+      createdAt: new Date('2024-01-01T00:00:00.000Z'),
+      tags: [],
+    };
+
+    const urgencyWithWait = evaluateUrgency(taskWithWaitPeriodPassed);
+    const urgencyWithoutWait = evaluateUrgency(taskWithoutWait);
+
+    // Both should have the same urgency since wait period has passed
+    expect(urgencyWithWait.score).toBeCloseTo(urgencyWithoutWait.score, 2);
+    expect(urgencyWithWait.score).toBeGreaterThan(0);
+    expect(urgencyWithWait.explanation.some(exp => exp.includes('Waiting'))).toBe(false);
   });
 
   it('should handle null waitDays (default behavior)', () => {
@@ -288,7 +319,7 @@ describe('waitDays functionality', () => {
     // Both should have the same urgency (normal behavior)
     expect(resultWithNull.score).toBeCloseTo(resultWithoutField.score, 2);
     expect(resultWithNull.score).toBeGreaterThan(0);
-    expect(resultWithNull.explanation.some(exp => exp.includes('waiting'))).toBe(false);
+    expect(resultWithNull.explanation.some(exp => exp.includes('Waiting'))).toBe(false);
   });
 });
 
