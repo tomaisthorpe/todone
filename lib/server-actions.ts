@@ -71,19 +71,19 @@ export async function toggleTaskAction(taskId: string) {
 
   // Handle different task types
   if (task.type === "HABIT") {
-    // For habits, use the same logic as the UI to determine effective completion state
+    // For habits, determine action based on UI availability state
     const habitShowsAsAvailable = shouldHabitShowAsAvailable({
       completed: task.completed,
       completedAt: task.completedAt,
       type: task.type,
     });
     
-    if (!habitShowsAsAvailable) {
-      // Habit shows as completed, so we're uncompleting it
-      await uncompleteHabit(task as TaskForCompletion);
-    } else {
+    if (habitShowsAsAvailable) {
       // Habit shows as available, so we're completing it
       await completeTask(task as TaskForCompletion, now);
+    } else {
+      // Habit shows as completed, so we're uncompleting it
+      await uncompleteHabit(task as TaskForCompletion);
     }
   } else if (task.type === "RECURRING" && !task.completed) {
     // Recurring task is being completed
