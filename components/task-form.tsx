@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -13,7 +13,11 @@ import {
 } from "@/components/ui/select";
 import { TagsInput } from "@/components/ui/tags-input";
 import { SubtasksInput } from "@/components/ui/subtasks-input";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   CheckSquare,
   RotateCcw,
@@ -85,6 +89,16 @@ export function TaskForm({
   onTagEdit,
 }: TaskFormProps) {
   const getFieldId = (fieldName: string) => `${fieldIdPrefix}-${fieldName}`;
+
+  // State to control wait days input visibility
+  const [showWaitDays, setShowWaitDays] = useState(false);
+
+  // Show wait days input by default if wait days is already set
+  useEffect(() => {
+    if (data.waitDays !== undefined && data.waitDays > 0) {
+      setShowWaitDays(true);
+    }
+  }, [data.waitDays]);
 
   const gridCols = "grid-cols-2";
   const gap = compact ? "gap-2" : "gap-4";
@@ -273,37 +287,58 @@ export function TaskForm({
           />
         </div>
 
-        {/* Wait Days - only show when due date is set and not in compact mode */}
-        {!compact && data.dueDate && (
-          <div>
-            <Label
-              htmlFor={getFieldId("waitDays")}
-              className="flex items-center gap-2"
-            >
-              Wait Days
-              <Tooltip>
-                <TooltipTrigger>
-                  <HelpCircle className="w-4 h-4 text-gray-400" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Number of days before due date to start calculating urgency (task urgency will be 0 until then)</p>
-                </TooltipContent>
-              </Tooltip>
-            </Label>
-            <Input
-              id={getFieldId("waitDays")}
-              type="number"
-              min="0"
-              max="365"
-              value={data.waitDays || ""}
-              onChange={(e) => 
-                onChange("waitDays", e.target.value ? parseInt(e.target.value) : undefined)
-              }
-              placeholder="0"
-              className="text-sm mt-1"
-            />
-          </div>
-        )}
+        {/* Wait Days - only show when due date is set and not in compact mode, and not a habit or recurring type */}
+        {!compact &&
+          data.dueDate &&
+          data.type !== "HABIT" &&
+          data.type !== "RECURRING" && (
+            <div>
+              {showWaitDays ? (
+                <div>
+                  <Label
+                    htmlFor={getFieldId("waitDays")}
+                    className="flex items-center gap-2"
+                  >
+                    Wait Days
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <HelpCircle className="w-4 h-4 text-gray-400" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>
+                          Number of days before due date to start calculating
+                          urgency (task urgency will be 0 until then)
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </Label>
+                  <Input
+                    id={getFieldId("waitDays")}
+                    type="number"
+                    min="0"
+                    max="365"
+                    value={data.waitDays || ""}
+                    onChange={(e) =>
+                      onChange(
+                        "waitDays",
+                        e.target.value ? parseInt(e.target.value) : undefined
+                      )
+                    }
+                    placeholder="0"
+                    className="text-sm mt-1"
+                  />
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowWaitDays(true)}
+                  className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
+                >
+                  Add wait days...
+                </button>
+              )}
+            </div>
+          )}
 
         {/* Habit-specific fields - only in full mode */}
         {!compact && data.type === "HABIT" && (
@@ -356,31 +391,135 @@ export function TaskForm({
                 <p className="text-sm text-red-500 mt-1">{errors.frequency}</p>
               )}
             </div>
+
+            {/* Wait Days for habits - show after frequency */}
+            {data.dueDate && (
+              <div>
+                {showWaitDays ? (
+                  <div>
+                    <Label
+                      htmlFor={getFieldId("waitDays")}
+                      className="flex items-center gap-2"
+                    >
+                      Wait Days
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <HelpCircle className="w-4 h-4 text-gray-400" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>
+                            Number of days before due date to start calculating
+                            urgency (task urgency will be 0 until then)
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </Label>
+                    <Input
+                      id={getFieldId("waitDays")}
+                      type="number"
+                      min="0"
+                      max="365"
+                      value={data.waitDays || ""}
+                      onChange={(e) =>
+                        onChange(
+                          "waitDays",
+                          e.target.value ? parseInt(e.target.value) : undefined
+                        )
+                      }
+                      placeholder="0"
+                      className="text-sm mt-1"
+                    />
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setShowWaitDays(true)}
+                    className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
+                  >
+                    Add wait days...
+                  </button>
+                )}
+              </div>
+            )}
           </>
         )}
 
         {/* Recurring task-specific fields - only in full mode */}
         {!compact && data.type === "RECURRING" && (
-          <div>
-            <Label htmlFor={getFieldId("frequency")}>Frequency (days) *</Label>
-            <Input
-              id={getFieldId("frequency")}
-              type="number"
-              min="1"
-              max="365"
-              placeholder="1 = daily, 7 = weekly, 30 = monthly"
-              value={data.frequency || ""}
-              onChange={(e) =>
-                onChange("frequency", parseInt(e.target.value) || undefined)
-              }
-            />
-            {errors.frequency && (
-              <p className="text-sm text-red-500 mt-1">{errors.frequency}</p>
+          <>
+            <div>
+              <Label htmlFor={getFieldId("frequency")}>
+                Frequency (days) *
+              </Label>
+              <Input
+                id={getFieldId("frequency")}
+                type="number"
+                min="1"
+                max="365"
+                placeholder="1 = daily, 7 = weekly, 30 = monthly"
+                value={data.frequency || ""}
+                onChange={(e) =>
+                  onChange("frequency", parseInt(e.target.value) || undefined)
+                }
+              />
+              {errors.frequency && (
+                <p className="text-sm text-red-500 mt-1">{errors.frequency}</p>
+              )}
+              <p className="text-xs text-gray-500 mt-1">
+                How often this task should repeat (in days)
+              </p>
+            </div>
+
+            {/* Wait Days for recurring tasks - show after frequency */}
+            {data.dueDate && (
+              <div>
+                {showWaitDays ? (
+                  <div>
+                    <Label
+                      htmlFor={getFieldId("waitDays")}
+                      className="flex items-center gap-2"
+                    >
+                      Wait Days
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <HelpCircle className="w-4 h-4 text-gray-400" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>
+                            Number of days before due date to start calculating
+                            urgency (task urgency will be 0 until then)
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </Label>
+                    <Input
+                      id={getFieldId("waitDays")}
+                      type="number"
+                      min="0"
+                      max="365"
+                      value={data.waitDays || ""}
+                      onChange={(e) =>
+                        onChange(
+                          "waitDays",
+                          e.target.value ? parseInt(e.target.value) : undefined
+                        )
+                      }
+                      placeholder="0"
+                      className="text-sm mt-1"
+                    />
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setShowWaitDays(true)}
+                    className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
+                  >
+                    Add wait days...
+                  </button>
+                )}
+              </div>
             )}
-            <p className="text-xs text-gray-500 mt-1">
-              How often this task should repeat (in days)
-            </p>
-          </div>
+          </>
         )}
 
         {/* Project - only in full mode */}
