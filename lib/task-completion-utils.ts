@@ -5,6 +5,7 @@
 import { prisma } from "./prisma";
 import { addDays } from "./date-utils";
 import { processHabitCompletion, processHabitUncompletion } from "./habit-utils";
+import { shouldHabitShowAsAvailable } from "./utils";
 
 export interface TaskForCompletion {
   id: string;
@@ -113,7 +114,13 @@ export async function completeTask(
 ): Promise<void> {
   switch (task.type) {
     case "HABIT":
-      if (!task.completed) {
+      const habitShowsAsAvailable = shouldHabitShowAsAvailable({
+        completed: task.completed,
+        completedAt: task.completedAt,
+        type: task.type,
+      });
+
+      if (habitShowsAsAvailable) {
         await processHabitCompletion(task.id, {
           id: task.id,
           dueDate: task.dueDate,
@@ -124,19 +131,19 @@ export async function completeTask(
         }, completionDate);
       }
       break;
-    
+
     case "RECURRING":
       if (!task.completed && task.frequency) {
         await completeRecurringTask(task, completionDate);
       }
       break;
-    
+
     case "TASK":
       if (!task.completed) {
         await completeRegularTask(task.id, completionDate);
       }
       break;
-    
+
     default:
       throw new Error(`Unknown task type: ${task.type}`);
   }
