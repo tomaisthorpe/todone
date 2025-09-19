@@ -38,7 +38,7 @@ Todone is designed to solve the problem of prioritizing work across multiple pro
 - **Context-based organization** (coding, bathroom, kitchen, etc.)
 - **Customizable urgency scoring** (inspired by TaskWarrior)
 - **Flexible habit tracking** with different types
-- **Text-based task entry** (like Todoist)
+- **Natural language task entry** with smart parsing (!context #tags p1 tomorrow)
 
 ## Key Features
 
@@ -122,7 +122,7 @@ This approach gives us speed for common patterns while maintaining full control 
 1. **Habits ≠ Deadlines** - Habits are flexible and forgiving, not rigid schedules
 2. **Context Matters** - Tasks are organized by where/when they're done
 3. **Urgency > Priority** - Mathematical urgency scoring beats arbitrary priorities
-4. **Text-First Entry** - Quick, natural language task creation
+4. **Natural Language Entry** - Smart parsing of context, tags, priority, and dates
 5. **Visual Scanning** - Important information is immediately visible
 
 ## Features 
@@ -141,6 +141,9 @@ This approach gives us speed for common patterns while maintaining full control 
 - ✅ Urgency scoring based on priority, age, due dates, tags
 - ✅ Optimistic UI updates with Server Actions
 - ✅ Task completion with habit streak tracking
+- ✅ Text-based task entry with natural language parsing
+- ✅ Subtasks with drag-and-drop reordering
+- ✅ Tag coefficient system for customizable urgency weighting
 
 **UI/UX:**
 - ✅ Responsive design with Tailwind CSS + shadcn/ui
@@ -148,13 +151,19 @@ This approach gives us speed for common patterns while maintaining full control 
 - ✅ Collapsible context groups
 - ✅ Today section for due tasks
 - ✅ Relaxed habit status language
+- ✅ Search and filtering across tasks and contexts
+- ✅ Context archiving system
+- ✅ Completed tasks page with pagination
+
+**Analytics & Insights:**
+- ✅ Task burndown chart and completion analytics
+- ✅ PWA badge notifications for due tasks
+- ✅ Context health tracking and visualization
 
 ### 🔄 Future Enhancements
-- Text-based task entry with natural language parsing
-- Customizable urgency weightings
+- Advanced analytics beyond burndown charts
 - Shared contexts for families/roommates  
-- Mobile app and sync across devices
-- Advanced analytics and reporting
+- Offline support
 
 ## Design Reference
 
