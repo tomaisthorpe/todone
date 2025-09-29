@@ -15,6 +15,7 @@ export interface TaskForCompletion {
   tags: string[];
   contextId: string;
   dueDate: Date | null;
+  waitDays: number | null;
   type: "TASK" | "HABIT" | "RECURRING";
   notes: string | null;
   userId: string;
@@ -47,19 +48,24 @@ export async function completeRecurringTask(
   }
 
   // Create the next recurring task instance
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const taskData: any = {
+    title: task.title,
+    project: task.project,
+    priority: task.priority,
+    tags: task.tags,
+    contextId: task.contextId,
+    dueDate: nextDueDate,
+    waitDays: task.waitDays,
+    notes: task.notes,
+    type: task.type,
+    userId: task.userId,
+    frequency: task.frequency,
+    nextDue: nextDueDate,
+  };
+  
   await prisma.task.create({
-    data: {
-      title: task.title,
-      project: task.project,
-      priority: task.priority,
-      tags: task.tags,
-      contextId: task.contextId,
-      dueDate: nextDueDate,
-      type: task.type,
-      userId: task.userId,
-      frequency: task.frequency,
-      nextDue: nextDueDate,
-    },
+    data: taskData,
   });
 
   // Mark current recurring task as completed
