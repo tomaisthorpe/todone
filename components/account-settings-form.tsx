@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +13,7 @@ interface AccountSettingsFormProps {
 }
 
 export function AccountSettingsForm({ user }: AccountSettingsFormProps) {
+  const { update: updateSession } = useSession();
   const [name, setName] = useState(user.name || "");
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<{
@@ -26,6 +28,8 @@ export function AccountSettingsForm({ user }: AccountSettingsFormProps) {
     startTransition(async () => {
       try {
         await updateUserNameAction(name);
+        // Refresh the session to get updated user data
+        await updateSession();
         setMessage({
           type: "success",
           text: "Name updated successfully",

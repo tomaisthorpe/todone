@@ -628,5 +628,6 @@ export async function updateUserNameAction(name: string) {
     data: { name: name.trim() },
   });
 
-  revalidatePath("/settings/account");
+  // Revalidate all pages that might display the user name
+  revalidatePath("/", "layout");
 }
