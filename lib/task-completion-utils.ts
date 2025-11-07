@@ -74,6 +74,7 @@ export async function completeRecurringTask(
     data: {
       completed: true,
       completedAt: completionDate,
+      waitDays: task.waitDays, // Explicitly preserve waitDays on completed task
     },
   });
 }
