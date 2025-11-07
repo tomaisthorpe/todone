@@ -141,17 +141,17 @@ export default async function CompletedPage({
                 Completed Tasks
               </h2>
             </div>
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-1 md:space-x-3">
               <Link href="/settings">
                 <Button variant="ghost" size="sm">
-                  <Settings className="w-4 h-4 mr-2" />
-                  Settings
+                  <Settings className="w-4 h-4 md:mr-2" />
+                  <span className="hidden md:inline">Settings</span>
                 </Button>
               </Link>
               <form action={signOutAction}>
                 <Button type="submit" variant="ghost" size="sm">
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Sign out
+                  <LogOut className="w-4 h-4 md:mr-2" />
+                  <span className="hidden md:inline">Sign out</span>
                 </Button>
               </form>
             </div>
