@@ -1,4 +1,4 @@
-import { CheckCircle2, LogOut } from "lucide-react";
+import { CheckCircle2, LogOut, Settings } from "lucide-react";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth/next";
 import { Session } from "next-auth";
@@ -35,6 +35,12 @@ export default async function Dashboard() {
                 <Button variant="ghost" size="sm">
                   <CheckCircle2 className="w-4 h-4 mr-2" />
                   Completed
+                </Button>
+              </Link>
+              <Link href="/settings">
+                <Button variant="ghost" size="sm">
+                  <Settings className="w-4 h-4 mr-2" />
+                  Settings
                 </Button>
               </Link>
               <form action={signOutAction}>

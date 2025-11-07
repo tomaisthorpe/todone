@@ -1,4 +1,4 @@
-import { CheckCircle2, LogOut, Clock } from "lucide-react";
+import { CheckCircle2, LogOut, Clock, Settings } from "lucide-react";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth/next";
 import { Session } from "next-auth";
@@ -142,6 +142,12 @@ export default async function CompletedPage({
               </h2>
             </div>
             <div className="flex items-center space-x-3">
+              <Link href="/settings">
+                <Button variant="ghost" size="sm">
+                  <Settings className="w-4 h-4 mr-2" />
+                  Settings
+                </Button>
+              </Link>
               <form action={signOutAction}>
                 <Button type="submit" variant="ghost" size="sm">
                   <LogOut className="w-4 h-4 mr-2" />
