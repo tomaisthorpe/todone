@@ -612,3 +612,21 @@ export async function unarchiveContextAction(contextId: string) {
   });
 
 }
+
+// Update user name action
+export async function updateUserNameAction(name: string) {
+  const userId = await getAuthenticatedUser();
+
+  // Validate name
+  if (!name || name.trim().length === 0) {
+    throw new Error("Name cannot be empty");
+  }
+
+  // Update user name
+  await prisma.user.update({
+    where: { id: userId },
+    data: { name: name.trim() },
+  });
+
+  revalidatePath("/settings/account");
+}
