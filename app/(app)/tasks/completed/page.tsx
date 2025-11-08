@@ -1,11 +1,6 @@
-import { CheckCircle2, LogOut, Clock, Settings } from "lucide-react";
-import { redirect } from "next/navigation";
-import { getServerSession } from "next-auth/next";
-import { Session } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { CheckCircle2, Clock } from "lucide-react";
 import { TaskCard } from "@/components/task-card";
 import { getCompletedTasks, getContexts, getBurndownData } from "@/lib/data";
-import { signOutAction } from "@/lib/server-actions";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/pagination";
 import { BurndownChart } from "@/components/burndown-chart";
@@ -26,13 +21,6 @@ export const metadata: Metadata = {
 export default async function CompletedPage({
   searchParams,
 }: CompletedPageProps) {
-  // Check authentication
-  const session = (await getServerSession(authOptions)) as Session | null;
-
-  if (!session) {
-    redirect("/auth/signin");
-  }
-
   // Parse page parameter
   const resolvedSearchParams = await searchParams;
   const page = resolvedSearchParams.page
@@ -119,47 +107,7 @@ export default async function CompletedPage({
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <Link
-                href="/tasks"
-                className="flex items-center hover:opacity-80 transition-opacity"
-              >
-                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <CheckCircle2 className="w-5 h-5 text-white" />
-                </div>
-                <h1 className="hidden md:block text-2xl font-bold text-gray-900 ml-3">
-                  todone
-                </h1>
-              </Link>
-              <span className="text-gray-400">/</span>
-              <h2 className="text-xl font-semibold text-gray-700">
-                Completed Tasks
-              </h2>
-            </div>
-            <div className="flex items-center space-x-1 md:space-x-3">
-              <Link href="/settings">
-                <Button variant="ghost" size="sm">
-                  <Settings className="w-4 h-4 md:mr-2" />
-                  <span className="hidden md:inline">Settings</span>
-                </Button>
-              </Link>
-              <form action={signOutAction}>
-                <Button type="submit" variant="ghost" size="sm">
-                  <LogOut className="w-4 h-4 md:mr-2" />
-                  <span className="hidden md:inline">Sign out</span>
-                </Button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-4xl mx-auto px-4 py-6">
+    <div className="max-w-4xl mx-auto px-4 py-6">
         {/* Page Header */}
         <div className="mb-6">
           <div className="flex items-center justify-between">
@@ -235,7 +183,6 @@ export default async function CompletedPage({
             </div>
           </div>
         )}
-      </div>
     </div>
   );
 }
