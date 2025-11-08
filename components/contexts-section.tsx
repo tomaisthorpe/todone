@@ -130,6 +130,7 @@ export function ContextsSection({
                     [context.id]: value,
                   })
                 }
+                searchQuery={searchQuery}
               />
             );
           })}
