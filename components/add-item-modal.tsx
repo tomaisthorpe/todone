@@ -86,6 +86,7 @@ interface TaskModalProps {
   defaultContextId?: string;
   contextToEdit?: Context;
   tagToEdit?: Tag;
+  defaultTab?: "task" | "context" | "tag";
 }
 
 const contextColors = [
@@ -112,8 +113,9 @@ export function TaskModal({
   defaultContextId,
   contextToEdit,
   tagToEdit,
+  defaultTab = "task",
 }: TaskModalProps) {
-  const [activeTab, setActiveTab] = useState<"task" | "context" | "tag">("task");
+  const [activeTab, setActiveTab] = useState<"task" | "context" | "tag">(defaultTab);
   const [isLoading, setIsLoading] = useState(false);
   const [existingTags, setExistingTags] = useState<string[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -231,7 +233,7 @@ export function TaskModal({
           color: "bg-blue-500",
           coefficient: 0,
         });
-        setActiveTab("task");
+        setActiveTab(defaultTab);
       }
     }
   }, [isOpen, task?.id, defaultContextId, contextToEdit?.id, inboxContext?.id, tagToEdit?.id]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -959,6 +961,8 @@ export function AddItemModal({
   tags = [],
   defaultContextId,
   addButtonSize = "lg",
+  defaultTab = "task",
+  buttonContent,
 }: {
   contexts: Array<{
     id: string;
@@ -970,13 +974,23 @@ export function AddItemModal({
   }>;
   tags?: Tag[];
   defaultContextId?: string;
-  addButtonSize?: "sm" | "lg";
+  addButtonSize?: "sm" | "lg" | "icon";
+  defaultTab?: "task" | "context" | "tag";
+  buttonContent?: React.ReactNode;
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
-      {addButtonSize === "sm" ? (
+      {addButtonSize === "icon" ? (
+        <button
+          onClick={() => setIsOpen(true)}
+          className="flex items-center justify-center p-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+          title="Add Context"
+        >
+          {buttonContent || <Plus className="w-4 h-4" />}
+        </button>
+      ) : addButtonSize === "sm" ? (
         <button
           onClick={() => setIsOpen(true)}
           className="flex items-center space-x-2 px-2 py-1 text-xs bg-white/20 hover:bg-white/30 rounded-md transition-colors"
@@ -997,6 +1011,7 @@ export function AddItemModal({
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
         defaultContextId={defaultContextId}
+        defaultTab={defaultTab}
       />
     </>
   );
