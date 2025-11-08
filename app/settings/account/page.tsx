@@ -80,9 +80,7 @@ export default async function AccountSettingsPage() {
         </div>
 
         {/* Account Settings Form */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <AccountSettingsForm user={session.user} />
-        </div>
+        <AccountSettingsForm user={session.user} />
       </div>
     </div>
   );

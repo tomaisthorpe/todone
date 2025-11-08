@@ -9,6 +9,7 @@ import { prisma } from "./prisma";
 import { calculateUrgency, parseTags, shouldHabitShowAsAvailable } from "./utils";
 import { completeTask, uncompleteHabit, toggleRegularTask, TaskForCompletion } from "./task-completion-utils";
 import { revalidatePath } from "next/cache";
+import bcrypt from "bcryptjs";
 
 // Get authenticated user or redirect
 async function getAuthenticatedUser() {
@@ -630,4 +631,47 @@ export async function updateUserNameAction(name: string) {
 
   // Revalidate all pages that might display the user name
   revalidatePath("/", "layout");
+}
+
+// Change password action
+export async function changePasswordAction(
+  currentPassword: string,
+  newPassword: string
+) {
+  const userId = await getAuthenticatedUser();
+
+  // Validate inputs
+  if (!currentPassword || !newPassword) {
+    throw new Error("Both current and new passwords are required");
+  }
+
+  if (newPassword.length < 8) {
+    throw new Error("New password must be at least 8 characters long");
+  }
+
+  // Get user with password
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { password: true },
+  });
+
+  if (!user || !user.password) {
+    throw new Error("User not found or no password set");
+  }
+
+  // Verify current password
+  const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+
+  if (!isPasswordValid) {
+    throw new Error("Current password is incorrect");
+  }
+
+  // Hash new password
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+  // Update password
+  await prisma.user.update({
+    where: { id: userId },
+    data: { password: hashedPassword },
+  });
 }
