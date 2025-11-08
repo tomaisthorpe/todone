@@ -39,8 +39,32 @@ export default function SignUp() {
       return;
     }
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters");
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters");
+      setIsLoading(false);
+      return;
+    }
+
+    if (!/[A-Z]/.test(password)) {
+      setError("Password must contain at least one uppercase letter");
+      setIsLoading(false);
+      return;
+    }
+
+    if (!/[a-z]/.test(password)) {
+      setError("Password must contain at least one lowercase letter");
+      setIsLoading(false);
+      return;
+    }
+
+    if (!/[0-9]/.test(password)) {
+      setError("Password must contain at least one number");
+      setIsLoading(false);
+      return;
+    }
+
+    if (!/[^A-Za-z0-9]/.test(password)) {
+      setError("Password must contain at least one special character");
       setIsLoading(false);
       return;
     }
@@ -161,7 +185,7 @@ export default function SignUp() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     placeholder="Enter your password"
-                    minLength={6}
+                    minLength={8}
                   />
                   <Button
                     type="button"
@@ -189,7 +213,7 @@ export default function SignUp() {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
                     placeholder="Confirm your password"
-                    minLength={6}
+                    minLength={8}
                   />
                   <Button
                     type="button"
