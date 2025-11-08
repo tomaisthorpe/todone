@@ -7,6 +7,7 @@ import { ChevronDown, ChevronUp, Archive, Search } from "lucide-react";
 import type { Context, Task, Tag } from "@/lib/data";
 import { ContextGroup } from "@/components/context-group";
 import { ArchivedContexts } from "@/components/archived-contexts";
+import { AddItemModal } from "@/components/add-item-modal";
 
 interface ContextsSectionProps {
   contexts: Context[];
@@ -75,7 +76,15 @@ export function ContextsSection({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-900">Contexts</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-xl font-semibold text-gray-900">Contexts</h2>
+          <AddItemModal
+            contexts={contexts}
+            tags={tags}
+            addButtonSize="icon"
+            defaultTab="context"
+          />
+        </div>
         <div className="flex items-center gap-2">
           <Button
             variant="ghost"
