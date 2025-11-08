@@ -708,7 +708,7 @@ export function SmartTaskInput({
             onClick={handleCursorChange}
             onBlur={handleInputBlur}
             onFocus={() => setIsInputFocused(true)}
-            placeholder="Type your task naturally... e.g., 'Setup todone !Homelab #sideprojects #setup p1 tomorrow' or 'Team standup weekly !Work #meetings'"
+            placeholder="Type your task naturally... e.g., 'Setup unwhelm !Homelab #sideprojects #setup p1 tomorrow' or 'Team standup weekly !Work #meetings'"
             className="relative text-base font-mono bg-transparent caret-gray-900 pr-8"
             style={{ zIndex: 2 }}
             disabled={isPending}

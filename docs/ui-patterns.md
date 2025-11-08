@@ -1,6 +1,6 @@
 # UI Patterns
 
-This document defines the consistent UI patterns used throughout Todone.
+This document defines the consistent UI patterns used throughout Unwhelm.
 
 ## Layout Patterns
 
@@ -555,9 +555,9 @@ Card
 
 **Example Usage:**
 ```
-Input: "Setup Todone !Homelab #sideprojects #setup p1 tomorrow"
+Input: "Setup Unwhelm !Homelab #sideprojects #setup p1 tomorrow"
 Parsing:
-- Title: "Setup Todone"
+- Title: "Setup Unwhelm"
 - Context: "Homelab" (blue badge)
 - Tags: ["sideprojects", "setup"] (green badges)
 - Priority: "HIGH" (red badge)

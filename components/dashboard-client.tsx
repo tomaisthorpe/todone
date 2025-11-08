@@ -10,7 +10,7 @@ import { usePWABadge } from "@/lib/hooks/use-pwa-badge";
 import { BadgePermissionBanner } from "@/components/badge-permission-banner";
 import { countDueAndOverdueTasks } from "@/lib/badge-utils";
 
-const COLLAPSED_STATE_KEY = "todone-collapsed-contexts";
+const COLLAPSED_STATE_KEY = "unwhelm-collapsed-contexts";
 
 function loadCollapsedState(): Record<string, boolean> {
   if (typeof window === "undefined") return {};

@@ -14,28 +14,28 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "todone",
+  title: "unwhelm",
   description:
     "A context-based task management app with customizable urgency scoring and flexible habit tracking.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "todone",
+    title: "unwhelm",
   },
   formatDetection: {
     telephone: false,
   },
   openGraph: {
     type: "website",
-    siteName: "todone",
-    title: "todone",
+    siteName: "unwhelm",
+    title: "unwhelm",
     description:
       "A context-based task management app with customizable urgency scoring and flexible habit tracking.",
   },
   twitter: {
     card: "summary",
-    title: "todone",
+    title: "unwhelm",
     description:
       "A context-based task management app with customizable urgency scoring and flexible habit tracking.",
   },
@@ -54,10 +54,10 @@ export default function RootLayout({
     <html lang="en">
       <head>
         {/* PWA Meta Tags */}
-        <meta name="application-name" content="todone" />
+        <meta name="application-name" content="unwhelm" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="todone" />
+        <meta name="apple-mobile-web-app-title" content="unwhelm" />
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="msapplication-config" content="/icons/browserconfig.xml" />

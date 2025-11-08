@@ -15,7 +15,7 @@ interface CompletedPageProps {
 }
 
 export const metadata: Metadata = {
-  title: "todone / Completed Tasks",
+  title: "unwhelm / Completed Tasks",
 };
 
 export default async function CompletedPage({

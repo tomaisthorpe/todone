@@ -28,9 +28,9 @@ import type { Transporter } from 'nodemailer';
  *
  *   await sendEmail({
  *     to: userEmail,
- *     subject: "Welcome to Todone!",
- *     html: "<h1>Welcome!</h1><p>Thanks for joining Todone.</p>",
- *     text: "Welcome! Thanks for joining Todone.",
+ *     subject: "Welcome to unwhelm!",
+ *     html: "<h1>Welcome!</h1><p>Thanks for joining unwhelm.</p>",
+ *     text: "Welcome! Thanks for joining unwhelm.",
  *   });
  * }
  *

@@ -1,8 +1,8 @@
-# Todone Setup Guide
+# Unwhelm Setup Guide
 
 ## Overview
 
-This is the full-stack version of Todone, a context-based task management app with customizable urgency scoring and flexible habit tracking. The application has been built according to the specifications in the README.md and design documents, **utilizing React Server Components and Server Actions for optimal performance**.
+This is the full-stack version of Unwhelm, a context-based task management app with customizable urgency scoring and flexible habit tracking. The application has been built according to the specifications in the README.md and design documents, **utilizing React Server Components and Server Actions for optimal performance**.
 
 ## Tech Stack
 
@@ -35,14 +35,14 @@ Make sure you have the following installed:
 
 1. Copy the `.env` file and update the database connection:
    ```bash
-   DATABASE_URL="postgresql://username:password@localhost:5432/todone?schema=public"
+   DATABASE_URL="postgresql://username:password@localhost:5432/unwhelm?schema=public"
    NEXTAUTH_SECRET="your-secure-random-string-here"
    NEXTAUTH_URL="http://localhost:3000"
    ```
 
 2. **For local PostgreSQL setup:**
    - Install PostgreSQL locally
-   - Create a database named `todone`
+   - Create a database named `unwhelm`
    - Update the `DATABASE_URL` with your credentials
 
 3. **For cloud PostgreSQL (recommended):**
@@ -83,7 +83,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ### 5. Demo Account
 
 The application comes with a pre-seeded demo account for immediate testing:
-- **Email**: `demo@todone.app`
+- **Email**: `demo@unwhelm.app`
 - **Password**: `password123`
 
 This account includes sample contexts and tasks that demonstrate all features including different task types, habit tracking, and context health visualization.

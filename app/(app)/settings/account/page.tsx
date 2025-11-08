@@ -8,7 +8,7 @@ import { Metadata } from "next";
 import { AccountSettingsForm } from "@/components/account-settings-form";
 
 export const metadata: Metadata = {
-  title: "todone / Account Settings",
+  title: "unwhelm / Account Settings",
 };
 
 export default async function AccountSettingsPage() {

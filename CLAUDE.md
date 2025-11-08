@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Todone is a context-based task management application built with Next.js 15 (App Router), React 19 Server Components, TypeScript, PostgreSQL/Prisma, and NextAuth.js. It features customizable urgency scoring (inspired by TaskWarrior), flexible habit tracking with 4 distinct types, and natural language task parsing.
+Unwhelm is a context-based task management application built with Next.js 15 (App Router), React 19 Server Components, TypeScript, PostgreSQL/Prisma, and NextAuth.js. It features customizable urgency scoring (inspired by TaskWarrior), flexible habit tracking with 4 distinct types, and natural language task parsing.
 
 **Core Philosophy:** Prioritize user psychology over rigid productivity systems. Habits should feel supportive, not demanding. Context health gives a sense of life balance.
 
@@ -171,7 +171,7 @@ When making significant changes, update these files in `/docs/`:
 
 NextAuth.js v4 with credentials provider:
 - Configuration in `lib/auth.ts`
-- Demo account: demo@todone.app / password123
+- Demo account: demo@unwhelm.app / password123
 - Passwords hashed with bcryptjs
 - Session checking: `getServerSession(authOptions)`
 
@@ -215,7 +215,7 @@ return <DashboardClient tasks={tasks} contexts={contexts} />;
 
 ```bash
 # Database
-DATABASE_URL="postgresql://username:password@localhost:5432/todone"
+DATABASE_URL="postgresql://username:password@localhost:5432/unwhelm"
 
 # Authentication
 NEXTAUTH_SECRET="your-secret-key-here"

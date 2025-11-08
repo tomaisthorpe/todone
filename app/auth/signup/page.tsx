@@ -91,7 +91,7 @@ export default function SignUp() {
                 <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                   <CheckCircle2 className="w-5 h-5 text-white" />
                 </div>
-                <h1 className="text-2xl font-bold text-gray-900">todone</h1>
+                <h1 className="text-2xl font-bold text-gray-900">unwhelm</h1>
               </div>
             </div>
           </div>
@@ -128,7 +128,7 @@ export default function SignUp() {
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                 <CheckCircle2 className="w-5 h-5 text-white" />
               </div>
-              <h1 className="text-2xl font-bold text-gray-900">todone</h1>
+              <h1 className="text-2xl font-bold text-gray-900">unwhelm</h1>
             </div>
           </div>
         </div>
@@ -137,7 +137,7 @@ export default function SignUp() {
       {/* Content */}
       <div className="max-w-md mx-auto px-4 py-12">
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-900">Join todone</h2>
+          <h2 className="text-3xl font-bold text-gray-900">Join unwhelm</h2>
           <p className="mt-2 text-sm text-gray-600">
             Create your account to start managing your tasks
           </p>

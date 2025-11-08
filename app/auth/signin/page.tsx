@@ -60,7 +60,7 @@ function SignInForm() {
       <CardHeader>
         <CardTitle>Sign In</CardTitle>
         <CardDescription>
-          Use the demo account: demo@todone.app / password123
+          Use the demo account: demo@unwhelm.app / password123
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -125,7 +125,7 @@ function SignInForm() {
         <div className="mt-6 p-4 bg-blue-50 rounded-lg">
           <h4 className="text-sm font-medium text-blue-900">Demo Account</h4>
           <p className="text-sm text-blue-700 mt-1">
-            Email: demo@todone.app
+            Email: demo@unwhelm.app
             <br />
             Password: password123
           </p>
@@ -135,7 +135,7 @@ function SignInForm() {
             size="sm"
             className="mt-2 bg-white"
             onClick={() => {
-              setEmail("demo@todone.app");
+              setEmail("demo@unwhelm.app");
               setPassword("password123");
             }}
           >
@@ -158,7 +158,7 @@ export default function SignIn() {
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                 <CheckCircle2 className="w-5 h-5 text-white" />
               </div>
-              <h1 className="text-2xl font-bold text-gray-900">todone</h1>
+              <h1 className="text-2xl font-bold text-gray-900">unwhelm</h1>
             </div>
           </div>
         </div>

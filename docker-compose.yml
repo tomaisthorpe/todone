@@ -9,7 +9,7 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=postgresql://todone:password@db:5432/todone
+      - DATABASE_URL=postgresql://unwhelm:password@db:5432/unwhelm
       - NEXTAUTH_URL=http://localhost:3000
       - NEXTAUTH_SECRET=your-secret-key-here-change-in-production
     depends_on:
@@ -22,15 +22,15 @@ services:
   db:
     image: postgres:15-alpine
     environment:
-      - POSTGRES_USER=todone
+      - POSTGRES_USER=unwhelm
       - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=todone
+      - POSTGRES_DB=unwhelm
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U todone"]
+      test: ["CMD-SHELL", "pg_isready -U unwhelm"]
       interval: 10s
       timeout: 5s
       retries: 5
