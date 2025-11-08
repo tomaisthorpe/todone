@@ -113,11 +113,8 @@ export function ContextsSection({
       {filteredContexts.length > 0 ? (
         <div className="grid grid-cols-1 gap-4">
           {filteredContexts.map((context) => {
-            const isControlled = Object.prototype.hasOwnProperty.call(
-              collapsedState,
-              context.id
-            );
-            const collapsedValue = collapsedState[context.id];
+            // Always use controlled mode, defaulting to false if not in state
+            const collapsedValue = collapsedState[context.id] ?? false;
 
             return (
               <ContextGroup
@@ -126,16 +123,13 @@ export function ContextsSection({
                 tasks={tasks}
                 allContexts={contexts}
                 tags={tags}
-                {...(isControlled
-                  ? {
-                      collapsed: collapsedValue,
-                      onCollapsedChange: (value: boolean) =>
-                        onCollapsedStateChange?.({
-                          ...collapsedState,
-                          [context.id]: value,
-                        }),
-                    }
-                  : {})}
+                collapsed={collapsedValue}
+                onCollapsedChange={(value: boolean) =>
+                  onCollapsedStateChange?.({
+                    ...collapsedState,
+                    [context.id]: value,
+                  })
+                }
               />
             );
           })}
