@@ -52,24 +52,50 @@ This codebase follows React/Next.js best practices with a server-first architect
 - `lib/utils.ts` - Urgency calculation (`evaluateUrgency`), utility functions
 - `lib/urgency-config.ts` - Urgency scoring constants (priority, age, due date coefficients)
 - `lib/habits.ts` - Habit-specific utilities (status calculation, streak tracking)
+- `lib/habit-utils.ts` - Additional habit utilities (complementary to habits.ts)
 - `lib/task-completion-utils.ts` - Task completion logic for all task types
 - `lib/date-utils.ts` - Date calculations respecting local calendar days
 - `lib/email.ts` - Email service supporting Resend API and SMTP for self-hosting
+- `lib/badge-utils.ts` - PWA badge functionality (count tasks, update badge, permissions)
+- `lib/context-icons.ts` - Context icon mapping to Lucide components
+- `lib/feature-limits.ts` - Resource limit configuration (MAX_TASKS, MAX_CONTEXTS)
+- `lib/validation.ts` - Centralized form validation utilities
+- `lib/hooks/use-pwa-badge.ts` - React hook for PWA badge management
 
 **Client Components:**
 - `components/dashboard-client.tsx` - Main client wrapper with optimistic UI
 - `components/task-toggle-button.tsx` - Interactive task completion button
-- `components/add-item-modal.tsx` - Task/context creation modal
+- `components/task-card.tsx` - Task display with metadata, urgency, and status
+- `components/task-form.tsx` - Reusable task form for modal and inline editing
+- `components/add-item-modal.tsx` - Task/context creation modal with tabs
+- `components/smart-task-input.tsx` - Natural language task input with parsing
+- `components/contexts-section.tsx` - Context section wrapper with search
+- `components/context-group.tsx` - Individual context display with health bar
+- `components/context-collapsible.tsx` - Collapsible context component
+- `components/today-section.tsx` - Today section wrapper
+- `components/pagination.tsx` - Pagination for completed tasks page
+- `components/burndown-chart.tsx` - Task completion visualization (Recharts)
+- `components/badge-permission-banner.tsx` - PWA badge permission prompt
+- `components/archived-contexts.tsx` - Archive management modal
+- `components/account-settings-form.tsx` - Account settings UI
+- `components/ui/subtasks-input.tsx` - Interactive subtasks with drag-and-drop
+- `components/ui/tags-input.tsx` - Tag input with autocomplete
+- `components/ui/markdown-text.tsx` - Markdown rendering component
 - `app/page.tsx` - Main dashboard (Server Component that fetches data)
 
 ### Database Schema
 
 **Core Models:**
 - `Task` - All task types (regular, habit, recurring) with type discriminator
+  - Includes `notes` (String), `subtasks` (JSON array), `completedAt` (DateTime), `waitDays` (Int)
+  - Subtasks format: `[{id: string, text: string, completed: boolean}]`
 - `Context` - Task organization by location/situation (kitchen, coding, bathroom)
+  - Includes `archived` (Boolean), `isInbox` (Boolean), `icon`, `color`, `coefficient`
 - `Tag` - Custom tags with urgency coefficients
+- `TaskTag` - Junction table for many-to-many task-tag relationships
 - `HabitCompletion` - Historical habit completion tracking
 - `User` - NextAuth.js user with credentials auth
+- `Account`, `Session`, `VerificationToken` - NextAuth.js authentication tables
 
 **Task Types:**
 1. `TASK` - Regular one-off tasks with due dates
@@ -77,6 +103,8 @@ This codebase follows React/Next.js best practices with a server-first architect
 3. `RECURRING` - Scheduled items with strict deadlines (meetings, bills)
 
 **Habit Types:** `STREAK`, `LEARNING`, `WELLNESS`, `MAINTENANCE` (affects UI emphasis)
+
+**Priority Levels:** `LOW`, `MEDIUM`, `HIGH`
 
 ## Urgency System
 
@@ -118,6 +146,120 @@ Habits use relaxed, non-judgmental language and have flexible timing:
 ## Context Health
 
 Context health is calculated based ONLY on habit completion (not regular tasks). It represents how well-maintained that area of life is. Calculation respects each habit's frequency and shows a percentage for each context.
+
+## Subtasks
+
+Tasks can have subtasks stored as a JSON array in the database:
+
+**Data Structure:**
+- Stored in `Task.subtasks` field as JSON: `[{id: string, text: string, completed: boolean}]`
+- Managed via `components/ui/subtasks-input.tsx`
+
+**Features:**
+- Drag-and-drop reordering using `@dnd-kit/sortable`
+- Inline editing of subtask text
+- Independent completion state (doesn't affect parent task)
+- Progress summary display ("X of Y completed")
+- Keyboard-accessible with grab handles
+
+**Usage:**
+- Available in task creation/editing modal
+- Displayed in task cards with completion count
+- Persisted with task updates via server actions
+
+## Archived Contexts
+
+Contexts can be archived to reduce clutter while preserving historical data:
+
+**Features:**
+- Archive/unarchive via context menu in UI
+- Archived contexts don't appear in main dashboard
+- Dedicated "Archived Contexts" modal to view and restore
+- All tasks remain associated with archived contexts
+- Database field: `Context.archived` (Boolean)
+
+**Server Actions:**
+- `archiveContextAction(contextId)` - Archives a context
+- `unarchiveContextAction(contextId)` - Restores an archived context
+
+**Component:** `components/archived-contexts.tsx`
+
+## Completed Tasks Page
+
+Dedicated page for viewing completed tasks with pagination:
+
+**Route:** `/tasks/completed`
+
+**Features:**
+- Shows all completed tasks across all contexts
+- Displays completion timestamp (date and time)
+- Pagination with 20 items per page
+- Full task metadata (context, tags, urgency, notes)
+- Sortable by completion date (newest first)
+
+**Components:**
+- `app/(app)/tasks/completed/page.tsx` - Server Component with pagination
+- `components/pagination.tsx` - Reusable pagination UI
+- `components/task-card.tsx` - Reused for consistent display
+
+## Settings Pages
+
+User account management:
+
+**Routes:**
+- `/settings` - Redirects to `/settings/account`
+- `/settings/account` - Account settings (name, email management)
+
+**Features:**
+- Profile information editing
+- Email verification status
+- Account creation date
+- Future: Password change, notification preferences
+
+**Components:**
+- `app/(app)/settings/account/page.tsx` - Settings page
+- `components/account-settings-form.tsx` - Account form UI
+
+## Progressive Web App (PWA)
+
+Unwhelm is a full Progressive Web App with offline support and native features:
+
+**Core Features:**
+- Service worker with comprehensive caching strategy
+- Installable on iOS, Android, Windows, macOS, Linux
+- Offline-first architecture with automatic sync
+- Badge API integration for app icon notifications
+- Responsive design optimized for mobile and desktop
+
+**Badge API:**
+Shows count of due/overdue tasks on the app icon (home screen/dock/taskbar):
+
+- **Implementation:** `lib/badge-utils.ts`, `lib/hooks/use-pwa-badge.ts`
+- **Count Logic:** Due today (0 days) or overdue (negative days), excluding completed tasks
+- **Habits:** Only counts habits that are "effectively incomplete" (not Fresh status)
+- **Permissions:** Requires notification permission on iOS (handled automatically)
+- **Auto-Update:** Refreshes every 5 minutes, on visibility change, and on focus
+- **Component:** `components/badge-permission-banner.tsx` for permission prompts
+- **API Route:** `app/api/badge/route.ts` for server-side badge updates
+
+**Caching Strategy (next.config.ts):**
+- **Fonts:** CacheFirst with 365-day expiration
+- **Images:** StaleWhileRevalidate with 24-hour expiration
+- **API calls:** NetworkFirst with 10-second timeout fallback
+- **Static assets:** StaleWhileRevalidate for JS/CSS
+- **Service worker:** Disabled in development, enabled in production
+
+**Installation:**
+- Configured via `next-pwa` package
+- Service worker registered automatically
+- Manifest and icons in `/public` directory
+- Support for all major platforms and browsers
+
+**Badge Permission Flow:**
+1. User visits app, banner prompts for badge permission (iOS only)
+2. Granting notification permission enables badge API
+3. Badge automatically updates with task count
+4. Banner can be dismissed and won't show again for 7 days
 
 ## Natural Language Task Parsing
 
@@ -236,6 +378,48 @@ SMTP_PASS="your-smtp-password"
 SMTP_SECURE="false"  # Optional: "true" for SSL/TLS (default: false for 587, true for 465)
 ```
 
+## Feature Limits
+
+Resource limits are configurable per user (potential for subscription tiers):
+
+**Configuration:** `lib/feature-limits.ts`
+
+- `MAX_TASKS` - Currently set to `Infinity` (unlimited)
+- `MAX_CONTEXTS` - Currently set to `Infinity` (unlimited)
+
+**Server-side Enforcement:**
+- Checked in server actions before creating new resources
+- Returns error messages from `FEATURE_LIMIT_ERRORS` when limits exceeded
+- Ready for future subscription tier implementation
+
+## Burndown Chart
+
+Task completion visualization over time:
+
+**Component:** `components/burndown-chart.tsx`
+
+**Features:**
+- Uses Recharts library for data visualization
+- Shows task creation vs. completion trends
+- Tracks total pending tasks over the past 30 days
+- Empty state with helpful messaging
+- Statistics summary (total created, completed, pending)
+
+**Data Structure:**
+```typescript
+interface BurndownDataPoint {
+  date: string;           // YYYY-MM-DD format
+  createdTasks: number;   // Tasks created on this day
+  completedTasks: number; // Tasks completed on this day
+  pendingTasks: number;   // Total pending tasks at end of day
+}
+```
+
+**Usage:**
+- Fetched via `getBurndownData()` from `lib/data.ts`
+- Displayed on dashboard or dedicated analytics page
+- Helps visualize productivity trends and task accumulation
+
 ## Important Notes
 
 - Context health calculation excludes regular tasks (habits only)
@@ -245,3 +429,7 @@ SMTP_SECURE="false"  # Optional: "true" for SSL/TLS (default: false for 587, tru
 - The "Today" section shows ALL tasks due today from any context
 - `waitDays` feature allows delaying urgency increases until N days before due date
 - Always use `diffInLocalCalendarDays` from `date-utils.ts` for calendar day calculations (respects local timezone, not UTC)
+- Subtasks are stored as JSON and don't affect parent task completion status
+- Archived contexts are hidden from main view but remain in database with all tasks intact
+- PWA badge shows count of due/overdue tasks (requires notification permission on iOS)
+- Service worker is disabled in development mode to avoid caching issues
