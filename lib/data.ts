@@ -671,3 +671,91 @@ export async function getUserUsageCounts(): Promise<{
     };
   }
 }
+
+// Admin-only functions
+export interface UserStats {
+  id: string;
+  createdAt: Date;
+  tasksCount: number;
+  contextsCount: number;
+  tagsCount: number;
+  completedTasksCount: number;
+}
+
+export async function isAdmin(): Promise<boolean> {
+  const session = await getAuthenticatedSession();
+
+  if (!session?.user?.id) {
+    return false;
+  }
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { role: true },
+    });
+
+    return user?.role === "ADMIN";
+  } catch (error) {
+    console.error("Error checking admin status:", error);
+    return false;
+  }
+}
+
+export async function getAllUserStats(): Promise<UserStats[]> {
+  const session = await getAuthenticatedSession();
+
+  if (!session?.user?.id) {
+    return [];
+  }
+
+  // Check if user is admin
+  const adminStatus = await isAdmin();
+  if (!adminStatus) {
+    return [];
+  }
+
+  try {
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        createdAt: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const userStats = await Promise.all(
+      users.map(async (user) => {
+        const [tasksCount, contextsCount, tagsCount, completedTasksCount] =
+          await Promise.all([
+            prisma.task.count({
+              where: { userId: user.id },
+            }),
+            prisma.context.count({
+              where: { userId: user.id },
+            }),
+            prisma.tag.count({
+              where: { userId: user.id },
+            }),
+            prisma.task.count({
+              where: { userId: user.id, completed: true },
+            }),
+          ]);
+
+        return {
+          id: user.id,
+          createdAt: user.createdAt,
+          tasksCount,
+          contextsCount,
+          tagsCount,
+          completedTasksCount,
+        };
+      })
+    );
+
+    return userStats;
+  } catch (error) {
+    console.error("Error fetching user stats:", error);
+    return [];
+  }
+}

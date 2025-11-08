@@ -1,4 +1,4 @@
-import { CheckCircle2, LogOut, Settings } from "lucide-react";
+import { CheckCircle2, LogOut, Settings, ShieldCheck } from "lucide-react";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth/next";
 import { Session } from "next-auth";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ReactNode } from "react";
 import Image from "next/image";
+import { isAdmin } from "@/lib/data";
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
   // Check authentication
@@ -16,6 +17,9 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   if (!session) {
     redirect("/auth/signin");
   }
+
+  // Check if user is admin
+  const adminStatus = await isAdmin();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -46,6 +50,14 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
                   <span className="hidden md:inline">Completed</span>
                 </Button>
               </Link>
+              {adminStatus && (
+                <Link href="/settings/admin">
+                  <Button variant="ghost" size="sm">
+                    <ShieldCheck className="w-4 h-4 md:mr-2" />
+                    <span className="hidden md:inline">Admin</span>
+                  </Button>
+                </Link>
+              )}
               <Link href="/settings">
                 <Button variant="ghost" size="sm">
                   <Settings className="w-4 h-4 md:mr-2" />
