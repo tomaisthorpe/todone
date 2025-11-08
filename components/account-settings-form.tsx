@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { updateUserNameAction } from "@/lib/server-actions";
+import { updateUserNameAction, changePasswordAction } from "@/lib/server-actions";
 
 interface AccountSettingsFormProps {
   user: {
@@ -20,6 +20,16 @@ export function AccountSettingsForm({ user }: AccountSettingsFormProps) {
   const [name, setName] = useState(user.name || "");
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
+
+  // Password change state
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isPasswordPending, startPasswordTransition] = useTransition();
+  const [passwordMessage, setPasswordMessage] = useState<{
     type: "success" | "error";
     text: string;
   } | null>(null);
@@ -49,9 +59,43 @@ export function AccountSettingsForm({ user }: AccountSettingsFormProps) {
     });
   };
 
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordMessage(null);
+
+    // Validate passwords match
+    if (newPassword !== confirmPassword) {
+      setPasswordMessage({
+        type: "error",
+        text: "New passwords do not match",
+      });
+      return;
+    }
+
+    startPasswordTransition(async () => {
+      try {
+        await changePasswordAction(currentPassword, newPassword);
+        // Clear form on success
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+        setPasswordMessage({
+          type: "success",
+          text: "Password changed successfully",
+        });
+      } catch (error) {
+        setPasswordMessage({
+          type: "error",
+          text: error instanceof Error ? error.message : "Failed to change password",
+        });
+      }
+    });
+  };
+
   return (
     <div className="space-y-6">
-      <div>
+      {/* Profile Information Section */}
+      <div className="bg-white rounded-lg shadow-sm p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">
           Profile Information
         </h3>
@@ -113,6 +157,98 @@ export function AccountSettingsForm({ user }: AccountSettingsFormProps) {
         </form>
       </div>
 
+      {/* Security Section */}
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Security</h3>
+
+        <form onSubmit={handlePasswordChange}>
+          {/* Current Password */}
+          <div className="mb-4">
+            <Label
+              htmlFor="currentPassword"
+              className="text-sm font-medium text-gray-700"
+            >
+              Current Password
+            </Label>
+            <Input
+              id="currentPassword"
+              type="password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              placeholder="Enter current password"
+              className="mt-1"
+              disabled={isPasswordPending}
+            />
+          </div>
+
+          {/* New Password */}
+          <div className="mb-4">
+            <Label
+              htmlFor="newPassword"
+              className="text-sm font-medium text-gray-700"
+            >
+              New Password
+            </Label>
+            <Input
+              id="newPassword"
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="Enter new password"
+              className="mt-1"
+              disabled={isPasswordPending}
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              Must be at least 8 characters long
+            </p>
+          </div>
+
+          {/* Confirm New Password */}
+          <div className="mb-4">
+            <Label
+              htmlFor="confirmPassword"
+              className="text-sm font-medium text-gray-700"
+            >
+              Confirm New Password
+            </Label>
+            <Input
+              id="confirmPassword"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Confirm new password"
+              className="mt-1"
+              disabled={isPasswordPending}
+            />
+          </div>
+
+          {/* Password Success/Error Message */}
+          {passwordMessage && (
+            <div
+              className={`mb-4 p-3 rounded-lg text-sm ${
+                passwordMessage.type === "success"
+                  ? "bg-green-50 text-green-800 border border-green-200"
+                  : "bg-red-50 text-red-800 border border-red-200"
+              }`}
+            >
+              {passwordMessage.text}
+            </div>
+          )}
+
+          {/* Submit Button */}
+          <Button
+            type="submit"
+            disabled={
+              isPasswordPending ||
+              !currentPassword ||
+              !newPassword ||
+              !confirmPassword
+            }
+          >
+            {isPasswordPending ? "Changing..." : "Change Password"}
+          </Button>
+        </form>
+      </div>
     </div>
   );
 }
