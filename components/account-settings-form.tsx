@@ -13,9 +13,17 @@ interface AccountSettingsFormProps {
     name?: string | null;
     email?: string | null;
   };
+  usageCounts: {
+    tasksCount: number;
+    contextsCount: number;
+  };
+  limits: {
+    maxTasks: number;
+    maxContexts: number;
+  };
 }
 
-export function AccountSettingsForm({ user }: AccountSettingsFormProps) {
+export function AccountSettingsForm({ user, usageCounts, limits }: AccountSettingsFormProps) {
   const router = useRouter();
   const [name, setName] = useState(user.name || "");
   const [isPending, startTransition] = useTransition();
@@ -155,6 +163,73 @@ export function AccountSettingsForm({ user }: AccountSettingsFormProps) {
             {isPending ? "Saving..." : "Save Changes"}
           </Button>
         </form>
+      </div>
+
+      {/* Usage & Limits Section */}
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          Usage & Limits
+        </h3>
+
+        <div className="space-y-4">
+          {/* Tasks Usage */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <Label className="text-sm font-medium text-gray-700">Tasks</Label>
+              <span className="text-sm text-gray-600">
+                {usageCounts.tasksCount.toLocaleString()} {limits.maxTasks === Infinity ? "" : `/ ${limits.maxTasks.toLocaleString()}`}
+              </span>
+            </div>
+            {limits.maxTasks !== Infinity && (
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className={`h-2 rounded-full transition-all ${
+                    (usageCounts.tasksCount / limits.maxTasks) >= 0.9
+                      ? "bg-red-500"
+                      : (usageCounts.tasksCount / limits.maxTasks) >= 0.7
+                      ? "bg-yellow-500"
+                      : "bg-blue-500"
+                  }`}
+                  style={{
+                    width: `${Math.min((usageCounts.tasksCount / limits.maxTasks) * 100, 100)}%`,
+                  }}
+                />
+              </div>
+            )}
+            {limits.maxTasks === Infinity && (
+              <p className="text-xs text-gray-500 mt-1">Unlimited</p>
+            )}
+          </div>
+
+          {/* Contexts Usage */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <Label className="text-sm font-medium text-gray-700">Contexts</Label>
+              <span className="text-sm text-gray-600">
+                {usageCounts.contextsCount.toLocaleString()} {limits.maxContexts === Infinity ? "" : `/ ${limits.maxContexts.toLocaleString()}`}
+              </span>
+            </div>
+            {limits.maxContexts !== Infinity && (
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className={`h-2 rounded-full transition-all ${
+                    (usageCounts.contextsCount / limits.maxContexts) >= 0.9
+                      ? "bg-red-500"
+                      : (usageCounts.contextsCount / limits.maxContexts) >= 0.7
+                      ? "bg-yellow-500"
+                      : "bg-blue-500"
+                  }`}
+                  style={{
+                    width: `${Math.min((usageCounts.contextsCount / limits.maxContexts) * 100, 100)}%`,
+                  }}
+                />
+              </div>
+            )}
+            {limits.maxContexts === Infinity && (
+              <p className="text-xs text-gray-500 mt-1">Unlimited</p>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Security Section */}

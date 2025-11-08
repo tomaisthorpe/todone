@@ -631,3 +631,43 @@ export async function getBurndownData(): Promise<BurndownDataPoint[]> {
     return [];
   }
 }
+
+/**
+ * Get user's current usage counts for tasks and contexts
+ * @returns Object with current task and context counts
+ */
+export async function getUserUsageCounts(): Promise<{
+  tasksCount: number;
+  contextsCount: number;
+}> {
+  const session = await getAuthenticatedSession();
+
+  if (!session?.user?.id) {
+    return {
+      tasksCount: 0,
+      contextsCount: 0,
+    };
+  }
+
+  try {
+    const [tasksCount, contextsCount] = await Promise.all([
+      prisma.task.count({
+        where: { userId: session.user.id },
+      }),
+      prisma.context.count({
+        where: { userId: session.user.id },
+      }),
+    ]);
+
+    return {
+      tasksCount,
+      contextsCount,
+    };
+  } catch (error) {
+    console.error("Error fetching user usage counts:", error);
+    return {
+      tasksCount: 0,
+      contextsCount: 0,
+    };
+  }
+}
