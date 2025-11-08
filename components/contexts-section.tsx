@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ChevronDown, ChevronUp, Archive, Search } from "lucide-react";
+import { ChevronDown, ChevronUp, Archive, Search, X } from "lucide-react";
 import type { Context, Task, Tag } from "@/lib/data";
 import { ContextGroup } from "@/components/context-group";
 import { ArchivedContexts } from "@/components/archived-contexts";
@@ -134,8 +134,17 @@ export function ContextsSection({
           placeholder="Search tasks, contexts, or tags..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10 bg-gray-50 border-gray-200 focus:bg-white"
+          className="pl-10 pr-10 bg-gray-50 border-gray-200 focus:bg-white"
         />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery("")}
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+            aria-label="Clear search"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       {filteredContexts.length > 0 ? (
