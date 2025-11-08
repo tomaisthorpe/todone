@@ -56,7 +56,7 @@ function SignInForm() {
   };
 
   return (
-    <Card className="bg-white">
+    <Card>
       <CardHeader>
         <CardTitle>Sign In</CardTitle>
         <CardDescription>
@@ -175,7 +175,7 @@ export default function SignIn() {
 
         <Suspense
           fallback={
-            <Card className="bg-white">
+            <Card>
               <CardHeader>
                 <CardTitle>Sign In</CardTitle>
                 <CardDescription>Loading...</CardDescription>

@@ -56,7 +56,7 @@ export default function SignOut() {
           </p>
         </div>
 
-        <Card className="bg-white">
+        <Card>
           <CardHeader>
             <CardTitle>Confirm Sign Out</CardTitle>
             <CardDescription>
