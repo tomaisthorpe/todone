@@ -10,6 +10,7 @@ import { calculateUrgency, parseTags, shouldHabitShowAsAvailable } from "./utils
 import { completeTask, uncompleteHabit, toggleRegularTask, TaskForCompletion } from "./task-completion-utils";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
+import { FEATURE_LIMITS, FEATURE_LIMIT_ERRORS } from "./feature-limits";
 
 // Get authenticated user or redirect
 async function getAuthenticatedUser() {
@@ -124,6 +125,15 @@ export async function completeTaskYesterdayAction(taskId: string) {
 // Server action to create a new task
 export async function createTaskAction(formData: FormData) {
   const userId = await getAuthenticatedUser();
+
+  // Feature gating: Check if user has reached the maximum number of tasks
+  const taskCount = await prisma.task.count({
+    where: { userId },
+  });
+
+  if (taskCount >= FEATURE_LIMITS.MAX_TASKS) {
+    throw new Error(FEATURE_LIMIT_ERRORS.MAX_TASKS);
+  }
 
   const title = formData.get("title") as string;
   const project = formData.get("project") as string;
@@ -331,6 +341,15 @@ export async function updateTaskAction(formData: FormData) {
 // Server action to create a new context
 export async function createContextAction(formData: FormData) {
   const userId = await getAuthenticatedUser();
+
+  // Feature gating: Check if user has reached the maximum number of contexts
+  const contextCount = await prisma.context.count({
+    where: { userId },
+  });
+
+  if (contextCount >= FEATURE_LIMITS.MAX_CONTEXTS) {
+    throw new Error(FEATURE_LIMIT_ERRORS.MAX_CONTEXTS);
+  }
 
   const name = formData.get("name") as string;
   const description = formData.get("description") as string;
