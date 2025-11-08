@@ -1,8 +1,8 @@
-# Unwhelm Setup Guide
+# unwhelm Setup Guide
 
 ## Overview
 
-This is the full-stack version of Unwhelm, a context-based task management app with customizable urgency scoring and flexible habit tracking. The application has been built according to the specifications in the README.md and design documents, **utilizing React Server Components and Server Actions for optimal performance**.
+This is the full-stack version of unwhelm, a context-based task management app with customizable urgency scoring and flexible habit tracking. The application has been built according to the specifications in the README.md and design documents, **utilizing React Server Components and Server Actions for optimal performance**.
 
 ## Tech Stack
 
@@ -20,13 +20,14 @@ This is the full-stack version of Unwhelm, a context-based task management app w
 ✅ **Server Actions**: All mutations handled server-side for better performance and security  
 ✅ **Minimal Client JavaScript**: Interactive components use `"use client"` while maintaining server-first approach  
 ✅ **Optimistic UI**: Task toggling with `useTransition` for immediate feedback  
-✅ **Type Safety**: Full TypeScript coverage from database to UI  
+✅ **Type Safety**: Full TypeScript coverage from database to UI
 
 ## Setup Instructions
 
 ### 1. Prerequisites
 
 Make sure you have the following installed:
+
 - Node.js 18 or later
 - PostgreSQL database (local or cloud)
 - npm or yarn package manager
@@ -34,6 +35,7 @@ Make sure you have the following installed:
 ### 2. Environment Configuration
 
 1. Copy the `.env` file and update the database connection:
+
    ```bash
    DATABASE_URL="postgresql://username:password@localhost:5432/unwhelm?schema=public"
    NEXTAUTH_SECRET="your-secure-random-string-here"
@@ -52,16 +54,19 @@ Make sure you have the following installed:
 ### 3. Installation and Database Setup
 
 1. **Install dependencies:**
+
    ```bash
    npm install
    ```
 
 2. **Generate Prisma client:**
+
    ```bash
    npm run db:generate
    ```
 
 3. **Push the database schema:**
+
    ```bash
    npm run db:push
    ```
@@ -74,6 +79,7 @@ Make sure you have the following installed:
 ### 4. Development
 
 Start the development server:
+
 ```bash
 npm run dev
 ```
@@ -83,6 +89,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ### 5. Demo Account
 
 The application comes with a pre-seeded demo account for immediate testing:
+
 - **Email**: `demo@unwhelm.app`
 - **Password**: `password123`
 
@@ -208,11 +215,13 @@ npm run db:studio       # Open Prisma Studio
 ## Server vs Client Components
 
 ### Server Components (no "use client")
+
 - `app/page.tsx` - Main dashboard with server-side data fetching
 - `components/today-section.tsx` - Today's tasks (static rendering)
 - `components/context-group.tsx` - Context display (static rendering)
 
 ### Client Components ("use client")
+
 - `components/task-card.tsx` - Task display with interactive elements
 - `components/task-toggle-button.tsx` - Task completion interaction
 - `components/context-collapsible.tsx` - Context collapse/expand
@@ -240,16 +249,19 @@ npm run db:studio       # Open Prisma Studio
 ## Troubleshooting
 
 ### Database Connection Issues
+
 - Verify your `DATABASE_URL` is correct
 - Ensure your PostgreSQL server is running
 - Check firewall settings for cloud databases
 
 ### Authentication Issues
+
 - Verify `NEXTAUTH_SECRET` is set
 - Check `NEXTAUTH_URL` matches your domain
 - Clear browser cookies if needed
 
 ### Build Issues
+
 - Run `npm run db:generate` after schema changes
 - Ensure all environment variables are set
 - Check TypeScript errors with `npm run lint`
@@ -267,9 +279,11 @@ The application follows React best practices with a server-first approach. For f
 ## Support
 
 For questions or issues:
+
 1. Check the documentation in `/docs/`
 2. Review the server-side data flow
 3. Check the console for error messages
 4. Verify database connectivity and seeding
 
 The application follows React Server Component best practices and provides excellent performance with minimal client-side JavaScript while maintaining full functionality.
+

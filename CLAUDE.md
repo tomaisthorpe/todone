@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Unwhelm is a context-based task management application built with Next.js 15 (App Router), React 19 Server Components, TypeScript, PostgreSQL/Prisma, and NextAuth.js. It features customizable urgency scoring (inspired by TaskWarrior), flexible habit tracking with 4 distinct types, and natural language task parsing.
+unwhelm is a context-based task management application built with Next.js 15 (App Router), React 19 Server Components, TypeScript, PostgreSQL/Prisma, and NextAuth.js. It features customizable urgency scoring (inspired by TaskWarrior), flexible habit tracking with 4 distinct types, and natural language task parsing.
 
 **Core Philosophy:** Prioritize user psychology over rigid productivity systems. Habits should feel supportive, not demanding. Context health gives a sense of life balance.
 
@@ -43,12 +43,14 @@ This codebase follows React/Next.js best practices with a server-first architect
 ### Key Files
 
 **Data Layer:**
+
 - `lib/data.ts` - Server-side data fetching (getTasks, getContexts, getTags)
 - `lib/server-actions.ts` - All mutations (create/update/delete tasks, contexts, tags)
 - `lib/prisma.ts` - Singleton Prisma client
 - `prisma/schema.prisma` - Database schema
 
 **Business Logic:**
+
 - `lib/utils.ts` - Urgency calculation (`evaluateUrgency`), utility functions
 - `lib/urgency-config.ts` - Urgency scoring constants (priority, age, due date coefficients)
 - `lib/habits.ts` - Habit-specific utilities (status calculation, streak tracking)
@@ -57,6 +59,7 @@ This codebase follows React/Next.js best practices with a server-first architect
 - `lib/email.ts` - Email service supporting Resend API and SMTP for self-hosting
 
 **Client Components:**
+
 - `components/dashboard-client.tsx` - Main client wrapper with optimistic UI
 - `components/task-toggle-button.tsx` - Interactive task completion button
 - `components/add-item-modal.tsx` - Task/context creation modal
@@ -65,6 +68,7 @@ This codebase follows React/Next.js best practices with a server-first architect
 ### Database Schema
 
 **Core Models:**
+
 - `Task` - All task types (regular, habit, recurring) with type discriminator
 - `Context` - Task organization by location/situation (kitchen, coding, bathroom)
 - `Tag` - Custom tags with urgency coefficients
@@ -72,6 +76,7 @@ This codebase follows React/Next.js best practices with a server-first architect
 - `User` - NextAuth.js user with credentials auth
 
 **Task Types:**
+
 1. `TASK` - Regular one-off tasks with due dates
 2. `HABIT` - Recurring activities with flexible timing, streak tracking
 3. `RECURRING` - Scheduled items with strict deadlines (meetings, bills)
@@ -97,12 +102,14 @@ Configuration lives in `lib/urgency-config.ts`. The system is designed to be tra
 Habits use relaxed, non-judgmental language and have flexible timing:
 
 **Status Language:**
+
 - "✓ Fresh" - Recently completed, no action needed
 - "⏰ Getting due" - Approaching usual frequency
 - "⚡ Ready" - Available to do when convenient
 - "🔄 Time for another" - Past usual frequency but not stressed
 
 **Completion Logic:**
+
 - Habits don't have "deadlines" - they have target frequencies
 - Streaks track consecutive completions within frequency window
 - `frequency` field is in days (1=daily, 7=weekly)
@@ -110,6 +117,7 @@ Habits use relaxed, non-judgmental language and have flexible timing:
 - Logic in `lib/task-completion-utils.ts:completeTask()`
 
 **Habit Types affect UI emphasis:**
+
 - `STREAK` - Exercise, meditation (prominent streak display)
 - `LEARNING` - Coding practice, reading (moderate emphasis)
 - `WELLNESS` - Skincare, make bed (balanced)
@@ -122,6 +130,7 @@ Context health is calculated based ONLY on habit completion (not regular tasks).
 ## Natural Language Task Parsing
 
 The `lib/utils.ts:parseTags()` function extracts:
+
 - `!context` - Context name
 - `#tag` - Tags
 - `p1`/`p2`/`p3` - Priority (high/medium/low)
@@ -132,6 +141,7 @@ Used in the smart task input component.
 ## Code Style (from Cursor rules)
 
 **TypeScript/React:**
+
 - Functional and declarative patterns, avoid classes
 - Descriptive variable names with auxiliary verbs (isLoading, hasError)
 - Use Server Components by default, minimize `'use client'`
@@ -139,20 +149,24 @@ Used in the smart task input component.
 - Directory names: lowercase-with-dashes
 
 **Tailwind CSS:**
+
 - Use `bg-color/opacity` format (e.g., `bg-white/30`, `bg-red-300/10`)
 - Never use `border` without a color, or omit it entirely
 - Mobile-first responsive design
 
 **Git Commits:**
+
 - Use conventional commit format (feat:, fix:, docs:, etc.)
 
 ## Documentation Updates
 
 When making significant changes, update these files in `/docs/`:
+
 - `design-decisions.md` - Add new UX decisions or update reasoning
 - `ui-patterns.md` - Update component patterns and examples
 
 **Triggers for documentation updates:**
+
 - Creating new component patterns
 - Changing visual designs
 - Making UX decisions
@@ -170,6 +184,7 @@ When making significant changes, update these files in `/docs/`:
 ## Authentication
 
 NextAuth.js v4 with credentials provider:
+
 - Configuration in `lib/auth.ts`
 - Demo account (optional): demo@unwhelm.app / password123 (enabled via `ENABLE_DEMO_USER` flag)
 - Passwords hashed with bcryptjs
@@ -178,6 +193,7 @@ NextAuth.js v4 with credentials provider:
 ## Common Patterns
 
 **Server Action Pattern:**
+
 ```typescript
 export async function myAction(data: FormData) {
   "use server";
@@ -188,14 +204,15 @@ export async function myAction(data: FormData) {
 ```
 
 **Optimistic UI Pattern:**
+
 ```typescript
 const [isPending, startTransition] = useTransition();
 
 function handleToggle(taskId: string) {
   // Optimistic update
-  setTasks(prev => prev.map(t =>
-    t.id === taskId ? {...t, completed: !t.completed} : t
-  ));
+  setTasks((prev) =>
+    prev.map((t) => (t.id === taskId ? { ...t, completed: !t.completed } : t)),
+  );
 
   startTransition(async () => {
     await toggleTaskAction(taskId);
@@ -204,6 +221,7 @@ function handleToggle(taskId: string) {
 ```
 
 **Data Fetching Pattern:**
+
 ```typescript
 // In Server Component (app/page.tsx)
 const tasks = await getTasks();
