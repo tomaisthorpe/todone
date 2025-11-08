@@ -149,17 +149,25 @@ function SignInForm() {
 
 export default function SignIn() {
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
-          <div className="flex justify-center">
-            <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
-              <CheckCircle2 className="w-8 h-8 text-white" />
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white shadow-sm">
+        <div className="max-w-4xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                <CheckCircle2 className="w-5 h-5 text-white" />
+              </div>
+              <h1 className="text-2xl font-bold text-gray-900">todone</h1>
             </div>
           </div>
-          <h2 className="mt-6 text-3xl font-bold tracking-tight text-gray-900">
-            Welcome to todone
-          </h2>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="max-w-md mx-auto px-4 py-12">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-gray-900">Welcome back</h2>
           <p className="mt-2 text-sm text-gray-600">
             Sign in to your account to manage your tasks
           </p>
@@ -185,7 +193,7 @@ export default function SignIn() {
           <SignInForm />
         </Suspense>
 
-        <div className="text-center">
+        <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
             Don&apos;t have an account?{" "}
             <Link
