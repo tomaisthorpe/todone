@@ -6,10 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { updateUserNameAction } from "@/lib/server-actions";
-import { User } from "next-auth";
 
 interface AccountSettingsFormProps {
-  user: User;
+  user: {
+    id?: string;
+    name?: string | null;
+    email?: string | null;
+  };
 }
 
 export function AccountSettingsForm({ user }: AccountSettingsFormProps) {
