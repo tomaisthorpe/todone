@@ -171,7 +171,7 @@ When making significant changes, update these files in `/docs/`:
 
 NextAuth.js v4 with credentials provider:
 - Configuration in `lib/auth.ts`
-- Demo account: demo@unwhelm.app / password123
+- Demo account (optional): demo@unwhelm.app / password123 (enabled via `ENABLE_DEMO_USER` flag)
 - Passwords hashed with bcryptjs
 - Session checking: `getServerSession(authOptions)`
 
@@ -234,6 +234,10 @@ SMTP_PORT="587"  # Default: 587 (or 465 for SSL)
 SMTP_USER="your-smtp-username"
 SMTP_PASS="your-smtp-password"
 SMTP_SECURE="false"  # Optional: "true" for SSL/TLS (default: false for 587, true for 465)
+
+# Demo User Feature Flag
+ENABLE_DEMO_USER="true"  # Set to "true" to create demo user during seed (default: false)
+NEXT_PUBLIC_ENABLE_DEMO_USER="true"  # Set to "true" to show demo credentials on login form (default: false)
 ```
 
 ## Important Notes

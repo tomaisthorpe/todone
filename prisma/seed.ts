@@ -4,6 +4,14 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 async function main() {
+  // Check if demo user should be created
+  const enableDemoUser = process.env.ENABLE_DEMO_USER === "true";
+
+  if (!enableDemoUser) {
+    console.log("Demo user creation is disabled (ENABLE_DEMO_USER=false)");
+    return;
+  }
+
   // Create a demo user
   const hashedPassword = await bcrypt.hash("password123", 12);
 
