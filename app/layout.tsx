@@ -86,37 +86,37 @@ export default function RootLayout({
         {/* Splash Screen Images for iOS */}
         <link
           rel="apple-touch-startup-image"
-          href="/icons/apple-splash-2048-2732.jpg"
+          href="/icons/apple-splash-2048-2732.png"
           sizes="2048x2732"
         />
         <link
           rel="apple-touch-startup-image"
-          href="/icons/apple-splash-1668-2224.jpg"
+          href="/icons/apple-splash-1668-2224.png"
           sizes="1668x2224"
         />
         <link
           rel="apple-touch-startup-image"
-          href="/icons/apple-splash-1536-2048.jpg"
+          href="/icons/apple-splash-1536-2048.png"
           sizes="1536x2048"
         />
         <link
           rel="apple-touch-startup-image"
-          href="/icons/apple-splash-1125-2436.jpg"
+          href="/icons/apple-splash-1125-2436.png"
           sizes="1125x2436"
         />
         <link
           rel="apple-touch-startup-image"
-          href="/icons/apple-splash-1242-2208.jpg"
+          href="/icons/apple-splash-1242-2208.png"
           sizes="1242x2208"
         />
         <link
           rel="apple-touch-startup-image"
-          href="/icons/apple-splash-750-1334.jpg"
+          href="/icons/apple-splash-750-1334.png"
           sizes="750x1334"
         />
         <link
           rel="apple-touch-startup-image"
-          href="/icons/apple-splash-640-1136.jpg"
+          href="/icons/apple-splash-640-1136.png"
           sizes="640x1136"
         />
 

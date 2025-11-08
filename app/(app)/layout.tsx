@@ -7,12 +7,9 @@ import { signOutAction } from "@/lib/server-actions";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ReactNode } from "react";
+import Image from "next/image";
 
-export default async function AppLayout({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export default async function AppLayout({ children }: { children: ReactNode }) {
   // Check authentication
   const session = (await getServerSession(authOptions)) as Session | null;
 
@@ -30,11 +27,16 @@ export default async function AppLayout({
               href="/tasks"
               className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
             >
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <CheckCircle2 className="w-5 h-5 text-white" />
+              <div className="w-8 h-8 flex items-center justify-center">
+                <Image
+                  src="/unwhelm.svg"
+                  alt="unwhelm logo"
+                  width="32"
+                  height="32"
+                />
               </div>
               <h1 className="hidden md:block text-2xl font-bold text-gray-900">
-                todone
+                unwhelm
               </h1>
             </Link>
             <div className="flex items-center space-x-1 md:space-x-3">
