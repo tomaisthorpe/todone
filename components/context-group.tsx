@@ -18,6 +18,7 @@ import {
 } from "./context-collapsible";
 import type { Task, Context, Tag } from "@/lib/data";
 import { getContextIconComponent } from "@/lib/context-icons";
+import { HighlightedText } from "@/components/ui/highlighted-text";
 
 interface ContextGroupProps {
   context: Context;
@@ -26,6 +27,7 @@ interface ContextGroupProps {
   tags: Tag[];
   collapsed?: boolean;
   onCollapsedChange?: (value: boolean) => void;
+  searchQuery?: string;
 }
 
 function getContextCompletion(tasks: Task[]) {
@@ -50,6 +52,7 @@ function ContextGroupHeader({
   completion,
   todayTasksInContext,
   hasHabits,
+  searchQuery,
 }: {
   context: Context;
   allContexts: Context[];
@@ -57,6 +60,7 @@ function ContextGroupHeader({
   completion: { percentage: number; completed: number; total: number };
   todayTasksInContext: number;
   hasHabits: boolean;
+  searchQuery?: string;
 }) {
   const [isEditContextOpen, setIsEditContextOpen] = useState(false);
   const { isCollapsed } = useCollapsible();
@@ -76,8 +80,14 @@ function ContextGroupHeader({
               <IconComponent className="w-5 h-5" />
             </div>
             <div className="text-left">
-              <h3 className="font-semibold">{context.name}</h3>
-              <p className="text-sm opacity-90">{context.description}</p>
+              <h3 className="font-semibold">
+                <HighlightedText text={context.name} searchQuery={searchQuery} />
+              </h3>
+              {context.description && (
+                <p className="text-sm opacity-90">
+                  <HighlightedText text={context.description} searchQuery={searchQuery} />
+                </p>
+              )}
             </div>
           </div>
           <div className="text-right">
@@ -142,6 +152,7 @@ export function ContextGroup({
   tags,
   collapsed,
   onCollapsedChange,
+  searchQuery,
 }: ContextGroupProps) {
   const contextTasks = tasks
     .filter((task) => {
@@ -199,6 +210,7 @@ export function ContextGroup({
           completion={completion}
           todayTasksInContext={todayTasksInContext}
           hasHabits={hasHabits}
+          searchQuery={searchQuery}
         />
         <ContextCollapsibleContent>
           <div className="p-2 md:p-4">
@@ -210,6 +222,7 @@ export function ContextGroup({
                     task={task}
                     contexts={allContexts}
                     tags={tags}
+                    searchQuery={searchQuery}
                   />
                 ))}
               </div>

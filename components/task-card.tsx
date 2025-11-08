@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 import { TaskToggleButton } from "./task-toggle-button";
 import { TaskModal } from "./add-item-modal";
 import { MarkdownText } from "@/components/ui/markdown-text";
+import { HighlightedText } from "@/components/ui/highlighted-text";
 import {
   Tooltip,
   TooltipContent,
@@ -44,6 +45,7 @@ interface TaskCardProps {
   showContext?: boolean;
   onContextClick?: (contextId: string) => void;
   showUrgency?: boolean;
+  searchQuery?: string;
 }
 
 const renderHabitIcon = (iconType: string, className: string) => {
@@ -118,6 +120,7 @@ export function TaskCard({
   showContext = false,
   showUrgency = true,
   onContextClick,
+  searchQuery,
 }: TaskCardProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const dateInfo = formatDateForTask(task.dueDate);
@@ -185,7 +188,11 @@ export function TaskCard({
                   onClick={() => setIsEditModalOpen(true)}
                   title="Click to edit task"
                 >
-                  <MarkdownText text={task.title} />
+                  {searchQuery ? (
+                    <HighlightedText text={task.title} searchQuery={searchQuery} />
+                  ) : (
+                    <MarkdownText text={task.title} />
+                  )}
                 </h3>
 
                 {task.type === "RECURRING" && (
@@ -250,7 +257,7 @@ export function TaskCard({
                     ))}
                   {task.project && (
                     <span className="text-xs text-gray-500 mb-1">
-                      {task.project}
+                      <HighlightedText text={task.project} searchQuery={searchQuery} />
                     </span>
                   )}
                   {task.tags.map((tag) => (
@@ -258,7 +265,7 @@ export function TaskCard({
                       key={tag}
                       className="block items-center px-1.5 py-0.5 rounded text-xs bg-gray-100 text-gray-600 mb-1"
                     >
-                      {tag}
+                      <HighlightedText text={tag} searchQuery={searchQuery} />
                     </span>
                   ))}
                   {task.notes && (
@@ -268,11 +275,20 @@ export function TaskCard({
                       </TooltipTrigger>
                       <TooltipContent>
                         <p className="text-xs max-w-xs">
-                          <MarkdownText 
-                            text={task.notes.length > 100
-                              ? `${task.notes.substring(0, 100)}...`
-                              : task.notes}
-                          />
+                          {searchQuery ? (
+                            <HighlightedText
+                              text={task.notes.length > 100
+                                ? `${task.notes.substring(0, 100)}...`
+                                : task.notes}
+                              searchQuery={searchQuery}
+                            />
+                          ) : (
+                            <MarkdownText
+                              text={task.notes.length > 100
+                                ? `${task.notes.substring(0, 100)}...`
+                                : task.notes}
+                            />
+                          )}
                         </p>
                       </TooltipContent>
                     </Tooltip>
