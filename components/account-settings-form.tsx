@@ -27,7 +27,10 @@ export function AccountSettingsForm({ user }: AccountSettingsFormProps) {
 
     startTransition(async () => {
       try {
-        await updateUserNameAction(name);
+        const trimmedName = name.trim();
+        await updateUserNameAction(trimmedName);
+        // Update local state to match server's trimmed value
+        setName(trimmedName);
         // Refresh the page to get updated session data
         router.refresh();
         setMessage({
@@ -98,7 +101,10 @@ export function AccountSettingsForm({ user }: AccountSettingsFormProps) {
           )}
 
           {/* Submit Button */}
-          <Button type="submit" disabled={isPending || name === user.name}>
+          <Button
+            type="submit"
+            disabled={isPending || name.trim() === user.name || name.trim().length === 0}
+          >
             {isPending ? "Saving..." : "Save Changes"}
           </Button>
         </form>
