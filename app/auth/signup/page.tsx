@@ -14,6 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { signupSchema } from "@/lib/validation";
 
 export default function SignUp() {
   const [name, setName] = useState("");
@@ -39,32 +40,11 @@ export default function SignUp() {
       return;
     }
 
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters");
-      setIsLoading(false);
-      return;
-    }
-
-    if (!/[A-Z]/.test(password)) {
-      setError("Password must contain at least one uppercase letter");
-      setIsLoading(false);
-      return;
-    }
-
-    if (!/[a-z]/.test(password)) {
-      setError("Password must contain at least one lowercase letter");
-      setIsLoading(false);
-      return;
-    }
-
-    if (!/[0-9]/.test(password)) {
-      setError("Password must contain at least one number");
-      setIsLoading(false);
-      return;
-    }
-
-    if (!/[^A-Za-z0-9]/.test(password)) {
-      setError("Password must contain at least one special character");
+    // Validate using shared Zod schema
+    const result = signupSchema.safeParse({ name, email, password });
+    if (!result.success) {
+      const firstError = result.error.errors[0];
+      setError(firstError.message);
       setIsLoading(false);
       return;
     }
