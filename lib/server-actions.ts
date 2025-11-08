@@ -640,13 +640,16 @@ export async function changePasswordAction(
 ) {
   const userId = await getAuthenticatedUser();
 
-  // Validate inputs
-  if (!currentPassword || !newPassword) {
-    throw new Error("Both current and new passwords are required");
-  }
+  // Validate inputs using Zod schema
+  const { changePasswordSchema } = await import("./validation");
+  const result = changePasswordSchema.safeParse({
+    currentPassword,
+    newPassword,
+  });
 
-  if (newPassword.length < 8) {
-    throw new Error("New password must be at least 8 characters long");
+  if (!result.success) {
+    const firstError = result.error.errors[0];
+    throw new Error(firstError.message);
   }
 
   // Get user with password

@@ -198,9 +198,16 @@ export function AccountSettingsForm({ user }: AccountSettingsFormProps) {
               className="mt-1"
               disabled={isPasswordPending}
             />
-            <p className="mt-1 text-xs text-gray-500">
-              Must be at least 8 characters long
-            </p>
+            <div className="mt-2 text-xs text-gray-600 space-y-1">
+              <p className="font-medium">Password must contain:</p>
+              <ul className="list-disc list-inside space-y-0.5 ml-2">
+                <li>At least 8 characters</li>
+                <li>At least one uppercase letter</li>
+                <li>At least one lowercase letter</li>
+                <li>At least one number</li>
+                <li>At least one special character</li>
+              </ul>
+            </div>
           </div>
 
           {/* Confirm New Password */}
