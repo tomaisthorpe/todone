@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TodaySection } from "@/components/today-section";
 import { AddItemModal } from "@/components/add-item-modal";
 import { SmartTaskInput } from "@/components/smart-task-input";
@@ -10,11 +10,38 @@ import { usePWABadge } from "@/lib/hooks/use-pwa-badge";
 import { BadgePermissionBanner } from "@/components/badge-permission-banner";
 import { countDueAndOverdueTasks } from "@/lib/badge-utils";
 
+const COLLAPSED_STATE_KEY = "todone-collapsed-contexts";
+
+function loadCollapsedState(): Record<string, boolean> {
+  if (typeof window === "undefined") return {};
+  try {
+    const saved = localStorage.getItem(COLLAPSED_STATE_KEY);
+    return saved ? JSON.parse(saved) : {};
+  } catch (error) {
+    console.error("Failed to load collapsed state from localStorage:", error);
+    return {};
+  }
+}
+
+function saveCollapsedState(state: Record<string, boolean>): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(COLLAPSED_STATE_KEY, JSON.stringify(state));
+  } catch (error) {
+    console.error("Failed to save collapsed state to localStorage:", error);
+  }
+}
+
 export function DashboardClient() {
-  const [collapsedState, setCollapsedState] = useState<Record<string, boolean>>({});
-  
+  const [collapsedState, setCollapsedState] = useState<Record<string, boolean>>(() => loadCollapsedState());
+
   // Use SWR hook for client-side data fetching
   const { tasks, contexts, archivedContexts, tags, isLoading, isError } = useDashboardData();
+
+  // Persist collapsed state to localStorage whenever it changes
+  useEffect(() => {
+    saveCollapsedState(collapsedState);
+  }, [collapsedState]);
   
   // Update PWA badge based on task data
   const { requestPermission, permissionState } = usePWABadge(tasks);
