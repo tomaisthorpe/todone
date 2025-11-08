@@ -31,7 +31,7 @@ export default async function Dashboard() {
               </h1>
             </div>
             <div className="flex items-center space-x-1 md:space-x-3">
-              <Link href="/completed">
+              <Link href="/tasks/completed">
                 <Button variant="ghost" size="sm">
                   <CheckCircle2 className="w-4 h-4 md:mr-2" />
                   <span className="hidden md:inline">Completed</span>

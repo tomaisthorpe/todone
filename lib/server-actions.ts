@@ -222,7 +222,7 @@ export async function createTaskAction(formData: FormData) {
     data: taskData,
   });
 
-  revalidatePath("/");
+  revalidatePath("/tasks");
 }
 
 // Server action to update an existing task
@@ -335,7 +335,7 @@ export async function updateTaskAction(formData: FormData) {
     data: updateData,
   });
 
-  revalidatePath("/");
+  revalidatePath("/tasks");
 }
 
 // Server action to create a new context
@@ -373,7 +373,7 @@ export async function createContextAction(formData: FormData) {
     },
   });
 
-  revalidatePath("/");
+  revalidatePath("/tasks");
 }
 
 // Server action to update an existing context
@@ -416,7 +416,7 @@ export async function updateContextAction(formData: FormData) {
     },
   });
 
-  revalidatePath("/");
+  revalidatePath("/tasks");
 }
 
 // Server action to delete a task
@@ -507,7 +507,7 @@ export async function archiveContextAction(contextId: string) {
     data: { archived: true },
   });
 
-  revalidatePath("/");
+  revalidatePath("/tasks");
 }
 
 // Server action to create a new tag
@@ -541,7 +541,7 @@ export async function createTagAction(formData: FormData) {
     },
   });
 
-  revalidatePath("/");
+  revalidatePath("/tasks");
 }
 
 // Server action to update an existing tag
@@ -588,7 +588,7 @@ export async function updateTagAction(formData: FormData) {
     },
   });
 
-  revalidatePath("/");
+  revalidatePath("/tasks");
 }
 
 // Server action to delete a tag
@@ -609,7 +609,7 @@ export async function deleteTagAction(tagId: string) {
     where: { id: tagId },
   });
 
-  revalidatePath("/");
+  revalidatePath("/tasks");
 }
 
 // Unarchive context action

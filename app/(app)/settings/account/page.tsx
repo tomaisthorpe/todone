@@ -29,7 +29,7 @@ export default async function AccountSettingsPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <Link
-                href="/"
+                href="/tasks"
                 className="flex items-center hover:opacity-80 transition-opacity"
               >
                 <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
@@ -73,7 +73,7 @@ export default async function AccountSettingsPage() {
                 </p>
               </div>
             </div>
-            <Link href="/">
+            <Link href="/tasks">
               <Button variant="outline">Back to Dashboard</Button>
             </Link>
           </div>
