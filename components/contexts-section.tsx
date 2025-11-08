@@ -40,38 +40,57 @@ export function ContextsSection({
     onCollapsedStateChange?.(next);
   };
 
+  // Helper function to check if a context has tasks matching the search query
+  const hasTaskMatches = (context: Context): boolean => {
+    if (searchQuery.trim() === "") return false;
+
+    const contextTasks = tasks.filter(task => task.contextId === context.id);
+    const searchLower = searchQuery.toLowerCase();
+
+    return contextTasks.some(task =>
+      task.title.toLowerCase().includes(searchLower) ||
+      task.project?.toLowerCase().includes(searchLower) ||
+      task.notes?.toLowerCase().includes(searchLower) ||
+      task.tags.some(tag => tag.toLowerCase().includes(searchLower))
+    );
+  };
+
   // Filter contexts based on search query
-  const filteredContexts = searchQuery.trim() === "" 
-    ? contexts 
+  const filteredContexts = searchQuery.trim() === ""
+    ? contexts
     : contexts.filter((context) => {
         // Check if context name matches
         if (context.name.toLowerCase().includes(searchQuery.toLowerCase())) {
           return true;
         }
-        
+
         // Check if context description matches
         if (context.description?.toLowerCase().includes(searchQuery.toLowerCase())) {
           return true;
         }
-        
+
         // Check if any tasks in this context match the search
-        const contextTasks = tasks.filter(task => task.contextId === context.id);
-        return contextTasks.some(task => {
-          const searchLower = searchQuery.toLowerCase();
-          return (
-            task.title.toLowerCase().includes(searchLower) ||
-            task.project?.toLowerCase().includes(searchLower) ||
-            task.notes?.toLowerCase().includes(searchLower) ||
-            task.tags.some(tag => tag.toLowerCase().includes(searchLower))
-          );
-        });
+        return hasTaskMatches(context);
       });
 
+  // Check if all contexts are effectively collapsed/expanded
+  // This takes into account temporary expansion due to search matches
   const allCollapsed =
-    filteredContexts.length > 0 && filteredContexts.every((c) => collapsedState[c.id] === true);
+    filteredContexts.length > 0 &&
+    filteredContexts.every((c) => {
+      const shouldTemporarilyExpand = hasTaskMatches(c);
+      const savedCollapsed = collapsedState[c.id] ?? false;
+      const effectiveCollapsed = shouldTemporarilyExpand ? false : savedCollapsed;
+      return effectiveCollapsed === true;
+    });
   const allExpanded =
     filteredContexts.length > 0 &&
-    filteredContexts.every((c) => collapsedState[c.id] === false);
+    filteredContexts.every((c) => {
+      const shouldTemporarilyExpand = hasTaskMatches(c);
+      const savedCollapsed = collapsedState[c.id] ?? false;
+      const effectiveCollapsed = shouldTemporarilyExpand ? false : savedCollapsed;
+      return effectiveCollapsed === false;
+    });
 
   return (
     <div className="space-y-4">
@@ -122,8 +141,11 @@ export function ContextsSection({
       {filteredContexts.length > 0 ? (
         <div className="grid grid-cols-1 gap-4">
           {filteredContexts.map((context) => {
-            // Always use controlled mode, defaulting to false if not in state
-            const collapsedValue = collapsedState[context.id] ?? false;
+            // Compute effective collapsed state
+            // If search is active and context has task matches, temporarily expand it
+            const savedCollapsedValue = collapsedState[context.id] ?? false;
+            const shouldTemporarilyExpand = hasTaskMatches(context);
+            const effectiveCollapsed = shouldTemporarilyExpand ? false : savedCollapsedValue;
 
             return (
               <ContextGroup
@@ -132,7 +154,7 @@ export function ContextsSection({
                 tasks={tasks}
                 allContexts={contexts}
                 tags={tags}
-                collapsed={collapsedValue}
+                collapsed={effectiveCollapsed}
                 onCollapsedChange={(value: boolean) =>
                   onCollapsedStateChange?.({
                     ...collapsedState,
