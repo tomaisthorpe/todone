@@ -54,6 +54,7 @@ This codebase follows React/Next.js best practices with a server-first architect
 - `lib/habits.ts` - Habit-specific utilities (status calculation, streak tracking)
 - `lib/task-completion-utils.ts` - Task completion logic for all task types
 - `lib/date-utils.ts` - Date calculations respecting local calendar days
+- `lib/email.ts` - Email service supporting Resend API and SMTP for self-hosting
 
 **Client Components:**
 - `components/dashboard-client.tsx` - Main client wrapper with optimistic UI
@@ -213,9 +214,26 @@ return <DashboardClient tasks={tasks} contexts={contexts} />;
 ## Environment Variables
 
 ```bash
+# Database
 DATABASE_URL="postgresql://username:password@localhost:5432/todone"
+
+# Authentication
 NEXTAUTH_SECRET="your-secret-key-here"
 NEXTAUTH_URL="http://localhost:3000"
+
+# Email Configuration (required for email features)
+EMAIL_PROVIDER="resend"  # Options: "resend" or "smtp"
+EMAIL_FROM="noreply@yourdomain.com"
+
+# For Resend (if EMAIL_PROVIDER="resend")
+RESEND_API_KEY="re_123456789"
+
+# For SMTP (if EMAIL_PROVIDER="smtp")
+SMTP_HOST="smtp.yourmailserver.com"
+SMTP_PORT="587"  # Default: 587 (or 465 for SSL)
+SMTP_USER="your-smtp-username"
+SMTP_PASS="your-smtp-password"
+SMTP_SECURE="false"  # Optional: "true" for SSL/TLS (default: false for 587, true for 465)
 ```
 
 ## Important Notes
