@@ -134,10 +134,97 @@ Examples:
 
 **Reasoning**: Get core functionality working first, then add persistence. Keep data structures simple and serializable.
 
-### Text-First Entry (Planned)
-**Decision**: Support natural language task entry like "Call mom tomorrow #family @home".
+### Text-First Entry
+**Decision**: Support natural language task entry like "Call mom tomorrow #family !context p1".
 
 **Reasoning**: Inspired by Todoist. Reduces friction for task creation, especially on mobile.
+
+**Implementation**: `components/smart-task-input.tsx` with real-time parsing and inline highlighting using positioned overlay technique.
+
+### Progressive Web App (PWA)
+**Decision**: Build as a full PWA with service worker, offline support, and Badge API integration.
+
+**Reasoning**:
+- Task management is used throughout the day across multiple contexts (home, work, mobile)
+- Offline support ensures access even without connectivity
+- Installability provides native-like experience without app store friction
+- Badge API creates persistent awareness of due/overdue tasks
+
+**Impact**:
+- Users can install on home screen (iOS/Android) or desktop (Windows/Mac/Linux)
+- App badge shows task count even when app is closed
+- Service worker caches assets for instant loading
+- Works offline with automatic sync when online
+
+**Implementation**: `next-pwa` package with comprehensive caching strategy, `lib/badge-utils.ts` for badge management, permission banner for iOS users.
+
+### Subtasks Feature
+**Decision**: Support hierarchical task breakdown with independent completion tracking.
+
+**Reasoning**:
+- Complex tasks benefit from step-by-step breakdown
+- Subtasks provide clarity without cluttering main task list
+- Independent completion allows tracking progress without completing parent
+- Stored as JSON for flexibility and denormalized performance
+
+**Impact**:
+- Reduces need for creating many small interconnected tasks
+- Better visualization of task complexity
+- Drag-and-drop reordering for prioritizing subtask order
+- Progress indicators show completion ratio
+
+**Implementation**: Stored as JSON array in Task model, managed via `components/ui/subtasks-input.tsx` with `@dnd-kit/sortable` for drag-and-drop.
+
+### Archived Contexts
+**Decision**: Allow contexts to be archived rather than deleted.
+
+**Reasoning**:
+- Life circumstances change (moved out of apartment, changed jobs, completed projects)
+- Deleting contexts loses historical data and task associations
+- Archiving preserves data while removing clutter from active view
+- Users may want to reference past contexts later
+
+**Impact**:
+- Keeps dashboard focused on active life areas
+- Maintains data integrity for completed tasks
+- Easy restoration if context becomes relevant again
+- Supports life transitions without data loss
+
+**Implementation**: Boolean `archived` field on Context model, dedicated modal for viewing/restoring archived contexts, filter archived contexts from main dashboard query.
+
+### Completed Tasks Page
+**Decision**: Separate page for viewing completed tasks with pagination.
+
+**Reasoning**:
+- Completed tasks clutter the main dashboard over time
+- Users sometimes need to reference what they've accomplished
+- Historical view helps with reflection and productivity analysis
+- Pagination handles large datasets efficiently
+
+**Impact**:
+- Main dashboard remains focused on actionable items
+- Easy access to completion history for accountability
+- Performance optimization through pagination
+- Supports productivity tracking and reporting
+
+**Implementation**: Dedicated `/tasks/completed` route, server-side pagination with 20 items per page, sortable by completion date.
+
+### Feature Limits Configuration
+**Decision**: Centralized configuration for resource limits (tasks, contexts) with infinite defaults.
+
+**Reasoning**:
+- Prepares infrastructure for future subscription tiers
+- Allows easy adjustment of limits without code changes
+- Server-side enforcement prevents abuse
+- Currently unlimited to avoid friction during initial launch
+
+**Impact**:
+- Ready for freemium/premium pricing model
+- Consistent limit enforcement across all creation flows
+- Clear error messages when limits reached
+- Easy A/B testing of limit configurations
+
+**Implementation**: `lib/feature-limits.ts` with exported constants, checked in server actions before resource creation.
 
 ## Rejected Approaches
 
@@ -170,10 +257,19 @@ How to handle task assignment and context health in shared spaces (family kitche
 How to surface context status on physical displays for location-based reminders.
 
 ### Mobile Experience
-How to adapt the context-based organization for mobile constraints.
+How to adapt the context-based organization for mobile constraints (already PWA-ready, but UX could be optimized further).
 
-### Urgency Customization
-UI for adjusting urgency calculation weights per user preferences.
+### Urgency Customization UI
+UI for adjusting urgency calculation weights per user preferences (backend supports this via coefficients).
 
-### Text Entry Parsing
-Grammar and patterns for natural language task creation.
+### Subscription Tiers
+Which features to gate behind paid tiers vs. keep free (feature limits infrastructure is ready).
+
+### Push Notifications
+Whether to add push notifications for due tasks beyond badge API (could create notification fatigue).
+
+### Task Dependencies
+How to handle tasks that block other tasks (subtasks partially address this, but explicit dependencies could be useful).
+
+### Burndown Chart Placement
+Where to display the burndown chart for maximum value (dashboard widget vs. dedicated analytics page).
