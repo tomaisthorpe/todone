@@ -143,7 +143,7 @@ export default function SignUp() {
           </p>
         </div>
 
-        <Card>
+        <Card className="bg-white">
           <CardHeader>
             <CardTitle>Sign Up</CardTitle>
             <CardDescription>
