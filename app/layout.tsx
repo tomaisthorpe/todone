@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Zain, Roboto } from "next/font/google";
+import { Zain, Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 
@@ -9,9 +9,8 @@ const zain = Zain({
   subsets: ["latin"],
 });
 
-const roboto = Roboto({
-  variable: "--font-roboto",
-  weight: ["300", "400", "500", "700"],
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
@@ -127,7 +126,7 @@ export default function RootLayout({
         <link rel="shortcut icon" href="/favicon.ico" />
       </head>
       <body
-        className={`${zain.variable} ${roboto.variable} font-[family-name:var(--font-roboto)] text-base antialiased`}
+        className={`${zain.variable} ${inter.variable} font-[family-name:var(--font-inter)] text-base antialiased`}
       >
         <Providers>{children}</Providers>
       </body>

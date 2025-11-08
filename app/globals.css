@@ -30,7 +30,7 @@
   /* Focus ring */
   --color-ring: var(--color-blue-500);
 
-  --default-font-family: var(--font-roboto);
+  --default-font-family: var(--font-inter);
   --font-family-brand: var(--font-zain);
   --default-font-size: 1rem;
   --default-line-height: 1.5;
