@@ -236,8 +236,7 @@ SMTP_PASS="your-smtp-password"
 SMTP_SECURE="false"  # Optional: "true" for SSL/TLS (default: false for 587, true for 465)
 
 # Demo User Feature Flag
-ENABLE_DEMO_USER="true"  # Set to "true" to create demo user during seed (default: false)
-NEXT_PUBLIC_ENABLE_DEMO_USER="true"  # Set to "true" to show demo credentials on login form (default: false)
+ENABLE_DEMO_USER="true"  # Set to "true" to enable demo user (creates during seed and shows on login form)
 ```
 
 ## Important Notes
