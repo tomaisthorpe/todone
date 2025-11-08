@@ -58,10 +58,11 @@ export const authOptions = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async session({ session, token }: { session: any; token: any }) {
       if (token?.id) {
-        // Validate that the user still exists and fetch fresh data
+        // Validate that the user still exists in the database
         try {
           const user = await prisma.user.findUnique({
-            where: { id: token.id as string }
+            where: { id: token.id as string },
+            select: { id: true } // Only select id to minimize query cost
           });
 
           if (!user) {
@@ -70,9 +71,6 @@ export const authOptions = {
           }
 
           session.user.id = token.id as string;
-          // Update session with fresh user data from database
-          session.user.name = user.name;
-          session.user.email = user.email;
         } catch (error) {
           console.error("Error validating user existence:", error);
           // Return null to invalidate session on database errors
