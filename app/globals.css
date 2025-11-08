@@ -1,14 +1,34 @@
 @import "tailwindcss";
 
 @theme {
+    /* Primary colors */
     --color-primary: var(--color-blue-500);
     --color-primary-foreground: var(--color-white);
+
+    /* Secondary colors */
     --color-secondary: var(--color-gray-500);
     --color-secondary-foreground: var(--color-white);
-    --color-accent: var(--color-gray-500);
-    --color-accent-foreground: var(--color-white);
+
+    /* Accent colors */
+    --color-accent: var(--color-gray-100);
+    --color-accent-foreground: var(--color-gray-900);
+
+    /* Destructive colors */
     --color-destructive: var(--color-red-500);
     --color-destructive-foreground: var(--color-white);
+
+    /* Background/Foreground */
+    --color-background: var(--color-white);
+    --color-foreground: var(--color-gray-900);
+
+    /* Muted foreground (for placeholders and descriptions) */
+    --color-muted-foreground: var(--color-gray-500);
+
+    /* Input background */
+    --color-input: var(--color-gray-200);
+
+    /* Focus ring */
+    --color-ring: var(--color-blue-500);
 }
 
 .border-input {
@@ -17,4 +37,8 @@
 
 .border-input:focus {
     border-color: #3b82f6;
+}
+
+.ring-offset-background {
+    --tw-ring-offset-color: var(--color-background);
 }
