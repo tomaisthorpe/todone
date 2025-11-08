@@ -25,6 +25,7 @@ function SignInForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const successMessage = searchParams.get("message");
+  const showDemoUser = process.env.NEXT_PUBLIC_ENABLE_DEMO_USER === "true";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,9 +60,11 @@ function SignInForm() {
     <Card>
       <CardHeader>
         <CardTitle>Sign In</CardTitle>
-        <CardDescription>
-          Use the demo account: demo@unwhelm.app / password123
-        </CardDescription>
+        {showDemoUser && (
+          <CardDescription>
+            Use the demo account: demo@unwhelm.app / password123
+          </CardDescription>
+        )}
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -122,26 +125,28 @@ function SignInForm() {
           </Button>
         </form>
 
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-          <h4 className="text-sm font-medium text-blue-900">Demo Account</h4>
-          <p className="text-sm text-blue-700 mt-1">
-            Email: demo@unwhelm.app
-            <br />
-            Password: password123
-          </p>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="mt-2 bg-white"
-            onClick={() => {
-              setEmail("demo@unwhelm.app");
-              setPassword("password123");
-            }}
-          >
-            Fill Demo Credentials
-          </Button>
-        </div>
+        {showDemoUser && (
+          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+            <h4 className="text-sm font-medium text-blue-900">Demo Account</h4>
+            <p className="text-sm text-blue-700 mt-1">
+              Email: demo@unwhelm.app
+              <br />
+              Password: password123
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="mt-2 bg-white"
+              onClick={() => {
+                setEmail("demo@unwhelm.app");
+                setPassword("password123");
+              }}
+            >
+              Fill Demo Credentials
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
