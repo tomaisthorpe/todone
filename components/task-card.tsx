@@ -177,7 +177,7 @@ export function TaskCard({
               <div className="flex items-center flex-wrap space-x-2">
                 <h3
                   className={cn(
-                    "font-medium text-sm cursor-pointer hover:text-blue-600 transition-colors",
+                    "font-normal text-base cursor-pointer hover:text-blue-600 transition-colors",
                     effectiveCompleted
                       ? "line-through text-gray-500"
                       : "text-gray-900"

@@ -1,44 +1,54 @@
 @import "tailwindcss";
 
 @theme {
-    /* Primary colors */
-    --color-primary: var(--color-blue-500);
-    --color-primary-foreground: var(--color-white);
+  /* Primary colors */
+  --color-primary: var(--color-blue-500);
+  --color-primary-foreground: var(--color-white);
 
-    /* Secondary colors */
-    --color-secondary: var(--color-gray-500);
-    --color-secondary-foreground: var(--color-white);
+  /* Secondary colors */
+  --color-secondary: var(--color-gray-500);
+  --color-secondary-foreground: var(--color-white);
 
-    /* Accent colors */
-    --color-accent: var(--color-gray-100);
-    --color-accent-foreground: var(--color-gray-900);
+  /* Accent colors */
+  --color-accent: var(--color-gray-100);
+  --color-accent-foreground: var(--color-gray-900);
 
-    /* Destructive colors */
-    --color-destructive: var(--color-red-500);
-    --color-destructive-foreground: var(--color-white);
+  /* Destructive colors */
+  --color-destructive: var(--color-red-500);
+  --color-destructive-foreground: var(--color-white);
 
-    /* Background/Foreground */
-    --color-background: var(--color-white);
-    --color-foreground: var(--color-gray-900);
+  /* Background/Foreground */
+  --color-background: var(--color-white);
+  --color-foreground: var(--color-gray-900);
 
-    /* Muted foreground (for placeholders and descriptions) */
-    --color-muted-foreground: var(--color-gray-500);
+  /* Muted foreground (for placeholders and descriptions) */
+  --color-muted-foreground: var(--color-gray-500);
 
-    /* Input background */
-    --color-input: var(--color-gray-200);
+  /* Input background */
+  --color-input: var(--color-gray-200);
 
-    /* Focus ring */
-    --color-ring: var(--color-blue-500);
+  /* Focus ring */
+  --color-ring: var(--color-blue-500);
+
+  --default-font-family: var(--font-roboto);
+  --font-family-brand: var(--font-zain);
+  --default-font-size: 1rem;
+  --default-line-height: 1.5;
 }
 
 .border-input {
-    border-color: #e5e7eb;
+  border-color: #e5e7eb;
 }
 
 .border-input:focus {
-    border-color: #3b82f6;
+  border-color: #3b82f6;
 }
 
 .ring-offset-background {
-    --tw-ring-offset-color: var(--color-background);
+  --tw-ring-offset-color: var(--color-background);
 }
+
+.font-brand {
+  font-family: var(--font-zain), sans-serif;
+}
+

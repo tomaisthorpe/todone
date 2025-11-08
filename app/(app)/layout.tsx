@@ -35,7 +35,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
                   height="32"
                 />
               </div>
-              <h1 className="hidden md:block text-2xl font-bold text-gray-900">
+              <h1 className="hidden md:block text-2xl font-bold text-gray-900 font-brand">
                 unwhelm
               </h1>
             </Link>
