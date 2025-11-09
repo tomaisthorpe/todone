@@ -45,6 +45,7 @@ export async function POST(request: NextRequest) {
       emailVerified: user.emailVerified,
       image: user.image,
       role: user.role,
+      plan: user.plan,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
