@@ -397,21 +397,36 @@ SMTP_SECURE="false"  # Optional: "true" for SSL/TLS (default: false for 587, tru
 
 # Demo User Feature Flag
 ENABLE_DEMO_USER="true"  # Set to "true" to enable demo user (creates during seed and shows on login form)
+
+# Self-Hosted Mode (optional)
+SELF_HOSTED="true"  # Set to "true" to provide unlimited resources to all users regardless of plan
 ```
 
 ## Feature Limits
 
-Resource limits are configurable per user (potential for subscription tiers):
+Resource limits are configurable based on user subscription plans:
 
 **Configuration:** `lib/feature-limits.ts`
 
-- `MAX_TASKS` - Currently set to `Infinity` (unlimited)
-- `MAX_CONTEXTS` - Currently set to `Infinity` (unlimited)
+**Plan Limits:**
+- **FREE Plan:**
+  - MAX_TASKS: Infinity (unlimited)
+  - MAX_CONTEXTS: 3
+- **PRO Plan:**
+  - MAX_TASKS: Infinity (unlimited)
+  - MAX_CONTEXTS: Infinity (unlimited)
+
+**Self-Hosted Mode:**
+- Set `SELF_HOSTED=true` environment variable to provide unlimited resources to all users
+- When enabled, `getPlanLimits()` returns unlimited for all plans
+- `getPlanDisplayName()` returns "Unlimited" instead of plan name
+- Useful for personal or organizational self-hosted deployments
 
 **Server-side Enforcement:**
 - Checked in server actions before creating new resources
 - Returns error messages from `FEATURE_LIMIT_ERRORS` when limits exceeded
-- Ready for future subscription tier implementation
+- Use `getPlanLimits(userPlan)` to get limits for a specific user's plan
+- Use `isSelfHosted()` to check if instance is running in self-hosted mode
 
 ## Burndown Chart
 
