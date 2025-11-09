@@ -21,7 +21,7 @@ export default async function AccountSettingsPage() {
   const usageCounts = await getUserUsageCounts();
 
   // Get plan limits based on user's plan (respects SELF_HOSTED mode)
-  const userPlan = (session.user as any)?.plan as UserPlan || "FREE";
+  const userPlan = ((session.user as { plan?: string })?.plan as UserPlan) || "FREE";
   const planLimits = getPlanLimits(userPlan);
 
   return (
