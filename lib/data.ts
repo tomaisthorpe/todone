@@ -675,6 +675,7 @@ export async function getUserUsageCounts(): Promise<{
 // Admin-only functions
 export interface UserStats {
   id: string;
+  email: string;
   createdAt: Date;
   tasksCount: number;
   contextsCount: number;
@@ -719,6 +720,7 @@ export async function getAllUserStats(): Promise<UserStats[]> {
     const users = await prisma.user.findMany({
       select: {
         id: true,
+        email: true,
         createdAt: true,
       },
       orderBy: { createdAt: "desc" },
@@ -744,6 +746,7 @@ export async function getAllUserStats(): Promise<UserStats[]> {
 
         return {
           id: user.id,
+          email: user.email,
           createdAt: user.createdAt,
           tasksCount,
           contextsCount,
