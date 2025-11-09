@@ -10,7 +10,7 @@ import { calculateUrgency, parseTags, shouldHabitShowAsAvailable } from "./utils
 import { completeTask, uncompleteHabit, toggleRegularTask, TaskForCompletion } from "./task-completion-utils";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
-import { FEATURE_LIMITS, FEATURE_LIMIT_ERRORS } from "./feature-limits";
+import { getPlanLimits, FEATURE_LIMIT_ERRORS, type UserPlan } from "./feature-limits";
 
 // Get authenticated user or redirect
 async function getAuthenticatedUser() {
@@ -127,11 +127,18 @@ export async function createTaskAction(formData: FormData) {
   const userId = await getAuthenticatedUser();
 
   // Feature gating: Check if user has reached the maximum number of tasks
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { plan: true },
+  });
+  const userPlan = (user?.plan as UserPlan) || "FREE";
+  const planLimits = getPlanLimits(userPlan);
+
   const taskCount = await prisma.task.count({
     where: { userId },
   });
 
-  if (taskCount >= FEATURE_LIMITS.MAX_TASKS) {
+  if (taskCount >= planLimits.MAX_TASKS) {
     throw new Error(FEATURE_LIMIT_ERRORS.MAX_TASKS);
   }
 
@@ -343,11 +350,18 @@ export async function createContextAction(formData: FormData) {
   const userId = await getAuthenticatedUser();
 
   // Feature gating: Check if user has reached the maximum number of contexts
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { plan: true },
+  });
+  const userPlan = (user?.plan as UserPlan) || "FREE";
+  const planLimits = getPlanLimits(userPlan);
+
   const contextCount = await prisma.context.count({
     where: { userId },
   });
 
-  if (contextCount >= FEATURE_LIMITS.MAX_CONTEXTS) {
+  if (contextCount >= planLimits.MAX_CONTEXTS) {
     throw new Error(FEATURE_LIMIT_ERRORS.MAX_CONTEXTS);
   }
 
@@ -492,11 +506,11 @@ export async function archiveContextAction(contextId: string) {
   });
 
   // Delete incomplete tasks, keep completed tasks
-  const incompleteTasks = tasks.filter((task) => !task.completed);
+  const incompleteTasks = tasks.filter((task: { completed: boolean }) => !task.completed);
   if (incompleteTasks.length > 0) {
     await prisma.task.deleteMany({
       where: {
-        id: { in: incompleteTasks.map((task) => task.id) },
+        id: { in: incompleteTasks.map((task: { id: string }) => task.id) },
       },
     });
   }

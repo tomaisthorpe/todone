@@ -48,6 +48,7 @@ model User {
   image         String?
   password      String?   // For credentials auth
   role          UserRole  @default(USER)
+  plan          UserPlan  @default(FREE)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -126,6 +127,11 @@ enum HabitType {
 enum UserRole {
   USER
   ADMIN
+}
+
+enum UserPlan {
+  FREE
+  PRO
 }
 
 model Task {
