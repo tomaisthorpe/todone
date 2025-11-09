@@ -7,7 +7,7 @@ import Link from "next/link";
 import { Metadata } from "next";
 import { AccountSettingsForm } from "@/components/account-settings-form";
 import { getUserUsageCounts } from "@/lib/data";
-import { FEATURE_LIMITS } from "@/lib/feature-limits";
+import { getPlanLimits, type UserPlan } from "@/lib/feature-limits";
 
 export const metadata: Metadata = {
   title: "unwhelm / Account Settings",
@@ -19,6 +19,10 @@ export default async function AccountSettingsPage() {
 
   // Get user's current usage counts
   const usageCounts = await getUserUsageCounts();
+
+  // Get plan limits based on user's plan (respects SELF_HOSTED mode)
+  const userPlan = (session.user as any)?.plan as UserPlan || "FREE";
+  const planLimits = getPlanLimits(userPlan);
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
@@ -49,8 +53,8 @@ export default async function AccountSettingsPage() {
           user={session.user}
           usageCounts={usageCounts}
           limits={{
-            maxTasks: FEATURE_LIMITS.MAX_TASKS,
-            maxContexts: FEATURE_LIMITS.MAX_CONTEXTS,
+            maxTasks: planLimits.MAX_TASKS,
+            maxContexts: planLimits.MAX_CONTEXTS,
           }}
         />
     </div>

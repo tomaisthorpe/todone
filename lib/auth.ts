@@ -40,6 +40,8 @@ export const authOptions = {
           id: user.id,
           email: user.email,
           name: user.name,
+          role: user.role,
+          plan: user.plan,
         };
       }
     })
@@ -62,7 +64,11 @@ export const authOptions = {
         try {
           const user = await prisma.user.findUnique({
             where: { id: token.id as string },
-            select: { id: true } // Only select id to minimize query cost
+            select: {
+              id: true,
+              role: true,
+              plan: true,
+            }
           });
 
           if (!user) {
@@ -71,6 +77,8 @@ export const authOptions = {
           }
 
           session.user.id = token.id as string;
+          session.user.role = user.role;
+          session.user.plan = user.plan;
         } catch (error) {
           console.error("Error validating user existence:", error);
           // Return null to invalidate session on database errors
