@@ -1,8 +1,8 @@
-# Todone
+# unwhelm
 
 > [!CAUTION]
-> I'm using this project to experiment with LLM-assisted development. Something I've been curious but cautious about. 
-> The codebase will likely evolve quickly and unconventionally as I experiment with AI tools. 
+> I'm using this project to experiment with LLM-assisted development. Something I've been curious but cautious about.
+> The codebase will likely evolve quickly and unconventionally as I experiment with AI tools.
 > Feedback and observations about this approach are welcome!
 
 A context-based task management app in early development with customizable urgency scoring and flexible habit tracking.
@@ -11,17 +11,19 @@ A context-based task management app in early development with customizable urgen
 
 ## Overview
 
-This is the **full-stack version** of Todone, utilizing React Server Components and Server Actions for optimal performance. The application has been built according to the specifications in the design documents with a server-first architecture.
+This is the **full-stack version** of unwhelm, utilizing React Server Components and Server Actions for optimal performance. The application has been built according to the specifications in the design documents with a server-first architecture.
 
 ## Quick Start
 
 For detailed setup instructions, see [SETUP.md](./SETUP.md).
 
 **Demo Account:**
-- Email: `demo@todone.app` 
+
+- Email: `demo@unwhelm.app`
 - Password: `password123`
 
 **Development:**
+
 ```bash
 npm install
 npm run db:push
@@ -33,7 +35,7 @@ Open [http://localhost:3000](http://localhost:3000) to see the application.
 
 ## Core Concept
 
-Todone is designed to solve the problem of prioritizing work across multiple projects and life areas. Unlike traditional task apps, it uses:
+unwhelm is designed to solve the problem of prioritizing work across multiple projects and life areas. Unlike traditional task apps, it uses:
 
 - **Context-based organization** (coding, bathroom, kitchen, etc.)
 - **Customizable urgency scoring** (inspired by TaskWarrior)
@@ -64,6 +66,7 @@ Each context shows a "health" percentage based only on habit completion (not reg
 ### Urgency System
 
 Tasks are sorted by urgency scores that can be customized based on:
+
 - Project importance
 - Age of task
 - Priority level
@@ -86,6 +89,7 @@ Contexts (collapsible)
 ## Habit Status Language
 
 Habits use relaxed, non-judgmental language:
+
 - **"✓ Fresh"** - Recently completed, no action needed
 - **"⏰ Getting due"** - Approaching usual frequency
 - **"⚡ Ready"** - Available to do when convenient
@@ -94,7 +98,7 @@ Habits use relaxed, non-judgmental language:
 ## Technical Stack
 
 - **Frontend**: Next.js 15 with App Router, React 19 Server Components, TypeScript
-- **Database**: PostgreSQL with Prisma ORM  
+- **Database**: PostgreSQL with Prisma ORM
 - **Authentication**: NextAuth.js v4 with credentials provider
 - **Styling**: Tailwind CSS + shadcn/ui components
 - **Data**: Server-side data fetching with Server Actions
@@ -103,19 +107,21 @@ Habits use relaxed, non-judgmental language:
 
 ### UI Component Strategy
 
-We use **shadcn/ui** for foundational components and build custom components for Todone-specific patterns:
+We use **shadcn/ui** for foundational components and build custom components for unwhelm-specific patterns:
 
 **shadcn/ui components:**
+
 - Basic building blocks: Button, Card, Badge, Dialog, Input
 - Standard patterns: Loading states, form components, modals
 
 **Custom components:**
+
 - TaskCard (handles 3 task types with different visual treatments)
 - ContextGroup (collapse/expand with health visualization)
 - HabitStatusBadge (relaxed status language with emojis)
 - UrgencyScore (mathematical scoring display)
 
-This approach gives us speed for common patterns while maintaining full control over the unique Todone UX that differentiates it from other task apps.
+This approach gives us speed for common patterns while maintaining full control over the unique unwhelm UX that differentiates it from other task apps.
 
 ## Design Principles
 
@@ -125,9 +131,10 @@ This approach gives us speed for common patterns while maintaining full control 
 4. **Natural Language Entry** - Smart parsing of context, tags, priority, and dates
 5. **Visual Scanning** - Important information is immediately visible
 
-## Features 
+## Features
 
 **Core Functionality:**
+
 - ✅ Complete task CRUD with Server Actions
 - ✅ Context management with health tracking
 - ✅ Dynamic urgency calculation
@@ -137,6 +144,7 @@ This approach gives us speed for common patterns while maintaining full control 
 - ✅ Server-side rendering and data fetching
 
 **Task Management:**
+
 - ✅ Three task types: regular, habits, recurring
 - ✅ Urgency scoring based on priority, age, due dates, tags
 - ✅ Optimistic UI updates with Server Actions
@@ -146,6 +154,7 @@ This approach gives us speed for common patterns while maintaining full control 
 - ✅ Tag coefficient system for customizable urgency weighting
 
 **UI/UX:**
+
 - ✅ Responsive design with Tailwind CSS + shadcn/ui
 - ✅ Context health visualization
 - ✅ Collapsible context groups
@@ -156,13 +165,15 @@ This approach gives us speed for common patterns while maintaining full control 
 - ✅ Completed tasks page with pagination
 
 **Analytics & Insights:**
+
 - ✅ Task burndown chart and completion analytics
 - ✅ PWA badge notifications for due tasks
 - ✅ Context health tracking and visualization
 
 ### 🔄 Future Enhancements
+
 - Advanced analytics beyond burndown charts
-- Shared contexts for families/roommates  
+- Shared contexts for families/roommates
 - Offline support
 
 ## Design Reference
@@ -180,6 +191,7 @@ Use this mockup as a reference for component structure, styling patterns, and us
 ## Documentation Maintenance
 
 When making significant changes to the UI or design decisions, please update:
+
 - `/docs/design-decisions.md` - Add new decisions or update reasoning
 - `/docs/ui-patterns.md` - Update component patterns and examples
 - `/docs/mockup.tsx` - Update if UI significantly changes
@@ -189,16 +201,19 @@ This helps maintain context for future development and AI assistance.
 ## Development Guidelines
 
 ### State Management
+
 - Keep task data structure flexible for different types
 - Separate context health calculation (habits only)
 - Maintain urgency scoring as a pure function
 
 ### UI Components
+
 - TaskCard component handles all task types
 - ContextGroup manages collapse/expand state
 - Clear visual hierarchy: habits with icons, recurring with rotate icon
 
 ### Habit System
+
 - Frequency in days (1 = daily, 7 = weekly)
 - Track streak, longest streak, last completed
 - Status calculation based on frequency vs. days since completion
@@ -210,14 +225,14 @@ This helps maintain context for future development and AI assistance.
 ✅ **Server Actions**: All mutations handled server-side for better performance and security  
 ✅ **Minimal Client JavaScript**: Only interactive components use `"use client"`  
 ✅ **Optimistic UI**: Task toggling with `useTransition` for immediate feedback  
-✅ **Type Safety**: Full TypeScript coverage from database to UI  
+✅ **Type Safety**: Full TypeScript coverage from database to UI
 
 ## File Structure
 
 ```
 ├── app/                          # Next.js App Router
 │   ├── api/                      # API routes (legacy)
-│   ├── auth/signin/              # Authentication pages  
+│   ├── auth/signin/              # Authentication pages
 │   ├── layout.tsx                # Root layout with providers
 │   └── page.tsx                  # Main dashboard (Server Component)
 ├── components/                   # React components
@@ -245,6 +260,7 @@ This helps maintain context for future development and AI assistance.
 ## Data Schema
 
 ### Task Object
+
 ```javascript
 {
   id: string,
@@ -257,20 +273,21 @@ This helps maintain context for future development and AI assistance.
   urgency: number,
   completed: boolean,
   type: 'task' | 'habit' | 'recurring',
-  
+
   // Habit-specific fields
   habitType?: 'streak' | 'learning' | 'wellness' | 'maintenance',
   streak?: number,
   longestStreak?: number,
   frequency?: number, // days
 
-  
+
   // Recurring-specific fields
   nextDue?: string
 }
 ```
 
 ### Context Object
+
 ```javascript
 {
   id: string,
@@ -313,7 +330,7 @@ npm run db:studio       # Open Prisma Studio
 ## Environment Variables
 
 ```bash
-DATABASE_URL="postgresql://username:password@localhost:5432/todone"
+DATABASE_URL="postgresql://username:password@localhost:5432/unwhelm"
 NEXTAUTH_SECRET="your-secret-key-here"
 NEXTAUTH_URL="http://localhost:3000"
 ```
