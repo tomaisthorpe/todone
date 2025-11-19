@@ -3,6 +3,15 @@ import withPWA from "next-pwa";
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  outputFileTracingIncludes: {
+    // Include Prisma CLI and its dependencies in standalone output
+    "/": [
+      "./node_modules/prisma/**/*",
+      "./node_modules/@prisma/**/*",
+      "./node_modules/.bin/prisma",
+      "./node_modules/jiti/**/*",
+    ],
+  },
 };
 
 export default withPWA({
