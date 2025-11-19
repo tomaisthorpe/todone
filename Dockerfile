@@ -1,6 +1,11 @@
 # Use the official Node.js runtime as the base image
 FROM node:20-slim AS base
 
+# Install OpenSSL for Prisma in all stages
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends openssl \
+  && rm -rf /var/lib/apt/lists/*
+
 # Install dependencies only when needed
 FROM base AS deps
 WORKDIR /app
@@ -35,11 +40,6 @@ WORKDIR /app
 ENV NODE_ENV production
 # Uncomment the following line in case you want to disable telemetry during runtime.
 # ENV NEXT_TELEMETRY_DISABLED 1
-
-# Install OpenSSL for Prisma
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends openssl \
-  && rm -rf /var/lib/apt/lists/*
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
