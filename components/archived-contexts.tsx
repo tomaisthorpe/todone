@@ -12,9 +12,10 @@ interface ArchivedContextsProps {
   archivedContexts: Context[];
   isOpen: boolean;
   onClose: () => void;
+  onDataChange?: () => void;
 }
 
-export function ArchivedContexts({ archivedContexts, isOpen, onClose }: ArchivedContextsProps) {
+export function ArchivedContexts({ archivedContexts, isOpen, onClose, onDataChange }: ArchivedContextsProps) {
   const [isLoading, setIsLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,7 +25,8 @@ export function ArchivedContexts({ archivedContexts, isOpen, onClose }: Archived
 
     try {
       await unarchiveContextAction(contextId);
-      // The page will automatically refresh due to revalidatePath in the server action
+      // Trigger immediate data refresh
+      onDataChange?.();
     } catch (error) {
       console.error("Failed to unarchive context:", error);
       setError(error instanceof Error ? error.message : "Failed to unarchive context");
