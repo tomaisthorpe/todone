@@ -665,7 +665,11 @@ export function TaskModal({
 
         {/* Task Form */}
         {activeTab === "task" && (
-          <form onSubmit={onSubmitTask} className="space-y-4">
+          <form
+            onSubmit={onSubmitTask}
+            className="space-y-4"
+            data-task-form="true"
+          >
             <TaskForm
               data={taskFormData}
               onChange={handleTaskFormChange}
@@ -1071,18 +1075,27 @@ export function TaskModal({
             </DialogTitle>
           </DialogHeader>
           <p>
-            You have unsaved changes. Are you sure you want to close without
-            saving?
+            You have unsaved changes. Would you like to save them before
+            closing?
           </p>
           <div className="flex justify-end gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setShowUnsavedChangesConfirm(false)}
-            >
-              Keep Editing
-            </Button>
             <Button variant="destructive" onClick={forceClose}>
               Discard Changes
+            </Button>
+            <Button
+              onClick={async () => {
+                setShowUnsavedChangesConfirm(false);
+                // Trigger form submission by creating a synthetic event
+                const form = document.querySelector(
+                  'form[data-task-form="true"]',
+                ) as HTMLFormElement;
+                if (form) {
+                  form.requestSubmit();
+                }
+              }}
+              disabled={isLoading}
+            >
+              Save Changes
             </Button>
           </div>
         </DialogContent>
