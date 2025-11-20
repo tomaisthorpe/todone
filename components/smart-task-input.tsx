@@ -339,9 +339,10 @@ export function SmartTaskInput({
 
       // Parse context (!contextName) - support spaces in context names
       // Only match contexts that exist in the database and are complete
-      let longestMatch: { context: typeof contexts[0]; startIndex: number; matchText: string } | null = null;
+      let bestMatch: { context: typeof contexts[0]; startIndex: number; matchText: string } | null = null;
 
-      // Find all possible context matches and select the longest one
+      // Find all possible context matches and select the first one that appears in the text
+      // If multiple contexts appear at the same position, prefer the longer match
       // Only match if the context name is complete (followed by space, end of string, or special char)
       for (const context of contexts) {
         const contextPattern = `!${context.name}`;
@@ -356,8 +357,11 @@ export function SmartTaskInput({
           const isCompleteMatch = !charAfter || charAfter === ' ' || charAfter === '#' || charAfter === '!';
 
           if (isCompleteMatch) {
-            if (!longestMatch || contextPattern.length > longestMatch.matchText.length) {
-              longestMatch = {
+            // Prioritize by position first (earliest wins), then by length (longest wins if at same position)
+            if (!bestMatch ||
+                contextIndex < bestMatch.startIndex ||
+                (contextIndex === bestMatch.startIndex && contextPattern.length > bestMatch.matchText.length)) {
+              bestMatch = {
                 context,
                 startIndex: contextIndex,
                 matchText: text.substring(contextIndex, contextIndex + contextPattern.length),
@@ -367,18 +371,18 @@ export function SmartTaskInput({
         }
       }
 
-      if (longestMatch) {
-        result.contextId = longestMatch.context.id;
-        result.contextName = longestMatch.context.name;
+      if (bestMatch) {
+        result.contextId = bestMatch.context.id;
+        result.contextName = bestMatch.context.name;
 
         newSegments.push({
-          text: longestMatch.matchText,
+          text: bestMatch.matchText,
           type: "context",
-          startIndex: longestMatch.startIndex,
-          endIndex: longestMatch.startIndex + longestMatch.matchText.length,
+          startIndex: bestMatch.startIndex,
+          endIndex: bestMatch.startIndex + bestMatch.matchText.length,
         });
 
-        workingText = workingText.replace(longestMatch.matchText, " ");
+        workingText = workingText.replace(bestMatch.matchText, " ");
       }
 
       // No fallback - only match contexts that actually exist in the database
