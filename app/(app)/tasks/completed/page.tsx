@@ -1,6 +1,6 @@
 import { CheckCircle2, Clock } from "lucide-react";
 import { TaskCard } from "@/components/task-card";
-import { getCompletedTasks, getContexts, getBurndownData } from "@/lib/data";
+import { getCompletedTasks, getContexts, getArchivedContexts, getBurndownData } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/pagination";
 import { BurndownChart } from "@/components/burndown-chart";
@@ -29,11 +29,15 @@ export default async function CompletedPage({
   const pageSize = 20;
 
   // Server-side data fetching
-  const [completedResult, contexts, burndownData] = await Promise.all([
+  const [completedResult, activeContexts, archivedContexts, burndownData] = await Promise.all([
     getCompletedTasks(page, pageSize),
     getContexts(),
+    getArchivedContexts(),
     getBurndownData(),
   ]);
+
+  // Combine active and archived contexts so tasks with archived contexts still show badges
+  const contexts = [...activeContexts, ...archivedContexts];
 
   // Group tasks by today vs older
   const today = startOfDay(new Date());

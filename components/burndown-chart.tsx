@@ -156,6 +156,8 @@ export function BurndownChart({ data }: BurndownChartProps) {
                 angle: -90,
                 position: "insideBottomLeft",
               }}
+              allowDecimals={false}
+              domain={[5, 'auto']}
             />
             <Tooltip content={<CustomTooltip />} />
             <Line
