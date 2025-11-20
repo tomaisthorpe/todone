@@ -932,7 +932,10 @@ export function TaskModal({
           onOpenChange={setShowDeleteConfirm}
           modal={true}
         >
-          <DialogContent className="bg-white">
+          <DialogContent
+            className="bg-white z-[10001]"
+            overlayClassName="z-[10000]"
+          >
             <DialogHeader>
               <DialogTitle className="flex items-center">
                 <AlertTriangle className="w-4 h-4 text-red-600 mr-2" />
@@ -965,7 +968,10 @@ export function TaskModal({
           onOpenChange={setShowArchiveConfirm}
           modal={true}
         >
-          <DialogContent className="bg-white">
+          <DialogContent
+            className="bg-white z-[10001]"
+            overlayClassName="z-[10000]"
+          >
             <DialogHeader>
               <DialogTitle className="flex items-center">
                 <Archive className="w-4 h-4 text-orange-600 mr-2" />
