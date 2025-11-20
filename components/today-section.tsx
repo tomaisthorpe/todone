@@ -22,6 +22,7 @@ interface TodaySectionProps {
   }>;
   tags: Tag[];
   onContextClick?: (contextId: string) => void;
+  onDataChange?: () => void;
 }
 
 function getTodayTasks(tasks: Task[]): Task[] {
@@ -93,6 +94,7 @@ export function TodaySection({
   contexts,
   tags,
   onContextClick,
+  onDataChange,
 }: TodaySectionProps) {
   const [activeTab, setActiveTab] = useState<"urgency" | "today">("urgency");
 
@@ -179,6 +181,7 @@ export function TodaySection({
                 tags={tags}
                 showContext={true}
                 onContextClick={onContextClick}
+                onDataChange={onDataChange}
               />
             ))}
             {currentTasks.length > 5 && (

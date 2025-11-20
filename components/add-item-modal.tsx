@@ -87,6 +87,7 @@ interface TaskModalProps {
   contextToEdit?: Context;
   tagToEdit?: Tag;
   defaultTab?: "task" | "context" | "tag";
+  onDataChange?: () => void;
 }
 
 const contextColors = [
@@ -114,6 +115,7 @@ export function TaskModal({
   contextToEdit,
   tagToEdit,
   defaultTab = "task",
+  onDataChange,
 }: TaskModalProps) {
   const [activeTab, setActiveTab] = useState<"task" | "context" | "tag">(defaultTab);
   const [isLoading, setIsLoading] = useState(false);
@@ -452,6 +454,8 @@ export function TaskModal({
 
     try {
       await archiveContextAction(contextToEdit.id);
+      // Trigger immediate data refresh
+      onDataChange?.();
       setShowArchiveConfirm(false);
       onClose();
     } catch (error) {
@@ -963,6 +967,7 @@ export function AddItemModal({
   addButtonSize = "lg",
   defaultTab = "task",
   buttonContent,
+  onDataChange,
 }: {
   contexts: Array<{
     id: string;
@@ -977,6 +982,7 @@ export function AddItemModal({
   addButtonSize?: "sm" | "lg" | "icon";
   defaultTab?: "task" | "context" | "tag";
   buttonContent?: React.ReactNode;
+  onDataChange?: () => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -1012,6 +1018,7 @@ export function AddItemModal({
         onClose={() => setIsOpen(false)}
         defaultContextId={defaultContextId}
         defaultTab={defaultTab}
+        onDataChange={onDataChange}
       />
     </>
   );

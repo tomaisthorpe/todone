@@ -104,6 +104,7 @@ export function ContextsSection({
             tags={tags}
             addButtonSize="icon"
             defaultTab="context"
+            onDataChange={onDataChange}
           />
         </div>
         <div className="flex items-center gap-2">
@@ -173,6 +174,7 @@ export function ContextsSection({
                   })
                 }
                 searchQuery={searchQuery}
+                onDataChange={onDataChange}
               />
             );
           })}

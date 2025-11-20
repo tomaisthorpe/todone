@@ -28,6 +28,7 @@ interface ContextGroupProps {
   collapsed?: boolean;
   onCollapsedChange?: (value: boolean) => void;
   searchQuery?: string;
+  onDataChange?: () => void;
 }
 
 function getContextCompletion(tasks: Task[]) {
@@ -108,6 +109,7 @@ function ContextGroupHeader({
                   tags={tags}
                   defaultContextId={context.id}
                   addButtonSize="sm"
+                  onDataChange={onDataChange}
                 />
               </div>
               {todayTasksInContext > 0 && (
@@ -140,6 +142,7 @@ function ContextGroupHeader({
         contextToEdit={context}
         isOpen={isEditContextOpen}
         onClose={() => setIsEditContextOpen(false)}
+        onDataChange={onDataChange}
       />
     </div>
   );
@@ -153,6 +156,7 @@ export function ContextGroup({
   collapsed,
   onCollapsedChange,
   searchQuery,
+  onDataChange,
 }: ContextGroupProps) {
   const contextTasks = tasks
     .filter((task) => {
@@ -223,6 +227,7 @@ export function ContextGroup({
                     contexts={allContexts}
                     tags={tags}
                     searchQuery={searchQuery}
+                    onDataChange={onDataChange}
                   />
                 ))}
               </div>
