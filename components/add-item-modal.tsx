@@ -124,6 +124,8 @@ export function TaskModal({
   const [existingTags, setExistingTags] = useState<string[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
+  const [showUnsavedChangesConfirm, setShowUnsavedChangesConfirm] =
+    useState(false);
   const [error, setError] = useState<string | null>(null);
   const { createTask, updateTask, deleteTask, createContext, updateContext } =
     useDashboardActions();
@@ -146,6 +148,10 @@ export function TaskModal({
     notes: "",
     subtasks: [],
   });
+
+  // Track initial form data to detect unsaved changes
+  const [initialTaskFormData, setInitialTaskFormData] =
+    useState<TaskFormData | null>(null);
 
   // Generate unique IDs for this modal instance to prevent conflicts
   const modalId = useId();
@@ -177,7 +183,7 @@ export function TaskModal({
       setError(null); // Clear errors when modal opens
       if (task) {
         // Editing mode - populate form with task data
-        setTaskFormData({
+        const formData = {
           title: task.title,
           project: task.project || "",
           priority: task.priority,
@@ -192,7 +198,9 @@ export function TaskModal({
           tags: task.tags,
           notes: task.notes || "",
           subtasks: task.subtasks || [],
-        });
+        };
+        setTaskFormData(formData);
+        setInitialTaskFormData(formData);
         setActiveTab("task");
       } else if (contextToEdit) {
         // Editing a context - populate context form
@@ -216,20 +224,22 @@ export function TaskModal({
         // Adding mode - reset to defaults
         const currentFallbackContextId =
           defaultContextId || inboxContext?.id || "";
-        setTaskFormData({
+        const defaultFormData = {
           title: "",
           project: "",
-          priority: "MEDIUM",
+          priority: "MEDIUM" as const,
           contextId: currentFallbackContextId,
           dueDate: "",
           waitDays: undefined,
-          type: "TASK",
+          type: "TASK" as const,
           habitType: undefined,
           frequency: undefined,
           tags: [],
           notes: "",
           subtasks: [],
-        });
+        };
+        setTaskFormData(defaultFormData);
+        setInitialTaskFormData(defaultFormData);
         // Also reset context form to defaults
         contextForm.reset({
           name: "",
@@ -249,6 +259,44 @@ export function TaskModal({
     inboxContext?.id,
     tagToEdit?.id,
   ]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Check if the task form has unsaved changes
+  const hasUnsavedTaskChanges = () => {
+    if (!initialTaskFormData || activeTab !== "task") return false;
+
+    // Deep comparison of form data
+    return (
+      taskFormData.title !== initialTaskFormData.title ||
+      taskFormData.project !== initialTaskFormData.project ||
+      taskFormData.priority !== initialTaskFormData.priority ||
+      taskFormData.contextId !== initialTaskFormData.contextId ||
+      taskFormData.dueDate !== initialTaskFormData.dueDate ||
+      taskFormData.waitDays !== initialTaskFormData.waitDays ||
+      taskFormData.type !== initialTaskFormData.type ||
+      taskFormData.habitType !== initialTaskFormData.habitType ||
+      taskFormData.frequency !== initialTaskFormData.frequency ||
+      taskFormData.notes !== initialTaskFormData.notes ||
+      JSON.stringify(taskFormData.tags) !==
+        JSON.stringify(initialTaskFormData.tags) ||
+      JSON.stringify(taskFormData.subtasks) !==
+        JSON.stringify(initialTaskFormData.subtasks)
+    );
+  };
+
+  // Handle modal close with unsaved changes check
+  const handleClose = () => {
+    if (hasUnsavedTaskChanges()) {
+      setShowUnsavedChangesConfirm(true);
+    } else {
+      onClose();
+    }
+  };
+
+  // Force close without checking for unsaved changes
+  const forceClose = () => {
+    setShowUnsavedChangesConfirm(false);
+    onClose();
+  };
 
   const handleTaskFormChange = <K extends keyof TaskFormData>(
     field: K,
@@ -500,7 +548,15 @@ export function TaskModal({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose} modal={true}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) {
+          handleClose();
+        }
+      }}
+      modal={true}
+    >
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white shadow-xl rounded-2xl border-0">
         <DialogHeader>
           <div className="flex items-center justify-between">
@@ -624,7 +680,7 @@ export function TaskModal({
             />
 
             <div className="flex justify-end space-x-2 pt-4">
-              <Button type="button" variant="outline" onClick={onClose}>
+              <Button type="button" variant="outline" onClick={handleClose}>
                 Cancel
               </Button>
               <Button type="submit" disabled={isLoading}>
@@ -1000,6 +1056,37 @@ export function TaskModal({
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Unsaved changes confirmation dialog */}
+      <Dialog
+        open={showUnsavedChangesConfirm}
+        onOpenChange={setShowUnsavedChangesConfirm}
+        modal={true}
+      >
+        <DialogContent className="bg-white">
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              <AlertTriangle className="w-4 h-4 text-orange-600 mr-2" />
+              Unsaved Changes
+            </DialogTitle>
+          </DialogHeader>
+          <p>
+            You have unsaved changes. Are you sure you want to close without
+            saving?
+          </p>
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowUnsavedChangesConfirm(false)}
+            >
+              Keep Editing
+            </Button>
+            <Button variant="destructive" onClick={forceClose}>
+              Discard Changes
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 }
