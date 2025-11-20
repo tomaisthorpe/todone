@@ -571,33 +571,19 @@ export function TaskModal({
             </DialogTitle>
 
             {/* Quick Actions in Header - Only for editing tasks */}
-            {isEditing && activeTab === "task" && (
+            {isEditing && activeTab === "task" && !task?.completed && (
               <div className="flex items-center space-x-2">
-                {!task?.completed && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleCompleteYesterday}
-                    disabled={isLoading}
-                    className="text-xs"
-                    tabIndex={-1}
-                  >
-                    <Calendar className="w-3 h-3 mr-1" />
-                    Complete Yesterday
-                  </Button>
-                )}
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={() => setShowDeleteConfirm(true)}
+                  onClick={handleCompleteYesterday}
                   disabled={isLoading}
-                  className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                  className="text-xs"
                   tabIndex={-1}
                 >
-                  <Trash2 className="w-3 h-3 mr-1" />
-                  Delete
+                  <Calendar className="w-3 h-3 mr-1" />
+                  Complete Yesterday
                 </Button>
               </div>
             )}
@@ -683,19 +669,32 @@ export function TaskModal({
               onTagEdit={handleTagEdit}
             />
 
-            <div className="flex justify-end space-x-2 pt-4">
-              <Button type="button" variant="outline" onClick={handleClose}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading
-                  ? isEditing
-                    ? "Updating..."
-                    : "Creating..."
-                  : isEditing
-                    ? "Update Task"
-                    : "Create Task"}
-              </Button>
+            <div className="flex justify-between pt-4">
+              {isEditing && (
+                <Button
+                  type="button"
+                  variant="outline-destructive"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  disabled={isLoading}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete Task
+                </Button>
+              )}
+              <div className="flex space-x-2 ml-auto">
+                <Button type="button" variant="outline" onClick={handleClose}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading
+                    ? isEditing
+                      ? "Updating..."
+                      : "Creating..."
+                    : isEditing
+                      ? "Update Task"
+                      : "Create Task"}
+                </Button>
+              </div>
             </div>
           </form>
         )}
