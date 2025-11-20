@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ChevronDown, ChevronUp, Archive, Search, X } from "lucide-react";
@@ -30,6 +30,8 @@ export function ContextsSection({
 }: ContextsSectionProps) {
   const [showArchivedContexts, setShowArchivedContexts] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+
   const handleExpandAll = () => {
     const next: Record<string, boolean> = {};
     for (const c of filteredContexts) next[c.id] = false;
@@ -94,6 +96,19 @@ export function ContextsSection({
       return effectiveCollapsed === false;
     });
 
+  // Scroll to keep search bar visible when searching
+  useEffect(() => {
+    if (searchQuery.trim() !== "" && searchContainerRef.current) {
+      // Use a small delay to ensure DOM has updated with filtered results
+      setTimeout(() => {
+        searchContainerRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 100);
+    }
+  }, [searchQuery, filteredContexts.length]);
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -130,7 +145,7 @@ export function ContextsSection({
       </div>
 
       {/* Search Input */}
-      <div className="relative">
+      <div ref={searchContainerRef} className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
         <Input
           type="text"
