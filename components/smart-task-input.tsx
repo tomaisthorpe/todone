@@ -102,6 +102,7 @@ export function SmartTaskInput({
 
   const [error, setError] = useState<string | null>(null);
   const [isInputFocused, setIsInputFocused] = useState(false);
+  const [ignoredMatches, setIgnoredMatches] = useState<Set<string>>(new Set());
   const { createTask } = useDashboardActions();
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -273,6 +274,29 @@ export function SmartTaskInput({
           break;
       }
     }
+
+    // Handle backspace to remove matches
+    if (e.key === "Backspace" && inputRef.current) {
+      const cursorPos = inputRef.current.selectionStart || 0;
+      const selectionEnd = inputRef.current.selectionEnd || 0;
+
+      // Only handle when there's no selection (just cursor position)
+      if (cursorPos === selectionEnd && cursorPos > 0) {
+        // Find if cursor is at the end of a matched segment
+        const matchedSegment = segments.find(
+          (seg) =>
+            seg.type !== "text" &&
+            seg.endIndex === cursorPos
+        );
+
+        if (matchedSegment) {
+          e.preventDefault();
+          // Add this match to ignored matches
+          const matchText = matchedSegment.text.toLowerCase().trim();
+          setIgnoredMatches((prev) => new Set([...prev, matchText]));
+        }
+      }
+    }
   };
 
   // Handle input cursor position changes
@@ -313,7 +337,7 @@ export function SmartTaskInput({
 
       // Parse context (!contextName)
       const contextMatch = workingText.match(/!([a-zA-Z0-9_-]+)/i);
-      if (contextMatch) {
+      if (contextMatch && !ignoredMatches.has(contextMatch[0].toLowerCase().trim())) {
         const contextName = contextMatch[1];
         const matchedContext = contexts.find(
           (ctx) => ctx.name.toLowerCase() === contextName.toLowerCase()
@@ -339,23 +363,25 @@ export function SmartTaskInput({
       // Parse tags (#tagname)
       const tagMatches = [...workingText.matchAll(/#([a-zA-Z0-9_-]+)/gi)];
       tagMatches.forEach((match) => {
-        const tagName = match[1].toLowerCase();
-        result.tags.push(tagName);
+        if (!ignoredMatches.has(match[0].toLowerCase().trim())) {
+          const tagName = match[1].toLowerCase();
+          result.tags.push(tagName);
 
-        const startIndex = text.indexOf(match[0]);
-        newSegments.push({
-          text: match[0],
-          type: "tag",
-          startIndex,
-          endIndex: startIndex + match[0].length,
-        });
+          const startIndex = text.indexOf(match[0]);
+          newSegments.push({
+            text: match[0],
+            type: "tag",
+            startIndex,
+            endIndex: startIndex + match[0].length,
+          });
 
-        workingText = workingText.replace(match[0], " ");
+          workingText = workingText.replace(match[0], " ");
+        }
       });
 
       // Parse priority (p1, p2, p3)
       const priorityMatch = workingText.match(/\bp([123])\b/i);
-      if (priorityMatch) {
+      if (priorityMatch && !ignoredMatches.has(priorityMatch[0].toLowerCase().trim())) {
         const priorityNum = priorityMatch[1];
         result.priority =
           priorityNum === "1" ? "HIGH" : priorityNum === "2" ? "MEDIUM" : "LOW";
@@ -380,6 +406,12 @@ export function SmartTaskInput({
         { pattern: /\bmonthly\b/i, frequency: 30, text: "monthly" },
         { pattern: /\byearly\b/i, frequency: 365, text: "yearly" },
         { pattern: /\bannually\b/i, frequency: 365, text: "annually" },
+        // "every [period]" patterns
+        { pattern: /\bevery\s+day\b/i, frequency: 1, text: "every day" },
+        { pattern: /\bevery\s+week\b/i, frequency: 7, text: "every week" },
+        { pattern: /\bevery\s+month\b/i, frequency: 30, text: "every month" },
+        { pattern: /\bevery\s+year\b/i, frequency: 365, text: "every year" },
+        // "every X days/weeks/months" patterns (with numbers)
         { pattern: /\bevery\s+(\d+)\s+days?\b/i, frequency: null, text: null }, // Special case
         { pattern: /\bevery\s+(\d+)\s+weeks?\b/i, frequency: null, text: null }, // Special case
         {
@@ -395,7 +427,7 @@ export function SmartTaskInput({
         text: patternText,
       } of recurringPatterns) {
         const match = workingText.match(pattern);
-        if (match) {
+        if (match && !ignoredMatches.has(match[0].toLowerCase().trim())) {
           let actualFrequency = frequency;
           let actualText = patternText;
 
@@ -439,20 +471,22 @@ export function SmartTaskInput({
       const chronoResults = chrono.parse(workingText);
       if (chronoResults.length > 0) {
         const chronoResult = chronoResults[0];
-        result.dueDate = chronoResult.start.date();
-        result.dueDateText = chronoResult.text;
+        if (!ignoredMatches.has(chronoResult.text.toLowerCase().trim())) {
+          result.dueDate = chronoResult.start.date();
+          result.dueDateText = chronoResult.text;
 
-        const startIndex = text.indexOf(chronoResult.text);
-        if (startIndex !== -1) {
-          newSegments.push({
-            text: chronoResult.text,
-            type: "date",
-            startIndex,
-            endIndex: startIndex + chronoResult.text.length,
-          });
+          const startIndex = text.indexOf(chronoResult.text);
+          if (startIndex !== -1) {
+            newSegments.push({
+              text: chronoResult.text,
+              type: "date",
+              startIndex,
+              endIndex: startIndex + chronoResult.text.length,
+            });
+          }
+
+          workingText = workingText.replace(chronoResult.text, " ");
         }
-
-        workingText = workingText.replace(chronoResult.text, " ");
       }
 
       // The remaining text is the title
@@ -494,7 +528,7 @@ export function SmartTaskInput({
       setSegments(finalSegments);
       return result;
     },
-    [contexts]
+    [contexts, ignoredMatches]
   );
 
   // Update parsing when input changes
@@ -599,6 +633,7 @@ export function SmartTaskInput({
           setInput("");
           setIsEditing(false);
           setError(null);
+          setIgnoredMatches(new Set());
         });
 
         onTaskCreated?.();
@@ -708,7 +743,7 @@ export function SmartTaskInput({
             onClick={handleCursorChange}
             onBlur={handleInputBlur}
             onFocus={() => setIsInputFocused(true)}
-            placeholder="Type your task naturally... e.g., 'Setup unwhelm !Homelab #sideprojects #setup p1 tomorrow' or 'Team standup weekly !Work #meetings'"
+            placeholder="Type your task naturally... e.g., 'Setup unwhelm !Homelab #sideprojects #setup p1 tomorrow' or 'Team standup every week !Work #meetings'"
             className="relative text-base font-mono bg-transparent caret-gray-900 pr-8"
             style={{ zIndex: 2 }}
             disabled={isPending}
@@ -989,7 +1024,7 @@ export function SmartTaskInput({
             </div>
             <div>
               <code className="bg-cyan-50 text-cyan-600 px-1 rounded">
-                daily, weekly, monthly, every 4 days
+                daily, weekly, every day, every week, every 4 days
               </code>{" "}
               for recurring tasks
             </div>
