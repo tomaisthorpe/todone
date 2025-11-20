@@ -637,6 +637,7 @@ export async function unarchiveContextAction(contextId: string) {
     data: { archived: false },
   });
 
+  revalidatePath("/tasks");
 }
 
 // Update user name action
