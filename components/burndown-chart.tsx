@@ -50,7 +50,7 @@ export function BurndownChart({ data }: BurndownChartProps) {
   const totalCreated = data.reduce((sum, point) => sum + point.createdTasks, 0);
   const totalCompleted = data.reduce(
     (sum, point) => sum + point.completedTasks,
-    0
+    0,
   );
   const currentIncomplete = data[data.length - 1]?.incompleteTasks || 0;
   const startIncomplete = data[0]?.incompleteTasks || 0;
@@ -189,9 +189,7 @@ export function BurndownChart({ data }: BurndownChartProps) {
           <div>
             <div className="text-lg font-semibold text-blue-600">
               {totalCompleted > 0
-                ? Math.round(
-                    (totalCompleted / (totalCompleted + totalCreated)) * 100
-                  )
+                ? Math.round((totalCompleted / totalCreated) * 100)
                 : 0}
               %
             </div>
