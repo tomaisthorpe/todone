@@ -36,7 +36,7 @@ export function DashboardClient() {
   const [collapsedState, setCollapsedState] = useState<Record<string, boolean>>(() => loadCollapsedState());
 
   // Use SWR hook for client-side data fetching
-  const { tasks, contexts, archivedContexts, tags, isLoading, isError } = useDashboardData();
+  const { tasks, contexts, archivedContexts, tags, isLoading, isError, mutate } = useDashboardData();
 
   // Persist collapsed state to localStorage whenever it changes
   useEffect(() => {
@@ -167,13 +167,14 @@ export function DashboardClient() {
         <TodaySection tasks={tasks} contexts={contexts} tags={tags} onContextClick={scrollToContext} />
 
         {/* Context Groups */}
-        <ContextsSection 
-          contexts={sortedContexts} 
-          tasks={tasks} 
+        <ContextsSection
+          contexts={sortedContexts}
+          tasks={tasks}
           tags={tags}
           collapsedState={collapsedState}
           onCollapsedStateChange={setCollapsedState}
           archivedContexts={archivedContexts}
+          onDataChange={mutate}
         />
       </div>
       <div className="flex justify-center mt-2 pb-16">

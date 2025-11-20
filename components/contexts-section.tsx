@@ -16,6 +16,7 @@ interface ContextsSectionProps {
   collapsedState?: Record<string, boolean>;
   onCollapsedStateChange?: (collapsedState: Record<string, boolean>) => void;
   archivedContexts: Context[];
+  onDataChange?: () => void;
 }
 
 export function ContextsSection({
@@ -25,6 +26,7 @@ export function ContextsSection({
   collapsedState = {},
   onCollapsedStateChange,
   archivedContexts,
+  onDataChange,
 }: ContextsSectionProps) {
   const [showArchivedContexts, setShowArchivedContexts] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -204,6 +206,7 @@ export function ContextsSection({
         archivedContexts={archivedContexts}
         isOpen={showArchivedContexts}
         onClose={() => setShowArchivedContexts(false)}
+        onDataChange={onDataChange}
       />
     </div>
   );
