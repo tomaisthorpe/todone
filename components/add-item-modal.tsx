@@ -536,7 +536,7 @@ export function TaskModal({
         )}
 
         {/* Tab Navigation - Only show when creating new items (not editing) */}
-        {!isEditing && !isEditingContext && !isEditingTag && (
+        {!isEditing && !isEditingContext && !isEditingTag ? (
           <div className="flex gap-2 bg-gray-100 rounded-lg p-1 mt-2 mb-6">
             <button
               onClick={() => setActiveTab("task")}
@@ -581,6 +581,9 @@ export function TaskModal({
               Add Tag
             </button>
           </div>
+        ) : (
+          // Add spacing when tabs are hidden (editing mode)
+          <div className="mt-4" />
         )}
 
         {/* Task Form */}
