@@ -7,6 +7,7 @@ import { CheckCircle2, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import Image from "next/image";
 import {
   Card,
   CardContent,
@@ -87,12 +88,22 @@ export default function SignUp() {
         <div className="bg-white shadow-sm">
           <div className="max-w-4xl mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <CheckCircle2 className="w-5 h-5 text-white" />
+              <Link
+                href="/"
+                className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
+              >
+                <div className="w-8 h-8 flex items-center justify-center">
+                  <Image
+                    src="/unwhelm.svg"
+                    alt="unwhelm logo"
+                    width="32"
+                    height="32"
+                  />
                 </div>
-                <h1 className="text-2xl font-bold text-gray-900 font-brand">unwhelm</h1>
-              </div>
+                <h1 className="hidden md:block text-2xl font-bold text-gray-900 font-brand">
+                  unwhelm
+                </h1>
+              </Link>
             </div>
           </div>
         </div>
@@ -124,12 +135,22 @@ export default function SignUp() {
       <div className="bg-white shadow-sm">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <CheckCircle2 className="w-5 h-5 text-white" />
+            <Link
+              href="/"
+              className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
+            >
+              <div className="w-8 h-8 flex items-center justify-center">
+                <Image
+                  src="/unwhelm.svg"
+                  alt="unwhelm logo"
+                  width="32"
+                  height="32"
+                />
               </div>
-              <h1 className="text-2xl font-bold text-gray-900">unwhelm</h1>
-            </div>
+              <h1 className="hidden md:block text-2xl font-bold text-gray-900 font-brand">
+                unwhelm
+              </h1>
+            </Link>
           </div>
         </div>
       </div>
