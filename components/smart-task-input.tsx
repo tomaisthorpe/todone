@@ -343,16 +343,27 @@ export function SmartTaskInput({
       let longestMatch: { context: typeof contexts[0]; startIndex: number; matchText: string } | null = null;
 
       // Find all possible context matches and select the longest one
+      // Only match if the context name is complete (followed by space, end of string, or special char)
       for (const context of contexts) {
         const contextPattern = `!${context.name}`;
         const contextIndex = text.toLowerCase().indexOf(contextPattern.toLowerCase());
+
         if (contextIndex !== -1 && !ignoredMatches.has(contextPattern.toLowerCase().trim())) {
-          if (!longestMatch || contextPattern.length > longestMatch.matchText.length) {
-            longestMatch = {
-              context,
-              startIndex: contextIndex,
-              matchText: text.substring(contextIndex, contextIndex + contextPattern.length),
-            };
+          // Check if this is a complete match (not a partial substring)
+          const endIndex = contextIndex + contextPattern.length;
+          const charAfter = text[endIndex];
+
+          // Context is valid if followed by: space, end of string, or special chars like # or !
+          const isCompleteMatch = !charAfter || charAfter === ' ' || charAfter === '#' || charAfter === '!';
+
+          if (isCompleteMatch) {
+            if (!longestMatch || contextPattern.length > longestMatch.matchText.length) {
+              longestMatch = {
+                context,
+                startIndex: contextIndex,
+                matchText: text.substring(contextIndex, contextIndex + contextPattern.length),
+              };
+            }
           }
         }
       }
@@ -373,6 +384,7 @@ export function SmartTaskInput({
       }
 
       // Fallback to regex for unmatched contexts (backwards compatibility)
+      // This will only match contexts without spaces that don't exist in the database
       if (!contextFound) {
         const contextMatch = workingText.match(/!([a-zA-Z0-9_-]+)/i);
         if (contextMatch && !ignoredMatches.has(contextMatch[0].toLowerCase().trim())) {
