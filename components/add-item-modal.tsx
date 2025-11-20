@@ -21,6 +21,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { TaskForm, type TaskFormData } from "@/components/task-form";
 import {
   archiveContextAction,
@@ -127,6 +132,8 @@ export function TaskModal({
   const [showUnsavedChangesConfirm, setShowUnsavedChangesConfirm] =
     useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [completeYesterdayTooltipOpen, setCompleteYesterdayTooltipOpen] =
+    useState(false);
   const { createTask, updateTask, deleteTask, createContext, updateContext } =
     useDashboardActions();
 
@@ -572,19 +579,32 @@ export function TaskModal({
 
             {/* Quick Actions in Header - Only for editing tasks */}
             {isEditing && activeTab === "task" && !task?.completed && (
-              <div className="flex items-center space-x-2">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleCompleteYesterday}
-                  disabled={isLoading}
-                  className="text-xs"
-                  tabIndex={-1}
+              <div className="flex items-center space-x-2 mr-8">
+                <Tooltip
+                  open={completeYesterdayTooltipOpen}
+                  onOpenChange={setCompleteYesterdayTooltipOpen}
                 >
-                  <Calendar className="w-3 h-3 mr-1" />
-                  Complete Yesterday
-                </Button>
+                  <TooltipTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleCompleteYesterday}
+                      disabled={isLoading}
+                      className="text-xs"
+                      tabIndex={-1}
+                    >
+                      <Calendar className="w-3 h-3 mr-1" />
+                      Complete Yesterday
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="max-w-xs">
+                    <p className="text-sm">
+                      Mark this task as completed yesterday. Useful if you forgot
+                      to check off a task you finished the day before.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
             )}
           </div>
