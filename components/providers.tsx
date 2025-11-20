@@ -2,6 +2,7 @@
 
 import { SessionProvider } from "next-auth/react";
 import { SWRConfig } from "swr";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -15,7 +16,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
           focusThrottleInterval: 60000,
         }}
       >
-        {children}
+        <TooltipProvider>{children}</TooltipProvider>
       </SWRConfig>
     </SessionProvider>
   );

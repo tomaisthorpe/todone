@@ -301,8 +301,13 @@ export function TaskForm({
                   >
                     Wait Days
                     <Tooltip>
-                      <TooltipTrigger>
-                        <HelpCircle className="w-4 h-4 text-gray-400" />
+                      <TooltipTrigger asChild>
+                        <button
+                          type="button"
+                          className="inline-flex items-center"
+                        >
+                          <HelpCircle className="w-4 h-4 text-gray-400" />
+                        </button>
                       </TooltipTrigger>
                       <TooltipContent>
                         <p>
@@ -403,8 +408,13 @@ export function TaskForm({
                     >
                       Wait Days
                       <Tooltip>
-                        <TooltipTrigger>
-                          <HelpCircle className="w-4 h-4 text-gray-400" />
+                        <TooltipTrigger asChild>
+                          <button
+                            type="button"
+                            className="inline-flex items-center"
+                          >
+                            <HelpCircle className="w-4 h-4 text-gray-400" />
+                          </button>
                         </TooltipTrigger>
                         <TooltipContent>
                           <p>
@@ -481,8 +491,13 @@ export function TaskForm({
                     >
                       Wait Days
                       <Tooltip>
-                        <TooltipTrigger>
-                          <HelpCircle className="w-4 h-4 text-gray-400" />
+                        <TooltipTrigger asChild>
+                          <button
+                            type="button"
+                            className="inline-flex items-center"
+                          >
+                            <HelpCircle className="w-4 h-4 text-gray-400" />
+                          </button>
                         </TooltipTrigger>
                         <TooltipContent>
                           <p>
