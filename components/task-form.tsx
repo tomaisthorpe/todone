@@ -300,17 +300,18 @@ export function TaskForm({
                     className="flex items-center gap-2"
                   >
                     Wait Days
-                    <Tooltip>
+                    <Tooltip delayDuration={300}>
                       <TooltipTrigger asChild>
                         <button
                           type="button"
-                          className="inline-flex items-center"
+                          className="inline-flex items-center cursor-help"
+                          onClick={(e) => e.preventDefault()}
                         >
-                          <HelpCircle className="w-4 h-4 text-gray-400" />
+                          <HelpCircle className="w-4 h-4 text-gray-400 hover:text-gray-600" />
                         </button>
                       </TooltipTrigger>
-                      <TooltipContent>
-                        <p>
+                      <TooltipContent side="top">
+                        <p className="max-w-xs">
                           Number of days before due date to start calculating
                           urgency (task urgency will be 0 until then)
                         </p>
@@ -407,17 +408,18 @@ export function TaskForm({
                       className="flex items-center gap-2"
                     >
                       Wait Days
-                      <Tooltip>
+                      <Tooltip delayDuration={300}>
                         <TooltipTrigger asChild>
                           <button
                             type="button"
-                            className="inline-flex items-center"
+                            className="inline-flex items-center cursor-help"
+                            onClick={(e) => e.preventDefault()}
                           >
-                            <HelpCircle className="w-4 h-4 text-gray-400" />
+                            <HelpCircle className="w-4 h-4 text-gray-400 hover:text-gray-600" />
                           </button>
                         </TooltipTrigger>
-                        <TooltipContent>
-                          <p>
+                        <TooltipContent side="top">
+                          <p className="max-w-xs">
                             Number of days before due date to start calculating
                             urgency (task urgency will be 0 until then)
                           </p>
@@ -490,17 +492,18 @@ export function TaskForm({
                       className="flex items-center gap-2"
                     >
                       Wait Days
-                      <Tooltip>
+                      <Tooltip delayDuration={300}>
                         <TooltipTrigger asChild>
                           <button
                             type="button"
-                            className="inline-flex items-center"
+                            className="inline-flex items-center cursor-help"
+                            onClick={(e) => e.preventDefault()}
                           >
-                            <HelpCircle className="w-4 h-4 text-gray-400" />
+                            <HelpCircle className="w-4 h-4 text-gray-400 hover:text-gray-600" />
                           </button>
                         </TooltipTrigger>
-                        <TooltipContent>
-                          <p>
+                        <TooltipContent side="top">
+                          <p className="max-w-xs">
                             Number of days before due date to start calculating
                             urgency (task urgency will be 0 until then)
                           </p>
