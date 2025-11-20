@@ -16,6 +16,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { signupSchema } from "@/lib/validation";
+import { PasswordRequirements } from "@/components/ui/password-requirements";
 
 export default function SignUp() {
   const [name, setName] = useState("");
@@ -225,6 +226,7 @@ export default function SignUp() {
                     )}
                   </Button>
                 </div>
+                <PasswordRequirements password={password} />
               </div>
 
               <div>
