@@ -26,7 +26,7 @@ export function TaskToggleButton({ taskId, completed }: TaskToggleButtonProps) {
       size="sm"
       onClick={handleToggle}
       disabled={isPending}
-      className="mt-0.5 p-0 h-auto hover:bg-transparent"
+      className="mt-0.5 py-0.5 px-0 h-auto hover:bg-transparent"
     >
       {completed ? (
         <CheckCircle2 className="w-5 h-5 text-green-600" />
@@ -36,3 +36,4 @@ export function TaskToggleButton({ taskId, completed }: TaskToggleButtonProps) {
     </Button>
   );
 }
+
