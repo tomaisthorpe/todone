@@ -79,7 +79,7 @@ export async function toggleTaskAction(taskId: string) {
       completedAt: task.completedAt,
       type: task.type,
     });
-    
+
     if (habitShowsAsAvailable) {
       // Habit shows as available, so we're completing it
       await completeTask(task as TaskForCompletion, now);
@@ -95,6 +95,8 @@ export async function toggleTaskAction(taskId: string) {
     await toggleRegularTask(taskId, task.completed, now);
   }
 
+  revalidatePath("/tasks");
+  revalidatePath("/tasks/completed");
 }
 
 // Server action to mark task as completed yesterday
@@ -120,6 +122,8 @@ export async function completeTaskYesterdayAction(taskId: string) {
     await completeTask(task as TaskForCompletion, yesterday);
   }
 
+  revalidatePath("/tasks");
+  revalidatePath("/tasks/completed");
 }
 
 // Server action to create a new task
@@ -435,6 +439,8 @@ export async function deleteTaskAction(taskId: string) {
     where: { id: taskId },
   });
 
+  revalidatePath("/tasks");
+  revalidatePath("/tasks/completed");
 }
 
 // Sign out action
