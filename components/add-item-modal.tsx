@@ -535,9 +535,9 @@ export function TaskModal({
           </div>
         )}
 
-        {/* Tab Navigation */}
-        <div className="flex gap-2 bg-gray-100 rounded-lg p-1 mt-2 mb-6">
-          {!isEditingContext && !isEditingTag && (
+        {/* Tab Navigation - Only show when creating new items (not editing) */}
+        {!isEditing && !isEditingContext && !isEditingTag && (
+          <div className="flex gap-2 bg-gray-100 rounded-lg p-1 mt-2 mb-6">
             <button
               onClick={() => setActiveTab("task")}
               className={`flex-1 px-4 py-2 text-sm font-medium rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400
@@ -550,10 +550,8 @@ export function TaskModal({
               type="button"
             >
               <CheckSquare className="w-4 h-4 inline mr-2" />
-              {isEditing ? "Edit Task" : "Add Task"}
+              Add Task
             </button>
-          )}
-          {!isEditing && (
             <button
               onClick={() => setActiveTab("context")}
               className={`flex-1 px-4 py-2 text-sm font-medium rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400
@@ -566,10 +564,8 @@ export function TaskModal({
               type="button"
             >
               <Home className="w-4 h-4 inline mr-2" />
-              {isEditingContext ? "Edit Context" : "Add Context"}
+              Add Context
             </button>
-          )}
-          {!isEditing && (
             <button
               onClick={() => setActiveTab("tag")}
               className={`flex-1 px-4 py-2 text-sm font-medium rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400
@@ -582,10 +578,10 @@ export function TaskModal({
               type="button"
             >
               <TagIcon className="w-4 h-4 inline mr-2" />
-              {isEditingTag ? "Edit Tag" : "Add Tag"}
+              Add Tag
             </button>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Task Form */}
         {activeTab === "task" && (
