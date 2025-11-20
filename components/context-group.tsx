@@ -54,6 +54,7 @@ function ContextGroupHeader({
   todayTasksInContext,
   hasHabits,
   searchQuery,
+  onDataChange,
 }: {
   context: Context;
   allContexts: Context[];
@@ -62,6 +63,7 @@ function ContextGroupHeader({
   todayTasksInContext: number;
   hasHabits: boolean;
   searchQuery?: string;
+  onDataChange?: () => void;
 }) {
   const [isEditContextOpen, setIsEditContextOpen] = useState(false);
   const { isCollapsed } = useCollapsible();
@@ -215,6 +217,7 @@ export function ContextGroup({
           todayTasksInContext={todayTasksInContext}
           hasHabits={hasHabits}
           searchQuery={searchQuery}
+          onDataChange={onDataChange}
         />
         <ContextCollapsibleContent>
           <div className="p-2 md:p-4">
