@@ -141,8 +141,9 @@ export function SmartTaskInput({
           triggerType = "context";
           triggerPos = i;
           break;
-        } else if (char === " ") {
-          // Stop searching if we hit a space
+        } else if (char === " " && triggerType !== "context") {
+          // For tags, stop searching at spaces
+          // For contexts, continue to support spaces in context names
           break;
         }
       }
@@ -172,17 +173,18 @@ export function SmartTaskInput({
               displayText: `#${tag}`,
             }));
         } else if (triggerType === "context") {
-          filteredSuggestions = contexts
-            .filter(
-              (context) =>
-                context.name.toLowerCase().includes(query.toLowerCase()) &&
-                query.trim() !== ""
-            )
-            .map((context) => ({
-              text: context.name,
-              type: "context" as const,
-              displayText: `!${context.name}`,
-            }));
+          // Only show context suggestions if no context has been parsed yet
+          if (!parsedTask.contextId && !parsedTask.contextName) {
+            filteredSuggestions = contexts
+              .filter((context) =>
+                context.name.toLowerCase().includes(query.toLowerCase())
+              )
+              .map((context) => ({
+                text: context.name,
+                type: "context" as const,
+                displayText: `!${context.name}`,
+              }));
+          }
         }
 
         setSuggestions(filteredSuggestions);
@@ -195,7 +197,7 @@ export function SmartTaskInput({
         setSelectedSuggestionIndex(-1);
       }
     },
-    [existingTags, contexts, parsedTask.tags]
+    [existingTags, contexts, parsedTask.tags, parsedTask.contextId, parsedTask.contextName]
   );
 
   // Handle input change with suggestions
@@ -335,29 +337,58 @@ export function SmartTaskInput({
       };
       const newSegments: ParsedSegment[] = [];
 
-      // Parse context (!contextName)
-      const contextMatch = workingText.match(/!([a-zA-Z0-9_-]+)/i);
-      if (contextMatch && !ignoredMatches.has(contextMatch[0].toLowerCase().trim())) {
-        const contextName = contextMatch[1];
-        const matchedContext = contexts.find(
-          (ctx) => ctx.name.toLowerCase() === contextName.toLowerCase()
-        );
-        if (matchedContext) {
-          result.contextId = matchedContext.id;
-          result.contextName = matchedContext.name;
-        } else {
-          result.contextName = contextName;
-        }
+      // Parse context (!contextName) - support spaces in context names
+      // Try to match against actual context names first (for spaces support)
+      let contextFound = false;
+      let longestMatch: { context: typeof contexts[0]; startIndex: number; matchText: string } | null = null;
 
-        const startIndex = workingText.indexOf(contextMatch[0]);
+      // Find all possible context matches and select the longest one
+      for (const context of contexts) {
+        const contextPattern = `!${context.name}`;
+        const contextIndex = text.toLowerCase().indexOf(contextPattern.toLowerCase());
+        if (contextIndex !== -1 && !ignoredMatches.has(contextPattern.toLowerCase().trim())) {
+          if (!longestMatch || contextPattern.length > longestMatch.matchText.length) {
+            longestMatch = {
+              context,
+              startIndex: contextIndex,
+              matchText: text.substring(contextIndex, contextIndex + contextPattern.length),
+            };
+          }
+        }
+      }
+
+      if (longestMatch) {
+        result.contextId = longestMatch.context.id;
+        result.contextName = longestMatch.context.name;
+
         newSegments.push({
-          text: contextMatch[0],
+          text: longestMatch.matchText,
           type: "context",
-          startIndex,
-          endIndex: startIndex + contextMatch[0].length,
+          startIndex: longestMatch.startIndex,
+          endIndex: longestMatch.startIndex + longestMatch.matchText.length,
         });
 
-        workingText = workingText.replace(contextMatch[0], " ");
+        workingText = workingText.replace(longestMatch.matchText, " ");
+        contextFound = true;
+      }
+
+      // Fallback to regex for unmatched contexts (backwards compatibility)
+      if (!contextFound) {
+        const contextMatch = workingText.match(/!([a-zA-Z0-9_-]+)/i);
+        if (contextMatch && !ignoredMatches.has(contextMatch[0].toLowerCase().trim())) {
+          const contextName = contextMatch[1];
+          result.contextName = contextName;
+
+          const startIndex = text.indexOf(contextMatch[0]);
+          newSegments.push({
+            text: contextMatch[0],
+            type: "context",
+            startIndex,
+            endIndex: startIndex + contextMatch[0].length,
+          });
+
+          workingText = workingText.replace(contextMatch[0], " ");
+        }
       }
 
       // Parse tags (#tagname)
