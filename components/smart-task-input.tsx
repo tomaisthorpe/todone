@@ -531,6 +531,23 @@ export function SmartTaskInput({
     [contexts, ignoredMatches]
   );
 
+  // Clean up ignored matches when they're no longer in the input
+  useEffect(() => {
+    if (ignoredMatches.size > 0) {
+      const lowercaseInput = input.toLowerCase();
+      const stillPresent = new Set(
+        Array.from(ignoredMatches).filter((match) =>
+          lowercaseInput.includes(match)
+        )
+      );
+
+      // Only update if something changed to avoid infinite loops
+      if (stillPresent.size !== ignoredMatches.size) {
+        setIgnoredMatches(stillPresent);
+      }
+    }
+  }, [input, ignoredMatches]);
+
   // Update parsing when input changes
   useEffect(() => {
     const parsed = parseInput(input);
