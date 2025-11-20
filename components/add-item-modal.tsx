@@ -115,7 +115,9 @@ export function TaskModal({
   tagToEdit,
   defaultTab = "task",
 }: TaskModalProps) {
-  const [activeTab, setActiveTab] = useState<"task" | "context" | "tag">(defaultTab);
+  const [activeTab, setActiveTab] = useState<"task" | "context" | "tag">(
+    defaultTab,
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [existingTags, setExistingTags] = useState<string[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -123,11 +125,11 @@ export function TaskModal({
   const [error, setError] = useState<string | null>(null);
   const { createTask, updateTask, deleteTask, createContext, updateContext } =
     useDashboardActions();
-  
+
   // Find inbox context for default selection
-  const inboxContext = contexts.find(c => c.isInbox);
+  const inboxContext = contexts.find((c) => c.isInbox);
   const fallbackContextId = defaultContextId || inboxContext?.id || "";
-  
+
   const [taskFormData, setTaskFormData] = useState<TaskFormData>({
     title: "",
     project: "",
@@ -210,7 +212,8 @@ export function TaskModal({
         setActiveTab("tag");
       } else {
         // Adding mode - reset to defaults
-        const currentFallbackContextId = defaultContextId || inboxContext?.id || "";
+        const currentFallbackContextId =
+          defaultContextId || inboxContext?.id || "";
         setTaskFormData({
           title: "",
           project: "",
@@ -236,11 +239,18 @@ export function TaskModal({
         setActiveTab(defaultTab);
       }
     }
-  }, [isOpen, task?.id, defaultContextId, contextToEdit?.id, inboxContext?.id, tagToEdit?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [
+    isOpen,
+    task?.id,
+    defaultContextId,
+    contextToEdit?.id,
+    inboxContext?.id,
+    tagToEdit?.id,
+  ]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleTaskFormChange = <K extends keyof TaskFormData>(
     field: K,
-    value: TaskFormData[K]
+    value: TaskFormData[K],
   ) => {
     setTaskFormData((prev) => ({ ...prev, [field]: value }));
     // Clear error when user makes changes
@@ -251,8 +261,10 @@ export function TaskModal({
 
   const handleTagEdit = (tagName: string) => {
     // Find the tag in the tags array
-    const existingTag = tags.find(tag => tag.name.toLowerCase() === tagName.toLowerCase());
-    
+    const existingTag = tags.find(
+      (tag) => tag.name.toLowerCase() === tagName.toLowerCase(),
+    );
+
     if (existingTag) {
       // Edit existing tag
       tagForm.reset({
@@ -293,7 +305,8 @@ export function TaskModal({
     formData.append("priority", taskFormData.priority);
     formData.append("contextId", taskFormData.contextId);
     if (taskFormData.dueDate) formData.append("dueDate", taskFormData.dueDate);
-    if (taskFormData.waitDays != null) formData.append("waitDays", taskFormData.waitDays.toString());
+    if (taskFormData.waitDays != null)
+      formData.append("waitDays", taskFormData.waitDays.toString());
     formData.append("type", taskFormData.type);
     if (taskFormData.habitType)
       formData.append("habitType", taskFormData.habitType);
@@ -302,10 +315,10 @@ export function TaskModal({
 
     // Convert tags array to comma-separated string for form data
     formData.append("tags", taskFormData.tags.join(", "));
-    
+
     // Add notes field
     if (taskFormData.notes) formData.append("notes", taskFormData.notes);
-    
+
     // Add subtasks as JSON string
     formData.append("subtasks", JSON.stringify(taskFormData.subtasks));
 
@@ -347,7 +360,7 @@ export function TaskModal({
     } catch (error) {
       console.error("Failed to save context:", error);
       setError(
-        error instanceof Error ? error.message : "Failed to save context"
+        error instanceof Error ? error.message : "Failed to save context",
       );
     } finally {
       setIsLoading(false);
@@ -366,10 +379,12 @@ export function TaskModal({
   const onSubmitTag = async (data: TagFormData) => {
     setIsLoading(true);
     const formData = new FormData();
-    
+
     // Check if we're editing an existing tag
-    const existingTag = tags.find(tag => tag.name.toLowerCase() === data.name.toLowerCase());
-    
+    const existingTag = tags.find(
+      (tag) => tag.name.toLowerCase() === data.name.toLowerCase(),
+    );
+
     if (existingTag) {
       // Update existing tag
       formData.append("tagId", existingTag.id);
@@ -384,7 +399,7 @@ export function TaskModal({
       } catch (error) {
         console.error("Failed to update tag:", error);
         setError(
-          error instanceof Error ? error.message : "Failed to update tag"
+          error instanceof Error ? error.message : "Failed to update tag",
         );
       } finally {
         setIsLoading(false);
@@ -402,7 +417,7 @@ export function TaskModal({
       } catch (error) {
         console.error("Failed to create tag:", error);
         setError(
-          error instanceof Error ? error.message : "Failed to create tag"
+          error instanceof Error ? error.message : "Failed to create tag",
         );
       } finally {
         setIsLoading(false);
@@ -421,7 +436,7 @@ export function TaskModal({
     } catch (error) {
       console.error("Failed to delete task:", error);
       setError(
-        error instanceof Error ? error.message : "Failed to delete task"
+        error instanceof Error ? error.message : "Failed to delete task",
       );
       setShowDeleteConfirm(false);
     } finally {
@@ -439,7 +454,9 @@ export function TaskModal({
     } catch (error) {
       console.error("Failed to complete task yesterday:", error);
       setError(
-        error instanceof Error ? error.message : "Failed to complete task yesterday"
+        error instanceof Error
+          ? error.message
+          : "Failed to complete task yesterday",
       );
     } finally {
       setIsLoading(false);
@@ -457,7 +474,7 @@ export function TaskModal({
     } catch (error) {
       console.error("Failed to archive context:", error);
       setError(
-        error instanceof Error ? error.message : "Failed to archive context"
+        error instanceof Error ? error.message : "Failed to archive context",
       );
       setShowArchiveConfirm(false);
     } finally {
@@ -487,12 +504,12 @@ export function TaskModal({
               {isEditing
                 ? "Edit Task"
                 : isEditingContext
-                ? "Edit Context"
-                : isEditingTag
-                ? "Edit Tag"
-                : "Add New Item"}
+                  ? "Edit Context"
+                  : isEditingTag
+                    ? "Edit Tag"
+                    : "Add New Item"}
             </DialogTitle>
-            
+
             {/* Quick Actions in Header - Only for editing tasks */}
             {isEditing && activeTab === "task" && (
               <div className="flex items-center space-x-2">
@@ -583,7 +600,7 @@ export function TaskModal({
           </div>
         ) : (
           // Add spacing when tabs are hidden (editing mode)
-          <div className="mt-4" />
+          <div className="mt-2" />
         )}
 
         {/* Task Form */}
@@ -612,8 +629,8 @@ export function TaskModal({
                     ? "Updating..."
                     : "Creating..."
                   : isEditing
-                  ? "Update Task"
-                  : "Create Task"}
+                    ? "Update Task"
+                    : "Create Task"}
               </Button>
             </div>
           </form>
@@ -628,9 +645,11 @@ export function TaskModal({
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
                 <Label htmlFor={getFieldId("name")}>
-                  Context Name * 
+                  Context Name *
                   {contextToEdit?.isInbox && (
-                    <span className="text-xs text-gray-500 ml-2">(cannot be changed)</span>
+                    <span className="text-xs text-gray-500 ml-2">
+                      (cannot be changed)
+                    </span>
                   )}
                 </Label>
                 <Input
@@ -744,14 +763,19 @@ export function TaskModal({
                 <Button type="button" variant="outline" onClick={onClose}>
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isLoading || (isEditingContext && contextToEdit?.isInbox)}>
+                <Button
+                  type="submit"
+                  disabled={
+                    isLoading || (isEditingContext && contextToEdit?.isInbox)
+                  }
+                >
                   {isLoading
                     ? isEditingContext
                       ? "Updating..."
                       : "Creating..."
                     : isEditingContext
-                    ? "Update Context"
-                    : "Create Context"}
+                      ? "Update Context"
+                      : "Create Context"}
                 </Button>
               </div>
             </div>
@@ -766,9 +790,7 @@ export function TaskModal({
           >
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
-                <Label htmlFor={getFieldId("name")}>
-                  Tag Name *
-                </Label>
+                <Label htmlFor={getFieldId("name")}>Tag Name *</Label>
                 <Input
                   id={getFieldId("name")}
                   placeholder="e.g., Work, Home, Kitchen"
@@ -785,9 +807,7 @@ export function TaskModal({
                 <Label htmlFor={getFieldId("color")}>Color</Label>
                 <Select
                   value={tagForm.watch("color")}
-                  onValueChange={(value) =>
-                    tagForm.setValue("color", value)
-                  }
+                  onValueChange={(value) => tagForm.setValue("color", value)}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -832,19 +852,25 @@ export function TaskModal({
                   values for higher priority tags.
                 </p>
               </div>
-
-              
             </div>
 
             <div className="flex justify-end pt-4">
               <div className="flex space-x-2 ml-auto">
                 {/* Delete button for existing tags */}
-                {tags.find(tag => tag.name.toLowerCase() === tagForm.watch("name").toLowerCase()) && (
+                {tags.find(
+                  (tag) =>
+                    tag.name.toLowerCase() ===
+                    tagForm.watch("name").toLowerCase(),
+                ) && (
                   <Button
                     type="button"
                     variant="destructive"
                     onClick={async () => {
-                      const existingTag = tags.find(tag => tag.name.toLowerCase() === tagForm.watch("name").toLowerCase());
+                      const existingTag = tags.find(
+                        (tag) =>
+                          tag.name.toLowerCase() ===
+                          tagForm.watch("name").toLowerCase(),
+                      );
                       if (existingTag) {
                         setIsLoading(true);
                         try {
@@ -853,7 +879,11 @@ export function TaskModal({
                           onClose();
                         } catch (error) {
                           console.error("Failed to delete tag:", error);
-                          setError(error instanceof Error ? error.message : "Failed to delete tag");
+                          setError(
+                            error instanceof Error
+                              ? error.message
+                              : "Failed to delete tag",
+                          );
                         } finally {
                           setIsLoading(false);
                         }
@@ -870,12 +900,20 @@ export function TaskModal({
                 </Button>
                 <Button type="submit" disabled={isLoading}>
                   {isLoading
-                    ? tags.find(tag => tag.name.toLowerCase() === tagForm.watch("name").toLowerCase())
+                    ? tags.find(
+                        (tag) =>
+                          tag.name.toLowerCase() ===
+                          tagForm.watch("name").toLowerCase(),
+                      )
                       ? "Updating..."
                       : "Creating..."
-                    : tags.find(tag => tag.name.toLowerCase() === tagForm.watch("name").toLowerCase())
-                    ? "Update Tag"
-                    : "Create Tag"}
+                    : tags.find(
+                          (tag) =>
+                            tag.name.toLowerCase() ===
+                            tagForm.watch("name").toLowerCase(),
+                        )
+                      ? "Update Tag"
+                      : "Create Tag"}
                 </Button>
               </div>
             </div>
@@ -885,7 +923,11 @@ export function TaskModal({
 
       {/* Delete confirmation dialog */}
       {isEditing && (
-        <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm} modal={true}>
+        <Dialog
+          open={showDeleteConfirm}
+          onOpenChange={setShowDeleteConfirm}
+          modal={true}
+        >
           <DialogContent className="bg-white">
             <DialogHeader>
               <DialogTitle className="flex items-center">
@@ -914,7 +956,11 @@ export function TaskModal({
 
       {/* Archive confirmation dialog */}
       {isEditingContext && (
-        <Dialog open={showArchiveConfirm} onOpenChange={setShowArchiveConfirm} modal={true}>
+        <Dialog
+          open={showArchiveConfirm}
+          onOpenChange={setShowArchiveConfirm}
+          modal={true}
+        >
           <DialogContent className="bg-white">
             <DialogHeader>
               <DialogTitle className="flex items-center">
