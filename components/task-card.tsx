@@ -46,6 +46,7 @@ interface TaskCardProps {
   onContextClick?: (contextId: string) => void;
   showUrgency?: boolean;
   searchQuery?: string;
+  onDataChange?: () => void;
 }
 
 const renderHabitIcon = (iconType: string, className: string) => {
@@ -121,6 +122,7 @@ export function TaskCard({
   showUrgency = true,
   onContextClick,
   searchQuery,
+  onDataChange,
 }: TaskCardProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const dateInfo = formatDateForTask(task.dueDate);
@@ -356,6 +358,7 @@ export function TaskCard({
         task={task}
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
+        onDataChange={onDataChange}
       />
     </TooltipProvider>
   );

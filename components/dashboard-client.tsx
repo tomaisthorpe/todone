@@ -164,7 +164,7 @@ export function DashboardClient() {
         />
 
         {/* Today Section */}
-        <TodaySection tasks={tasks} contexts={contexts} tags={tags} onContextClick={scrollToContext} />
+        <TodaySection tasks={tasks} contexts={contexts} tags={tags} onContextClick={scrollToContext} onDataChange={mutate} />
 
         {/* Context Groups */}
         <ContextsSection
@@ -178,7 +178,7 @@ export function DashboardClient() {
         />
       </div>
       <div className="flex justify-center mt-2 pb-16">
-        <AddItemModal contexts={contexts} tags={tags} />
+        <AddItemModal contexts={contexts} tags={tags} onDataChange={mutate} />
       </div>
     </>
   );
