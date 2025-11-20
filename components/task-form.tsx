@@ -93,6 +93,13 @@ export function TaskForm({
   // State to control wait days input visibility
   const [showWaitDays, setShowWaitDays] = useState(false);
 
+  // State to control tooltip visibility for each wait days section
+  const [tooltipOpen, setTooltipOpen] = useState<{
+    task?: boolean;
+    habit?: boolean;
+    recurring?: boolean;
+  }>({});
+
   // Show wait days input by default if wait days is already set
   useEffect(() => {
     if (data.waitDays !== undefined && data.waitDays > 0) {
@@ -300,17 +307,33 @@ export function TaskForm({
                     className="flex items-center gap-2"
                   >
                     Wait Days
-                    <Tooltip delayDuration={300}>
+                    <Tooltip
+                      open={tooltipOpen.task}
+                      onOpenChange={(open) =>
+                        setTooltipOpen((prev) => ({ ...prev, task: open }))
+                      }
+                    >
                       <TooltipTrigger asChild>
                         <button
                           type="button"
                           className="inline-flex items-center cursor-help"
-                          onClick={(e) => e.preventDefault()}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setTooltipOpen((prev) => ({
+                              ...prev,
+                              task: !prev.task,
+                            }));
+                          }}
                         >
                           <HelpCircle className="w-4 h-4 text-gray-400 hover:text-gray-600" />
                         </button>
                       </TooltipTrigger>
-                      <TooltipContent side="top">
+                      <TooltipContent
+                        side="top"
+                        onPointerDownOutside={(e) => {
+                          e.preventDefault();
+                        }}
+                      >
                         <p className="max-w-xs">
                           Number of days before due date to start calculating
                           urgency (task urgency will be 0 until then)
@@ -408,17 +431,33 @@ export function TaskForm({
                       className="flex items-center gap-2"
                     >
                       Wait Days
-                      <Tooltip delayDuration={300}>
+                      <Tooltip
+                        open={tooltipOpen.habit}
+                        onOpenChange={(open) =>
+                          setTooltipOpen((prev) => ({ ...prev, habit: open }))
+                        }
+                      >
                         <TooltipTrigger asChild>
                           <button
                             type="button"
                             className="inline-flex items-center cursor-help"
-                            onClick={(e) => e.preventDefault()}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setTooltipOpen((prev) => ({
+                                ...prev,
+                                habit: !prev.habit,
+                              }));
+                            }}
                           >
                             <HelpCircle className="w-4 h-4 text-gray-400 hover:text-gray-600" />
                           </button>
                         </TooltipTrigger>
-                        <TooltipContent side="top">
+                        <TooltipContent
+                          side="top"
+                          onPointerDownOutside={(e) => {
+                            e.preventDefault();
+                          }}
+                        >
                           <p className="max-w-xs">
                             Number of days before due date to start calculating
                             urgency (task urgency will be 0 until then)
@@ -492,17 +531,36 @@ export function TaskForm({
                       className="flex items-center gap-2"
                     >
                       Wait Days
-                      <Tooltip delayDuration={300}>
+                      <Tooltip
+                        open={tooltipOpen.recurring}
+                        onOpenChange={(open) =>
+                          setTooltipOpen((prev) => ({
+                            ...prev,
+                            recurring: open,
+                          }))
+                        }
+                      >
                         <TooltipTrigger asChild>
                           <button
                             type="button"
                             className="inline-flex items-center cursor-help"
-                            onClick={(e) => e.preventDefault()}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setTooltipOpen((prev) => ({
+                                ...prev,
+                                recurring: !prev.recurring,
+                              }));
+                            }}
                           >
                             <HelpCircle className="w-4 h-4 text-gray-400 hover:text-gray-600" />
                           </button>
                         </TooltipTrigger>
-                        <TooltipContent side="top">
+                        <TooltipContent
+                          side="top"
+                          onPointerDownOutside={(e) => {
+                            e.preventDefault();
+                          }}
+                        >
                           <p className="max-w-xs">
                             Number of days before due date to start calculating
                             urgency (task urgency will be 0 until then)
