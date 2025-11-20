@@ -1073,7 +1073,10 @@ export function TaskModal({
         onOpenChange={setShowUnsavedChangesConfirm}
         modal={true}
       >
-        <DialogContent className="bg-white">
+        <DialogContent
+          className="bg-white z-[10001]"
+          overlayClassName="z-[10000]"
+        >
           <DialogHeader>
             <DialogTitle className="flex items-center">
               <AlertTriangle className="w-4 h-4 text-orange-600 mr-2" />
