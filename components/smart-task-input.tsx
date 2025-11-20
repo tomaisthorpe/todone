@@ -338,8 +338,7 @@ export function SmartTaskInput({
       const newSegments: ParsedSegment[] = [];
 
       // Parse context (!contextName) - support spaces in context names
-      // Try to match against actual context names first (for spaces support)
-      let contextFound = false;
+      // Only match contexts that exist in the database and are complete
       let longestMatch: { context: typeof contexts[0]; startIndex: number; matchText: string } | null = null;
 
       // Find all possible context matches and select the longest one
@@ -380,28 +379,11 @@ export function SmartTaskInput({
         });
 
         workingText = workingText.replace(longestMatch.matchText, " ");
-        contextFound = true;
       }
 
-      // Fallback to regex for unmatched contexts (backwards compatibility)
-      // This will only match contexts without spaces that don't exist in the database
-      if (!contextFound) {
-        const contextMatch = workingText.match(/!([a-zA-Z0-9_-]+)/i);
-        if (contextMatch && !ignoredMatches.has(contextMatch[0].toLowerCase().trim())) {
-          const contextName = contextMatch[1];
-          result.contextName = contextName;
-
-          const startIndex = text.indexOf(contextMatch[0]);
-          newSegments.push({
-            text: contextMatch[0],
-            type: "context",
-            startIndex,
-            endIndex: startIndex + contextMatch[0].length,
-          });
-
-          workingText = workingText.replace(contextMatch[0], " ");
-        }
-      }
+      // No fallback - only match contexts that actually exist in the database
+      // This ensures partial matches like "!hom" don't get highlighted
+      // Users can still create tasks with unknown contexts via the edit form
 
       // Parse tags (#tagname)
       const tagMatches = [...workingText.matchAll(/#([a-zA-Z0-9_-]+)/gi)];
