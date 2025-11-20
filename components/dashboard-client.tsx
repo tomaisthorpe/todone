@@ -148,6 +148,9 @@ export function DashboardClient() {
     return bMaxUrgency - aMaxUrgency;
   });
 
+  // Combine active and archived contexts for task badge display
+  const allContexts = [...contexts, ...archivedContexts];
+
   return (
     <>
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
@@ -164,7 +167,7 @@ export function DashboardClient() {
         />
 
         {/* Today Section */}
-        <TodaySection tasks={tasks} contexts={contexts} tags={tags} onContextClick={scrollToContext} onDataChange={mutate} />
+        <TodaySection tasks={tasks} contexts={allContexts} tags={tags} onContextClick={scrollToContext} onDataChange={mutate} />
 
         {/* Context Groups */}
         <ContextsSection
