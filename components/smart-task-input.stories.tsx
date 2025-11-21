@@ -66,17 +66,26 @@ const mockContexts = [
 export const Default: Story = {
   args: {
     contexts: mockContexts,
-  },
-};
-
-export const WithMultipleContexts: Story = {
-  args: {
-    contexts: mockContexts,
+    defaultValue: '',
   },
   parameters: {
     docs: {
       description: {
-        story: 'Try typing: "Setup unwhelm !Coding #sideprojects p1 tomorrow"',
+        story: 'Empty input - start typing to see natural language parsing in action',
+      },
+    },
+  },
+};
+
+export const WithContext: Story = {
+  args: {
+    contexts: mockContexts,
+    defaultValue: 'Setup unwhelm !Coding #sideprojects p1 tomorrow',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Shows context (!Coding), tags (#sideprojects), priority (p1), and date (tomorrow) highlighting',
       },
     },
   },
@@ -85,50 +94,26 @@ export const WithMultipleContexts: Story = {
 export const RecurringTaskExample: Story = {
   args: {
     contexts: mockContexts,
+    defaultValue: 'Team standup meeting every week !Work #meetings p2',
   },
   parameters: {
     docs: {
       description: {
-        story: 'Try typing: "Team standup meeting every week !Work #meetings p2"',
+        story: 'Demonstrates recurring task pattern with "every week" highlighted in cyan',
       },
     },
   },
 };
 
-export const WithContextSuggestions: Story = {
+export const HighPriorityTask: Story = {
   args: {
     contexts: mockContexts,
+    defaultValue: 'Fix critical bug !Work #urgent #bug p1 today',
   },
   parameters: {
     docs: {
       description: {
-        story: 'Type "!" to see context suggestions',
-      },
-    },
-  },
-};
-
-export const WithTagSuggestions: Story = {
-  args: {
-    contexts: mockContexts,
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: 'Type "#" to see tag suggestions',
-      },
-    },
-  },
-};
-
-export const ComplexTaskExample: Story = {
-  args: {
-    contexts: mockContexts,
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: 'Example: "Fix critical bug in authentication system !Work #urgent #bug p1 today"',
+        story: 'High priority task with multiple tags and urgent due date',
       },
     },
   },
@@ -137,11 +122,40 @@ export const ComplexTaskExample: Story = {
 export const DailyHabitExample: Story = {
   args: {
     contexts: mockContexts,
+    defaultValue: 'Morning meditation daily !Home #wellness',
   },
   parameters: {
     docs: {
       description: {
-        story: 'Example: "Morning meditation daily !Home #wellness"',
+        story: 'Daily habit showing "daily" recurring pattern highlighted',
+      },
+    },
+  },
+};
+
+export const ComplexParsing: Story = {
+  args: {
+    contexts: mockContexts,
+    defaultValue: 'Review pull requests every 3 days !Coding #review #code p2 next monday',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Complex example with custom frequency (every 3 days), multiple tags, and relative date',
+      },
+    },
+  },
+};
+
+export const LowPriorityTask: Story = {
+  args: {
+    contexts: mockContexts,
+    defaultValue: 'Clean garage !Home p3 in 2 weeks',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Low priority task (p3) with relative date parsing',
       },
     },
   },

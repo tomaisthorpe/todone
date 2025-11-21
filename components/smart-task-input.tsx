@@ -38,6 +38,7 @@ interface SmartTaskInputProps {
   }>;
   className?: string;
   onTaskCreated?: () => void;
+  defaultValue?: string;
 }
 
 interface ParsedTask {
@@ -71,8 +72,9 @@ export function SmartTaskInput({
   contexts,
   className,
   onTaskCreated,
+  defaultValue = "",
 }: SmartTaskInputProps) {
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState(defaultValue);
   const [parsedTask, setParsedTask] = useState<ParsedTask>({
     title: "",
     contextId: null,
