@@ -24,7 +24,6 @@ export interface Subtask {
 export interface Task {
   id: string;
   title: string;
-  project: string | null;
   priority: "LOW" | "MEDIUM" | "HIGH";
   tags: string[];
   contextId: string;
@@ -129,7 +128,6 @@ export async function getTasks(): Promise<Task[]> {
           waitDays: task.waitDays,
           createdAt: task.createdAt,
           tags: task.tags,
-          project: task.project,
           contextCoefficient: task.context?.coefficient || 0,
           tagCoefficients,
         }),
@@ -315,7 +313,6 @@ export async function getUserTasks(userId: string): Promise<Task[]> {
           waitDays: task.waitDays,
           createdAt: task.createdAt,
           tags: task.tags,
-          project: task.project,
           contextCoefficient: task.context?.coefficient || 0,
           tagCoefficients,
         }),
@@ -477,7 +474,6 @@ export async function getCompletedTasks(
           waitDays: task.waitDays,
           createdAt: task.createdAt,
           tags: task.tags,
-          project: task.project,
           contextCoefficient: task.context?.coefficient || 0,
           tagCoefficients,
         }),

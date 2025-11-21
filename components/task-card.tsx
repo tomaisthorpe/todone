@@ -159,7 +159,6 @@ export function TaskCard({
     dueDate: task.dueDate,
     createdAt: task.createdAt,
     tags: task.tags,
-    project: task.project,
     contextCoefficient: taskContext?.coefficient || 0,
     tagCoefficients,
   });
@@ -225,7 +224,6 @@ export function TaskCard({
               </div>
 
               {((showContext && taskContext) ||
-                task.project ||
                 task.tags.length > 0 ||
                 task.notes ||
                 (task.subtasks && task.subtasks.length > 0)) && (
@@ -257,11 +255,6 @@ export function TaskCard({
                         {taskContext.name}
                       </span>
                     ))}
-                  {task.project && (
-                    <span className="text-xs text-gray-500 mb-1">
-                      <HighlightedText text={task.project} searchQuery={searchQuery} />
-                    </span>
-                  )}
                   {task.tags.map((tag) => (
                     <span
                       key={tag}

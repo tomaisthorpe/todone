@@ -51,7 +51,6 @@ describe('evaluateUrgency', () => {
     dueDate: null,
     createdAt: new Date('2024-01-01T00:00:00.000Z'),
     tags: [],
-    project: null,
   };
 
   it('should calculate urgency for basic task', () => {
@@ -100,15 +99,6 @@ describe('evaluateUrgency', () => {
     expect(dueTodayResult.score).toBeGreaterThan(dueTomorrowResult.score);
   });
 
-  it('should handle project contribution', () => {
-    const withProject = evaluateUrgency({ ...baseTask, project: 'Important Project' });
-    const withoutProject = evaluateUrgency({ ...baseTask, project: null });
-    const emptyProject = evaluateUrgency({ ...baseTask, project: '   ' });
-
-    expect(withProject.score).toBeGreaterThan(withoutProject.score);
-    expect(withoutProject.score).toBe(emptyProject.score);
-  });
-
   it('should handle special tags', () => {
     const nextTag = evaluateUrgency({ ...baseTask, tags: ['next'] });
     const blockedTag = evaluateUrgency({ ...baseTask, tags: ['blocked'] });
@@ -142,7 +132,6 @@ describe('evaluateUrgency', () => {
       dueDate: new Date(),
       createdAt: new Date('2024-01-01T00:00:00.000Z'),
       tags: ['next'],
-      project: 'Test Project',
       contextCoefficient: 2,
     };
 
@@ -151,7 +140,6 @@ describe('evaluateUrgency', () => {
     expect(result.explanation.some(exp => exp.includes('High priority'))).toBe(true);
     expect(result.explanation.some(exp => exp.includes('Due in'))).toBe(true);
     expect(result.explanation.some(exp => exp.includes('Task age'))).toBe(true);
-    expect(result.explanation.some(exp => exp.includes('Project set'))).toBe(true);
     expect(result.explanation.some(exp => exp.includes('Tag: next'))).toBe(true);
     expect(result.explanation.some(exp => exp.includes('Context coefficient'))).toBe(true);
   });

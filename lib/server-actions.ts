@@ -140,7 +140,6 @@ export async function createTaskAction(formData: FormData) {
   }
 
   const title = formData.get("title") as string;
-  const project = formData.get("project") as string;
   const priority =
     (formData.get("priority") as "LOW" | "MEDIUM" | "HIGH") || "MEDIUM";
   const contextId = formData.get("contextId") as string;
@@ -199,7 +198,6 @@ export async function createTaskAction(formData: FormData) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const taskData: any = {
     title,
-    project: project || null,
     priority,
     tags,
     contextId: finalContextId,
@@ -235,7 +233,6 @@ export async function updateTaskAction(formData: FormData) {
 
   const taskId = formData.get("taskId") as string;
   const title = formData.get("title") as string;
-  const project = formData.get("project") as string;
   const priority =
     (formData.get("priority") as "LOW" | "MEDIUM" | "HIGH") || "MEDIUM";
   const contextId = formData.get("contextId") as string;
@@ -299,7 +296,6 @@ export async function updateTaskAction(formData: FormData) {
     waitDays,
     createdAt: existingTask.createdAt,
     tags,
-    project: project || null,
     contextCoefficient: context.coefficient || 0,
   });
 
@@ -307,7 +303,6 @@ export async function updateTaskAction(formData: FormData) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateData: any = {
     title,
-    project: project || null,
     priority,
     tags,
     contextId,

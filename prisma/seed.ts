@@ -106,7 +106,6 @@ async function main() {
     {
       id: "task-1",
       title: "Fix authentication bug in user dashboard",
-      project: "SideProject A",
       priority: "HIGH" as const,
       tags: ["bug", "urgent"],
       contextId: "coding-context",
@@ -118,7 +117,6 @@ async function main() {
     {
       id: "habit-1",
       title: "Morning workout",
-      project: "Health",
       priority: "MEDIUM" as const,
       tags: ["fitness"],
       contextId: "bedroom-context",
@@ -137,7 +135,6 @@ async function main() {
     {
       id: "task-2",
       title: "Deploy staging environment",
-      project: "SideProject A",
       priority: "HIGH" as const,
       tags: ["deployment"],
       contextId: "coding-context",
@@ -149,7 +146,6 @@ async function main() {
     {
       id: "task-3",
       title: "Review pull requests",
-      project: "SideProject B",
       priority: "MEDIUM" as const,
       tags: ["review"],
       contextId: "coding-context",
@@ -162,7 +158,6 @@ async function main() {
     {
       id: "habit-2",
       title: "Daily coding practice",
-      project: "Learning",
       priority: "MEDIUM" as const,
       tags: ["learning", "coding"],
       contextId: "coding-context",
@@ -178,7 +173,6 @@ async function main() {
     {
       id: "recurring-1",
       title: "Weekly team standup",
-      project: "Work",
       priority: "MEDIUM" as const,
       tags: ["meeting", "recurring"],
       contextId: "coding-context",
@@ -194,7 +188,6 @@ async function main() {
     {
       id: "habit-3",
       title: "Wipe down counters",
-      project: "Cleaning",
       priority: "MEDIUM" as const,
       tags: ["cleaning"],
       contextId: "kitchen-context",
@@ -210,7 +203,6 @@ async function main() {
     {
       id: "task-4",
       title: "Empty dishwasher",
-      project: "Cleaning",
       priority: "MEDIUM" as const,
       tags: ["dishes"],
       contextId: "kitchen-context",
@@ -224,7 +216,6 @@ async function main() {
     {
       id: "habit-4",
       title: "Make bed",
-      project: "Morning Routine",
       priority: "LOW" as const,
       tags: ["routine"],
       contextId: "bedroom-context",
@@ -241,7 +232,6 @@ async function main() {
     {
       id: "habit-5",
       title: "Read before bed",
-      project: "Learning",
       priority: "LOW" as const,
       tags: ["reading", "routine"],
       contextId: "bedroom-context",
@@ -259,7 +249,6 @@ async function main() {
     {
       id: "habit-6",
       title: "Evening skincare routine",
-      project: "Self-Care",
       priority: "LOW" as const,
       tags: ["skincare", "routine"],
       contextId: "bathroom-context",
@@ -277,7 +266,6 @@ async function main() {
     {
       id: "task-completed-yesterday",
       title: "Task completed yesterday (should be hidden)",
-      project: "Testing",
       priority: "LOW" as const,
       tags: ["test"],
       contextId: "bathroom-context",

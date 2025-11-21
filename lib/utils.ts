@@ -13,7 +13,6 @@ export type UrgencyInput = {
   waitDays?: number | null; // Number of days before due date to start increasing urgency
   createdAt: Date;
   tags: string[];
-  project?: string | null;
   contextCoefficient?: number;
   tagCoefficients?: { [tagName: string]: number };
 };
@@ -95,11 +94,6 @@ export function evaluateUrgency(task: UrgencyInput): UrgencyResult {
     add(dueContribution, label);
   } else {
     add(0.0, "No due date");
-  }
-
-  // Project contribution: fixed 1 * coefficient if project exists
-  if (task.project && task.project.trim().length > 0) {
-    add(1 * URGENCY_CONSTANTS.project.coefficient, "Project set");
   }
 
   // Special tags contribution
